@@ -55,7 +55,7 @@
  '(custom-safe-themes
    '("2dff5f0b44a9e6c8644b2159414af72261e38686072e063aa66ee98a2faecf0e" "8f567db503a0d27202804f2ee51b4cd409eab5c4374f57640317b8fcbbd3e466" default))
  '(package-selected-packages
-   '(flycheck ace-window all-the-icons neotree which-key molokai-theme try use-package)))
+   '(yasnippet-snippets yasnippet flycheck ace-window all-the-icons neotree which-key molokai-theme try use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -142,3 +142,14 @@
 ; (use-package flycheck
 ;   :ensure t
 ;   :init (global-flycheck-mode t))
+
+
+;; Pacote YASnippet
+(use-package yasnippet
+  :ensure t
+  :config (yas-global-mode 1))
+; M-x package-install RET yasnippet-snippets
+
+
+
+

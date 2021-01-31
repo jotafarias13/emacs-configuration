@@ -6,6 +6,11 @@
 ; (setq default-directory "/Users/Jota/Sync/Jota/Acadêmico/Projetos/C_C++/"
 
 
+;; Tamanho da tela inicial
+(add-to-list 'initial-frame-alist '(height . 1.0))
+(add-to-list 'initial-frame-alist '(width . 0.5))
+
+
 ;; Remover mensagem de boas-vindas
 (setq inhibit-startup-message t)
 
@@ -25,6 +30,14 @@
 
 ;; Visual line mode sempre ativo
 (global-visual-line-mode 1)
+
+
+;; Gerenciamento de arquivos de backup e autosave
+(setq backup-directory-alist '((".*" . "~/.emacs.d/backup/")))
+(setq version-control t)
+(setq delete-old-versions t)
+(setq auto-save-list-file-prefix "~/.emacs.d/autosave/")
+(setq auto-save-file-name-transforms '((".*" "~/.emacs.d/autosave/" t)))
 
 
 ;; Tamanho da fonte
@@ -61,13 +74,13 @@
 ;   :ensure t
 					;   :config (load-theme 'rebecca t))
 
-; (use-package dracula-theme ; tema dracula
-;   :ensure t
-;   :config (load-theme 'dracula t))
-
-(use-package vscode-dark-plus-theme ; tema vscode dark+
+(use-package dracula-theme ; tema dracula
   :ensure t
-  :config (load-theme 'vscode-dark-plus t))
+  :config (load-theme 'dracula t))
+
+; (use-package vscode-dark-plus-theme ; tema vscode dark+
+;   :ensure t
+;   :config (load-theme 'vscode-dark-plus t))
 
 ; (load-theme 'misterioso) ; tema misterioso
 ; (load-them 'tango-dark) ; tema tango-dark
@@ -113,6 +126,7 @@
 (global-set-key (kbd "M-<down>") 'shrink-window) ; diminuir a janela verticalmente com M-<down>
 (global-set-key (kbd "M-<right>") 'enlarge-window-horizontally) ; aumentar a janela horizontalmente com M-<right>
 (global-set-key (kbd "M-<left>") 'shrink-window-horizontally) ; diminuir a janela horizontalmente com M-<left>
+(global-set-key (kbd "C-=") 'set-mark-command) ; selecionar texto com C-=
 
 
 ;; Troca dos comandos C e M
@@ -132,7 +146,7 @@
 ;; Pacote Ace-window
 (use-package ace-window
   :ensure t
-  :bind (("M-<tab>" . ace-window)))
+  :bind (("C-1" . ace-window)))
 
 
 ;; Pacote Flycheck

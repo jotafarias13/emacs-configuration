@@ -8,7 +8,7 @@
 
 ;; Tamanho da tela inicial
 (add-to-list 'initial-frame-alist '(height . 1.0))
-(add-to-list 'initial-frame-alist '(width . 0.5))
+(add-to-list 'initial-frame-alist '(width . 1.0))
 
 
 ;; Remover mensagem de boas-vindas
@@ -30,6 +30,10 @@
 
 ;; Visual line mode sempre ativo
 (global-visual-line-mode 1)
+
+
+;; Indicar começo-fim de parênteses
+(show-paren-mode 1)
 
 
 ;; Gerenciamento de arquivos de backup e autosave
@@ -101,7 +105,7 @@
 
 
 ;; Pacote All the icons
-(use-package all-the-icons
+(use-package all-the-icons)
 ; M-x all-the-icons-install-fonts
 
 
@@ -120,6 +124,12 @@
 (global-set-key (kbd "M-<right>") 'enlarge-window-horizontally) ; aumentar a janela horizontalmente com M-<right>
 (global-set-key (kbd "M-<left>") 'shrink-window-horizontally) ; diminuir a janela horizontalmente com M-<left>
 (global-set-key (kbd "C-=") 'set-mark-command) ; selecionar texto com C-=
+(global-set-key (kbd "C-M-y") 'clipboard-yank) ; colar do clipboard
+
+
+;; Funções para ir para diretório dired
+(global-set-key (kbd "C-M-1") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Acadêmico/Pós-Graduação/UFRN/Mestrado/Dissertação/Defesa_emacs/")))
+(global-set-key (kbd "C-M-2") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Acadêmico/Projetos/C_C++/")))
 
 
 ;; Troca dos comandos C e M
@@ -149,7 +159,7 @@
 ;; Pacote YASnippet
 (use-package yasnippet
   :config (yas-global-mode 1))
-; M-x package-install RET yasnippet-snippets
+(use-package yasnippet-snippets)
 
 
 ;; Pacote exec-path-from-shell
@@ -175,8 +185,6 @@
 ;; Pacote AUCTEX
 (use-package tex
   :ensure auctex)
-;(use-package auctex-latexmk)
-;(setq auctex-latexmk-inherit-TeX-PDF-mode t)
 (setq TeX-auto-save t)
 (setq TeX-parse-self t)
 (setq-default TeX-master nil)
@@ -189,26 +197,86 @@
 ;; Use Skim as viewer, enable source <-> PDF sync
 ;; make latexmk available via C-c C-c
 ;; Note: SyncTeX is setup via ~/.latexmkrc (see below)
+
 (add-hook 'LaTeX-mode-hook (lambda ()
   (push
-    '("latexmk" "latexmk -pdf -pvc %s" TeX-run-TeX nil t
-      :help "Run latexmk on file")
+    '("LaTexMk" "latexmk -pdf -pvc %s" TeX-run-TeX nil t
+      :help "Run LaTexMk on file")
     TeX-command-list)))
+
 (add-hook 'LaTeX-mode-hook (lambda ()
   (push
-    '("clean all" "latexmk -c; rm -f *.bbl *.brf" TeX-run-TeX nil t
+    '("CleanAll" "latexmk -c; rm -f *.bbl *.brf" TeX-run-TeX nil t
       :help "Files for deletion not found")
     TeX-command-list)))
-(add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "latexmk")))
+
+(add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "LaTexMk")))
 
 ;; use Skim as default pdf viewer
 ;; Skim's displayline is used for forward search (from .tex to .pdf)
 ;; option -b highlights the current line; option -g opens Skim in the background  
 (setq TeX-view-program-selection '((output-pdf "PDF Viewer")))
 (setq TeX-view-program-list
-     '(("PDF Viewer" "/Applications/Skim.app/Contents/SharedSupport/displayline -b -g %n %o %b")))
+      '(("PDF Viewer" "/Applications/Skim.app/Contents/SharedSupport/displayline -b -g %n %o %b")))
+
+(server-start); start emacs in server mode so that skim can talk to it
 
 
+;;Adiciona o comando de latexmk pra o auctex
+;(use-package auctex-latexmk
+;  :config
+;  (auctex-latexmk-setup)
+;  (setq auctex-latexmk-inherit-TeX-PDF-mode t))
 
 
+;; Pacote de autocompletar coisas no minibuffer
+(use-package ivy
+  :diminish 
+  :bind (("C-s" . swiper)
+         :map ivy-minibuffer-map
+         ("TAB" . ivy-alt-done)	
+         ("C-l" . ivy-alt-done)
+         ("C-j" . ivy-next-line)
+         ("C-k" . ivy-previous-line)
+         :map ivy-switch-buffer-map
+         ("C-k" . ivy-previous-line)
+         ("C-l" . ivy-done)
+         ("C-d" . ivy-switch-buffer-kill)
+         :map ivy-reverse-i-search-map
+         ("C-k" . ivy-previous-line)
+         ("C-d" . ivy-reverse-i-search-kill))
+  :config
+  (ivy-mode 1))
+
+;; Pacote de pesquisar que substitui isearch e usa ivy
+(use-package swiper)
+
+
+;; Configurações do dired
+; Impede o dired de criar buffers adicionais
+(with-eval-after-load 'dired
+  (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file))
+(put 'dired-find-alternate-file 'disabled nil)
+
+; Adiciona o hook / para pesquisar usando a função dired-isearch-filenames-regexp
+(eval-after-load "dired" '(progn
+  (define-key dired-mode-map (kbd "/") 'dired-isearch-filenames-regexp)))
+
+; Adiciona o hook para abrir o dired pesquisando
+;(add-hook 'dired-mode-hook
+;  (lambda () (dired-isearch-filenames-regexp)))
+
+; Adiciona o hook pra quando terminar a pesquisa entrar no arquivo e pesquisar denovo
+(add-hook 'isearch-mode-end-hook 
+  (lambda ()
+    (when (and (eq major-mode 'dired-mode)
+      (not isearch-mode-end-hook-quit))
+        (dired-find-file)
+        (dired-isearch-filenames-regexp))))
+
+; Adiciona o hook para quando pesquisar ir para cima no buffer antes
+(add-hook 'isearch-mode-hook 
+  (lambda ()
+    (when (eq major-mode 'dired-mode)
+      (beginning-of-buffer))))
 

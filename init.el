@@ -56,30 +56,27 @@
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
+(require 'use-package)
+(setq use-package-always-ensure t)
 
 ; Adicionado automaticamente pelo MELPA
 
 
 ;; Pacote Try
- (use-package try
-   :ensure t)
-
+ (use-package try)
+ 
 
 ;; Temas
 ; (use-package molokai-theme ; tema molokai
-;   :ensure t
 ;   :config (load-theme 'molokai))
 
 ; (use-package rebecca-theme ; tema rebecca
-;   :ensure t
-					;   :config (load-theme 'rebecca t))
+;   :config (load-theme 'rebecca t))
 
 (use-package dracula-theme ; tema dracula
-  :ensure t
   :config (load-theme 'dracula t))
 
 ; (use-package vscode-dark-plus-theme ; tema vscode dark+
-;   :ensure t
 ;   :config (load-theme 'vscode-dark-plus t))
 
 ; (load-theme 'misterioso) ; tema misterioso
@@ -88,7 +85,6 @@
 
 ;; Pacote Which-Key
 (use-package which-key
-  :ensure t
   :config
   (progn
     (which-key-setup-side-window-right-bottom)
@@ -98,7 +94,6 @@
 
 ;; Pacote Auto-Complete
 (use-package auto-complete
-  :ensure t
   :init
   (progn
     (ac-config-default)
@@ -107,13 +102,11 @@
 
 ;; Pacote All the icons
 (use-package all-the-icons
-  :ensure t)
 ; M-x all-the-icons-install-fonts
 
 
 ;; Pacote Neotree
 (use-package neotree
-  :ensure t
   :config
   (progn
      (setq neo-theme (if (display-graphic-p) 'icons 'arrow)))
@@ -145,33 +138,29 @@
 
 ;; Pacote Ace-window
 (use-package ace-window
-  :ensure t
   :bind (("C-1" . ace-window)))
 
 
 ;; Pacote Flycheck
 ; (use-package flycheck
-;   :ensure t
 ;   :init (global-flycheck-mode t))
 
 
 ;; Pacote YASnippet
 (use-package yasnippet
-  :ensure t
   :config (yas-global-mode 1))
 ; M-x package-install RET yasnippet-snippets
 
 
 ;; Pacote exec-path-from-shell
-(use-package exec-path-from-shell ; torna o PATH do shell igual do temrinal
-  :ensure t)
+(use-package exec-path-from-shell) ; torna o PATH do shell igual do temrinal
 (when (memq window-system '(mac ns x))
   (exec-path-from-shell-initialize))
 
 
 ;; Pacote Magit
 (use-package magit
-  :ensure t)
+  :custom (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))  
 
 
 ;; Diminuir prompts yes/no

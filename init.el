@@ -46,7 +46,7 @@
 
 ;; Tamanho da fonte
 ;(set-face-attribute 'default nil :height 150)
-
+    
 
 ;; Gerenciador de pacotes
 (require 'package)
@@ -128,7 +128,7 @@
 
 
 ;; Funções para ir para diretório dired
-(global-set-key (kbd "C-M-1") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Acadêmico/Pós-Graduação/UFRN/Mestrado/Dissertação/Defesa_emacs/")))
+(global-set-key (kbd "C-M-1") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Acadêmico/Pós-Graduação/UFRN/Mestrado/Dissertação/Defesa/")))
 (global-set-key (kbd "C-M-2") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Acadêmico/Projetos/C_C++/")))
 
 
@@ -279,4 +279,42 @@
   (lambda ()
     (when (eq major-mode 'dired-mode)
       (beginning-of-buffer))))
+
+; Permite usar o comando dired-find-alternate-file que mata o buffer atual no lugar de criar outro
+(put 'dired-find-alternate-file 'disabled nil)
+
+; Define o Enter como sendo essa função
+(eval-after-load "dired"
+  (lambda ()
+    (define-key dired-mode-map (kbd "<return>") 'dired-find-alternate-file)))
+
+; Próximo item e item anterior
+(define-key isearch-mode-map "\C-j" 'isearch-repeat-forward)
+(define-key isearch-mode-map "\C-k" 'isearch-repeat-backward)
+
+
+;; Pacote rainbow para distinguir parênteses
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
+
+
+;; Pacote evil e configurações
+(use-package evil
+  :init
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  (setq evil-want-C-u-scroll t)
+  (setq evil-want-C-i-jump nil)
+  :config
+  (evil-mode 1)
+  (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+  (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+
+  ;; Use visual line motions even outside of visual-line-mode buffers
+  (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+  (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+
+  (evil-set-initial-state 'messages-buffer-mode 'normal)
+  (evil-set-initial-state 'dashboard-mode 'normal))
+
 

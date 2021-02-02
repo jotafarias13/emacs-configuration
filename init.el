@@ -27,6 +27,14 @@
 ;; Numerar linhas
 (global-linum-mode t)
 
+; Desabilita line-number para alguns modos
+(dolist (mode '(org-mode-hook
+                term-mode-hook
+                shell-mode-hook
+                treemacs-mode-hook
+                eshell-mode-hook))
+  (add-hook mode (lambda () (display-line-numbers-mode 0))))
+
 
 ;; Visual line mode sempre ativo
 (global-visual-line-mode 1)
@@ -254,9 +262,9 @@
 
 ;; Configurações do dired
 ; Impede o dired de criar buffers adicionais
-(with-eval-after-load 'dired
-  (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file))
-(put 'dired-find-alternate-file 'disabled nil)
+;(with-eval-after-load 'dired
+;  (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file))
+;(put 'dired-find-alternate-file 'disabled nil)
 
 ; Adiciona o hook / para pesquisar usando a função dired-isearch-filenames-regexp
 (eval-after-load "dired" '(progn
@@ -291,6 +299,11 @@
 ; Próximo item e item anterior
 (define-key isearch-mode-map "\C-j" 'isearch-repeat-forward)
 (define-key isearch-mode-map "\C-k" 'isearch-repeat-backward)
+
+
+;; Pacote all-the-icons para o dired
+(use-package all-the-icons-dired
+  :hook (dired-mode . all-the-icons-dired-mode))
 
 
 ;; Pacote rainbow para distinguir parênteses

@@ -79,21 +79,18 @@
  
 
 ;; Temas
-; (use-package molokai-theme ; tema molokai
-;   :config (load-theme 'molokai))
+;(use-package dracula-theme ; tema dracula
+;  :config (load-theme 'dracula t))
 
-; (use-package rebecca-theme ; tema rebecca
-;   :config (load-theme 'rebecca t))
+(use-package vscode-dark-plus-theme ; tema vscode dark+
+  :config (load-theme 'vscode-dark-plus t))
 
-(use-package dracula-theme ; tema dracula
-  :config (load-theme 'dracula t))
+;(use-package darktooth-theme)
+;  :config (load-theme 'darktooth t))
 
-; (use-package vscode-dark-plus-theme ; tema vscode dark+
-;   :config (load-theme 'vscode-dark-plus t))
-
-; (load-theme 'misterioso) ; tema misterioso
-; (load-them 'tango-dark) ; tema tango-dark
-
+;(use-package spacemacs-theme
+;  :defer t
+;  :init (load-theme 'spacemacs-dark t))
 
 ;; Pacote Which-Key
 (use-package which-key
@@ -202,6 +199,9 @@
 (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
 (setq reftex-plug-into-AUCTeX t)
 (setq TeX-PDF-mode t)
+; Ativa algumas configurações do AUCTeX para melhorar a escrita do código
+(setq TeX-electric-sub-and-superscript t)
+(setq LaTeX-electric-left-right-brace t)
 ;; Use Skim as viewer, enable source <-> PDF sync
 ;; make latexmk available via C-c C-c
 ;; Note: SyncTeX is setup via ~/.latexmkrc (see below)
@@ -227,8 +227,11 @@
 (setq TeX-view-program-list
       '(("PDF Viewer" "/Applications/Skim.app/Contents/SharedSupport/displayline -b -g %n %o %b")))
 
-(server-start); start emacs in server mode so that skim can talk to it
+; Altera a cor dos headings (sections) do código latex para cyan ao invés de amarelo
+(with-eval-after-load 'font-latex
+  (set-face-attribute 'font-latex-sectioning-5-face nil :foreground "cyan"))
 
+(server-start); start emacs in server mode so that skim can talk to it
 
 ;;Adiciona o comando de latexmk pra o auctex
 ;(use-package auctex-latexmk

@@ -71,8 +71,6 @@
 (require 'use-package)
 (setq use-package-always-ensure t)
 
-; Adicionado automaticamente pelo MELPA
-
 
 ;; Pacote Try
  (use-package try)
@@ -102,11 +100,35 @@
 
 
 ;; Pacote Auto-Complete
-(use-package auto-complete
+;; (use-package auto-complete
+;;   :init
+;;   (progn
+;;     (ac-config-default)
+;;     (global-auto-complete-mode t)))
+
+
+
+;; Instalar company para auto completar
+(use-package company
+  :config
+  (add-hook 'after-init-hook 'global-company-mode))
+
+; Aplica o company no auctex
+(use-package company-auctex
   :init
-  (progn
-    (ac-config-default)
-    (global-auto-complete-mode t)))
+  (company-auctex-init))
+
+(defun my-latex-mode-setup ()
+  (setq-local company-backends
+              (append '((company-math-symbols-latex company-latex-commands))
+                      company-backends)))
+
+(use-package company-math
+  :config
+  (add-hook 'TeX-mode-hook 'my-latex-mode-setup)
+  (add-to-list 'company-backends 'company-math-symbols-unicode)
+  (setq company-tooltip-align-annotations t))
+
 
 
 ;; Pacote All the icons
@@ -165,6 +187,8 @@
 (use-package yasnippet
   :config (yas-global-mode 1))
 (use-package yasnippet-snippets)
+(setq yas-snippet-dirs '("~/.emacs.d/snippets")) ; snippets pessoais
+
 
 
 ;; Pacote exec-path-from-shell
@@ -233,7 +257,17 @@
 
 (server-start); start emacs in server mode so that skim can talk to it
 
-;;Adiciona o comando de latexmk pra o auctex
+
+; Acho que adiciona uns negocios de autocomplete em referências
+(use-package reftex
+  :ensure t
+  :defer t
+  :config
+  (setq reftex-cite-prompt-optional-args t);; Prompt for empty optional arguments in cite
+  (setq reftex-plug-into-AUCTeX t)) 
+
+
+;; Adiciona o comando de latexmk pra o auctex
 ;(use-package auctex-latexmk
 ;  :config
 ;  (auctex-latexmk-setup)
@@ -264,42 +298,38 @@
 
 
 ;; Configurações do dired
-; Impede o dired de criar buffers adicionais
-;(with-eval-after-load 'dired
-;  (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file))
-;(put 'dired-find-alternate-file 'disabled nil)
-
-; Adiciona o hook / para pesquisar usando a função dired-isearch-filenames-regexp
+; Adiciona o hook / para pesquisar usando a funcao dired-isearch-filenames-regexp
 (eval-after-load "dired" '(progn
-  (define-key dired-mode-map (kbd "/") 'dired-isearch-filenames-regexp)))
+  (define-key dired-mode-map (kbd "/") 'dired-isearch-filenames-regexp)
+))
 
-; Adiciona o hook para abrir o dired pesquisando
-;(add-hook 'dired-mode-hook
-;  (lambda () (dired-isearch-filenames-regexp)))
-
-; Adiciona o hook pra quando terminar a pesquisa entrar no arquivo e pesquisar denovo
+; Adiciona o hook pra quando terminar a pesquisa entrar no arquivo e pesquisar de novo
 (add-hook 'isearch-mode-end-hook 
-  (lambda ()
-    (when (and (eq major-mode 'dired-mode)
-      (not isearch-mode-end-hook-quit))
-        (dired-find-file)
-        (dired-isearch-filenames-regexp))))
+	  (lambda ()
+	    (when (and (eq major-mode 'dired-mode)
+		       (not isearch-mode-end-hook-quit))
+	      (if (file-directory-p (dired-file-name-at-point)) (progn (dired-find-alternate-file) (dired-isearch-filenames-regexp))
+		(dired-find-file)
+	      ))))
 
-; Adiciona o hook para quando pesquisar ir para cima no buffer antes
+; Adiciona o hook para quando pesquisar ir para cimao início do buffer antes
 (add-hook 'isearch-mode-hook 
-  (lambda ()
-    (when (eq major-mode 'dired-mode)
-      (beginning-of-buffer))))
+	  (lambda ()
+	    (when (eq major-mode 'dired-mode)
+	      (beginning-of-buffer))))
 
 ; Permite usar o comando dired-find-alternate-file que mata o buffer atual no lugar de criar outro
 (put 'dired-find-alternate-file 'disabled nil)
 
-; Define o Enter como sendo essa função
+;Define o Enter como sendo essa funcao
 (eval-after-load "dired"
   (lambda ()
-    (define-key dired-mode-map (kbd "<return>") 'dired-find-alternate-file)))
+    (define-key dired-mode-map (kbd "<return>") 
+      (lambda ()
+	(interactive)
+	(if (file-directory-p (dired-file-name-at-point)) (progn (dired-find-alternate-file)) (dired-find-file))))))
 
-; Próximo item e item anterior
+;Próximo item e item anterior
 (define-key isearch-mode-map "\C-j" 'isearch-repeat-forward)
 (define-key isearch-mode-map "\C-k" 'isearch-repeat-backward)
 
@@ -311,7 +341,8 @@
 
 ;; Pacote rainbow para distinguir parênteses
 (use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode))
+  :hook (prog-mode . rainbow-delimiters-mode)
+  :config (set-face-attribute 'rainbow-delimiters-depth-1-face nil :foreground "linkColor"))
 
 
 ;; Pacote evil e configurações

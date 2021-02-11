@@ -99,37 +99,6 @@
     (which-key-mode)))
 
 
-;; Pacote Auto-Complete
-;; (use-package auto-complete
-;;   :init
-;;   (progn
-;;     (ac-config-default)
-;;     (global-auto-complete-mode t)))
-
-
-
-;; Instalar company para auto completar
-(use-package company
-  :config
-  (add-hook 'after-init-hook 'global-company-mode))
-
-; Aplica o company no auctex
-(use-package company-auctex
-  :init
-  (company-auctex-init))
-
-(defun my-latex-mode-setup ()
-  (setq-local company-backends
-              (append '((company-math-symbols-latex company-latex-commands))
-                      company-backends)))
-
-(use-package company-math
-  :config
-  (add-hook 'TeX-mode-hook 'my-latex-mode-setup)
-  (add-to-list 'company-backends 'company-math-symbols-unicode)
-  (setq company-tooltip-align-annotations t))
-
-
 
 ;; Pacote All the icons
 (use-package all-the-icons)
@@ -155,8 +124,13 @@
 
 
 ;; Funções para ir para diretório dired
-(global-set-key (kbd "C-M-1") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Acadêmico/Pós-Graduação/UFRN/Mestrado/Dissertação/Defesa/")))
-(global-set-key (kbd "C-M-2") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Acadêmico/Projetos/C_C++/")))
+(global-set-key (kbd "C-M-0") (lambda () (interactive) (find-file "~/.emacs.d/init.el" nil)))
+(global-set-key (kbd "C-M-1") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Pós-Graduação/UFRN/Mestrado/Dissertação/Defesa/")))
+(global-set-key (kbd "C-M-2") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Projetos/C_C++/")))
+
+
+;; Altera o padrão para separação de sentenças para ser apenas um espaço
+(setq sentence-end-double-space nil)
 
 
 ;; Troca dos comandos C e M
@@ -183,12 +157,46 @@
 ;   :init (global-flycheck-mode t))
 
 
+;; Instalar company para auto completar
+(use-package company
+  :config
+  (add-hook 'after-init-hook 'global-company-mode)
+  :after lsp-mode    ; Configurações do lsp-mode
+  :hook (lsp-mode . company-mode)
+  :bind (:map company-active-map
+         ("<tab>" . company-complete-selection))
+        (:map lsp-mode-map
+         ("<tab>" . company-indent-or-complete-common))
+  :custom
+  (company-minimum-prefix-length 1)
+  (company-idle-delay 0.0))
+
+; Aplica o company no auctex
+(use-package company-auctex
+  :init
+  (company-auctex-init))
+
+(defun my-latex-mode-setup ()
+  (setq-local company-backends
+              (append '((company-math-symbols-latex company-latex-commands))
+                      company-backends)))
+
+(use-package company-math
+  :config
+  (add-hook 'TeX-mode-hook 'my-latex-mode-setup)
+  (add-to-list 'company-backends 'company-math-symbols-unicode)
+  (setq company-tooltip-align-annotations t))
+
+; Company box para melhor aparência na integração com lsp-mode
+(use-package company-box
+  :hook (company-mode . company-box-mode))
+
+
 ;; Pacote YASnippet
 (use-package yasnippet
   :config (yas-global-mode 1))
 (use-package yasnippet-snippets)
 (setq yas-snippet-dirs '("~/.emacs.d/snippets")) ; snippets pessoais
-
 
 
 ;; Pacote exec-path-from-shell
@@ -342,7 +350,10 @@
 ;; Pacote rainbow para distinguir parênteses
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode)
-  :config (set-face-attribute 'rainbow-delimiters-depth-1-face nil :foreground "linkColor"))
+  :config
+  (set-face-attribute 'rainbow-delimiters-depth-1-face nil :foreground "linkColor")
+  (set-face-attribute 'rainbow-delimiters-depth-4-face nil :foreground "systemBlueColor")
+  (set-face-attribute 'rainbow-delimiters-depth-7-face nil :foreground "Purple"))
 
 
 ;; Pacote evil e configurações
@@ -364,4 +375,37 @@
   (evil-set-initial-state 'messages-buffer-mode 'normal)
   (evil-set-initial-state 'dashboard-mode 'normal))
 
+
+;; Pacote lsp-mode (transforma emacs numa IDE)
+; Primeiramente, precisa instalar o clangd para funcionar com C/C++
+; brew install llvm; Colocar clangd no $PATH;
+; Criar o arquivo compile_commands.json no project root directory
+; Utiliza o Makefile para gerar através de: compiledb -n make 
+; Instala o compiledb com pip install compiledb
+; Breadcrumb no topo do buffer (caminho do arquivo)
+(defun efs/lsp-mode-setup ()
+  (setq lsp-headerline-breadcrumb-segments '(project path-up-to-project file symbols))
+  (lsp-headerline-breadcrumb-mode))
+
+(use-package lsp-mode
+  :commands (lsp lsp-deferred)
+  :hook (lsp-mode . efs/lsp-mode-setup)
+  :init
+  (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
+  :hook (c++-mode . lsp)
+  :config
+  (lsp-enable-which-key-integration t))
+
+; lsp-ui para o editor ficar me explicando o código à medida que navego nele
+(use-package lsp-ui
+  :hook (lsp-mode . lsp-ui-mode)
+  :custom
+  (lsp-ui-doc-position 'bottom))
+
+; lsp-treemacs para diagnóstico, referência de símbolo e símbolos em arquivo
+(use-package lsp-treemacs
+  :after lsp)
+
+; lsp-ivy para funcionalidades de procura do ivy dentro do lsp-mode
+(use-package lsp-ivy)
 

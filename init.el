@@ -102,6 +102,7 @@
 
 ;; Pacote All the icons
 (use-package all-the-icons)
+;; (all-the-icons-install-fonts)
 ; M-x all-the-icons-install-fonts
 
 
@@ -127,6 +128,7 @@
 (global-set-key (kbd "C-M-0") (lambda () (interactive) (find-file "~/.emacs.d/init.el" nil)))
 (global-set-key (kbd "C-M-1") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Pós-Graduação/UFRN/Mestrado/Dissertação/Defesa/")))
 (global-set-key (kbd "C-M-2") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Projetos/C_C++/")))
+(global-set-key (kbd "C-M-s") (lambda () (interactive) (eshell nil)))
 
 
 ;; Altera o padrão para separação de sentenças para ser apenas um espaço
@@ -161,12 +163,12 @@
 (use-package company
   :config
   (add-hook 'after-init-hook 'global-company-mode)
-  :after lsp-mode    ; Configurações do lsp-mode
-  :hook (lsp-mode . company-mode)
-  :bind (:map company-active-map
-         ("<tab>" . company-complete-selection))
-        (:map lsp-mode-map
-         ("<tab>" . company-indent-or-complete-common))
+  ;; :after lsp-mode    ; Configurações do lsp-mode
+  ;; :hook (lsp-mode . company-mode)
+  ;; :bind (:map company-active-map
+  ;;        ("<tab>" . company-complete-selection))
+        ;; (:map lsp-mode-map
+        ;;  ("<tab>" . company-indent-or-complete-common))
   :custom
   (company-minimum-prefix-length 1)
   (company-idle-delay 0.0))
@@ -266,22 +268,6 @@
 (server-start); start emacs in server mode so that skim can talk to it
 
 
-; Acho que adiciona uns negocios de autocomplete em referências
-(use-package reftex
-  :ensure t
-  :defer t
-  :config
-  (setq reftex-cite-prompt-optional-args t);; Prompt for empty optional arguments in cite
-  (setq reftex-plug-into-AUCTeX t)) 
-
-
-;; Adiciona o comando de latexmk pra o auctex
-;(use-package auctex-latexmk
-;  :config
-;  (auctex-latexmk-setup)
-;  (setq auctex-latexmk-inherit-TeX-PDF-mode t))
-
-
 ;; Pacote de autocompletar coisas no minibuffer
 (use-package ivy
   :diminish 
@@ -300,6 +286,21 @@
          ("C-d" . ivy-reverse-i-search-kill))
   :config
   (ivy-mode 1))
+
+; Deixa o ivy visualmente mais prático e interessante
+(use-package ivy-rich
+  :after ivy
+  :init
+  (ivy-rich-mode 1)
+  :config
+  (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line))
+
+
+;; Pacote para funcionar com o ivy
+(use-package counsel
+  :config
+  (counsel-mode 1))
+
 
 ;; Pacote de pesquisar que substitui isearch e usa ivy
 (use-package swiper)
@@ -376,6 +377,11 @@
   (evil-set-initial-state 'dashboard-mode 'normal))
 
 
+;; Pacote evil-tex para utilizar evil keybindings voltados para tex
+(use-package evil-tex)
+(add-hook 'LaTeX-mode-hook #'evil-tex-mode)
+
+
 ;; Pacote lsp-mode (transforma emacs numa IDE)
 ; Primeiramente, precisa instalar o clangd para funcionar com C/C++
 ; brew install llvm; Colocar clangd no $PATH;
@@ -402,10 +408,34 @@
   :custom
   (lsp-ui-doc-position 'bottom))
 
-; lsp-treemacs para diagnóstico, referência de símbolo e símbolos em arquivo
-(use-package lsp-treemacs
-  :after lsp)
+;; ; lsp-treemacs para diagnóstico, referência de símbolo e símbolos em arquivo
+;; (use-package lsp-treemacs
+;;   :after (lsp treemacs))
 
 ; lsp-ivy para funcionalidades de procura do ivy dentro do lsp-mode
 (use-package lsp-ivy)
 
+
+;; Pacote para adicionar informação extra nos buffers de ajuda
+(use-package helpful
+  :commands (helpful-callable helpful-variable helpful-command helpful-key)
+  :custom
+  (counsel-describe-function-function #'helpful-callable)
+  (counsel-describe-variable-function #'helpful-variable)
+  :bind
+  ([remap describe-function] . counsel-describe-function)
+  ([remap describe-command] . helpful-command)
+  ([remap describe-variable] . counsel-describe-variable)
+  ([remap describe-key] . helpful-key))
+
+
+;; Pacote eglot para servir como lsp para latex
+(use-package eglot)
+(defun my-latex-root (dir)
+  (when-let ((root (locate-dominating-file dir "defesa.tex")))
+    (cons 'latex-module root)))
+
+(add-hook 'project-find-functions #'my-latex-root)
+
+(cl-defmethod project-roots ((project (head latex-module)))
+  (list (cdr project)))

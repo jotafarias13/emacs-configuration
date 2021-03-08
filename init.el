@@ -1,9 +1,14 @@
 ;; CONFIGURAÇÕES DO EMACS
 
 
+
+;; Buffer de inicialização
+(add-hook 'after-init-hook (lambda () (org-agenda nil "d") (delete-other-windows)))
+
+
 ;; Diretório padrão de inicialização
 (setq default-directory "~/.emacs.d/")
-; (setq default-directory "/Users/Jota/Sync/Jota/Acadêmico/Projetos/C_C++/"
+;; (setq default-directory "/Users/Jota/Sync/Jota/Acadêmico/Projetos/C_C++/"
 
 
 ;; Tamanho da tela inicial
@@ -25,9 +30,11 @@
 
 
 ;; Numerar linhas
-(global-linum-mode t)
+(column-number-mode)
+(global-display-line-numbers-mode t)
 
-; Desabilita line-number para alguns modos
+
+;; Desabilita line-number para alguns modos
 (dolist (mode '(org-mode-hook
                 term-mode-hook
                 shell-mode-hook
@@ -41,7 +48,8 @@
 
 
 ;; Indicar começo-fim de parênteses
-(show-paren-mode 1)
+(add-hook 'after-init-hook (lambda () (show-paren-mode 1)))
+(add-hook 'show-paren-mode-hook '(lambda () (set-face-attribute 'show-paren-match nil :foreground "Magenta" :background "#595959")))
 
 
 ;; Gerenciamento de arquivos de backup e autosave
@@ -52,24 +60,50 @@
 (setq auto-save-file-name-transforms '((".*" "~/.emacs.d/autosave/" t)))
 
 
-;; Tamanho da fonte
-;(set-face-attribute 'default nil :height 150)
-    
+
+;; Fontes
+
+;; You will most likely need to adjust this font size for your system!
+(defvar jlf/default-font-size 120)
+(defvar jlf/default-variable-font-size 120)
+
+(set-face-attribute 'default nil :font "Fira Code" :height jlf/default-font-size)
+
+;; Set the fixed pitch face
+(set-face-attribute 'fixed-pitch nil :font "Fira Code" :height jlf/default-font-size)
+
+;; Set the variable pitch face
+(set-face-attribute 'variable-pitch nil :font "Cantarell" :height jlf/default-variable-font-size :weight 'regular)   
+
 
 ;; Gerenciador de pacotes
 (require 'package)
-(setq package-enable-at-startup nil) ; desabilitar início de ativação
 
-; Repositório MELPA
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-(package-initialize) ; inicializar pacotes
+;; Repositório MELPA
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                         ("org" . "https://orgmode.org/elpa/")
+                         ("elpa" . "https://elpa.gnu.org/packages/")))
 
-; Instalação do use-package
+(package-initialize) ;; inicializar pacotes
+
+;; Instalação do use-package
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
+
 (require 'use-package)
 (setq use-package-always-ensure t)
+
+
+;; Pacote para gerenciar atualização automática dos pacotes
+(use-package auto-package-update
+  :custom
+  (auto-package-update-interval 7)
+  (auto-package-update-prompt-before-update t)
+  (auto-package-update-hide-results t)
+  :config
+  (auto-package-update-maybe)
+  (auto-package-update-at-time "09:00"))
 
 
 ;; Pacote Try
@@ -77,25 +111,17 @@
  
 
 ;; Temas
-;(use-package dracula-theme ; tema dracula
-;  :config (load-theme 'dracula t))
+;; (use-package vscode-dark-plus-theme ; tema vscode dark+
+;;   :config (load-theme 'vscode-dark-plus t))
+(use-package doom-themes
+  :init (load-theme 'doom-moonlight t))
 
-(use-package vscode-dark-plus-theme ; tema vscode dark+
-  :config (load-theme 'vscode-dark-plus t))
-
-;(use-package darktooth-theme)
-;  :config (load-theme 'darktooth t))
-
-;(use-package spacemacs-theme
-;  :defer t
-;  :init (load-theme 'spacemacs-dark t))
 
 ;; Pacote Which-Key
 (use-package which-key
   :config
   (progn
     (which-key-setup-side-window-right-bottom)
-   ; (which-key-setup-side-window-right)
     (which-key-mode)))
 
 
@@ -103,7 +129,13 @@
 ;; Pacote All the icons
 (use-package all-the-icons)
 ;; (all-the-icons-install-fonts)
-; M-x all-the-icons-install-fonts
+;; M-x all-the-icons-install-fonts
+
+
+;; Pacote para barra de modos (inferior) minimalista
+(use-package doom-modeline
+  :init (doom-modeline-mode 1)
+  :custom ((doom-modeline-height 15)))
 
 
 ;; Pacote Neotree
@@ -128,6 +160,7 @@
 (global-set-key (kbd "C-M-0") (lambda () (interactive) (find-file "~/.emacs.d/init.el" nil)))
 (global-set-key (kbd "C-M-1") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Pós-Graduação/UFRN/Mestrado/Dissertação/Defesa/")))
 (global-set-key (kbd "C-M-2") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Projetos/C_C++/")))
+(global-set-key (kbd "C-M-3") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Projetos/Emacs/Org/")))
 (global-set-key (kbd "C-M-s") (lambda () (interactive) (eshell nil)))
 
 
@@ -163,35 +196,45 @@
 (use-package company
   :config
   (add-hook 'after-init-hook 'global-company-mode)
-  ;; :after lsp-mode    ; Configurações do lsp-mode
-  ;; :hook (lsp-mode . company-mode)
+  (add-hook 'company-mode-hook '(lambda () (define-key company-active-map (kbd "<tab>") nil)))
+  (add-hook 'company-mode-hook '(lambda () (define-key company-active-map (kbd "TAB") nil)))
+  (add-hook 'company-mode-hook '(lambda () (define-key company-active-map (kbd "C-<return>") 'company-abort)))
+  (add-hook 'company-mode-hook '(lambda () (define-key company-active-map (kbd "<return>") 'company-complete-selection)))
+  (add-hook 'company-mode-hook '(lambda () (define-key company-active-map (kbd "C-j") 'company-select-next)))
+  (add-hook 'company-mode-hook '(lambda () (define-key company-active-map (kbd "C-k") 'company-select-previous)))
   ;; :bind (:map company-active-map
-  ;;        ("<tab>" . company-complete-selection))
+  ;;       ("<tab>" . nil)
+  ;;       ("TAB" . nil) 
+  ;; 	("<return>" . company-complete-selection) 
+  ;; 	("C-<return>" . company-abort))
         ;; (:map lsp-mode-map
         ;;  ("<tab>" . company-indent-or-complete-common))
   :custom
   (company-minimum-prefix-length 1)
   (company-idle-delay 0.0))
 
-; Aplica o company no auctex
-(use-package company-auctex
-  :init
-  (company-auctex-init))
+;; (define-key company-active-map (kbd "<tab>") nil)
+;; (define-key company-active-map (kbd "TAB") nil)
 
-(defun my-latex-mode-setup ()
-  (setq-local company-backends
-              (append '((company-math-symbols-latex company-latex-commands))
-                      company-backends)))
+;; ; Aplica o company no auctex
+;; (use-package company-auctex
+;;   :init
+;;   (company-auctex-init))
 
-(use-package company-math
-  :config
-  (add-hook 'TeX-mode-hook 'my-latex-mode-setup)
-  (add-to-list 'company-backends 'company-math-symbols-unicode)
-  (setq company-tooltip-align-annotations t))
+;; (defun jlf/latex-mode-setup ()
+;;   (setq-local company-backends
+;;               (append '((company-math-symbols-latex company-latex-commands))
+;;                       company-backends)))
 
-; Company box para melhor aparência na integração com lsp-mode
-(use-package company-box
-  :hook (company-mode . company-box-mode))
+;; (use-package company-math
+;;   :config
+;;   (add-hook 'TeX-mode-hook 'jlf/latex-mode-setup)
+;;   (add-to-list 'company-backends 'company-math-symbols-unicode)
+;;   (setq company-tooltip-align-annotations t))
+
+;; ; Company box para melhor aparência na integração com lsp-mode
+;; (use-package company-box
+;;   :hook (company-mode . company-box-mode))
 
 
 ;; Pacote YASnippet
@@ -242,8 +285,8 @@
 
 (add-hook 'LaTeX-mode-hook (lambda ()
   (push
-    '("LaTexMk" "latexmk -pdf -pvc %s" TeX-run-TeX nil t
-      :help "Run LaTexMk on file")
+    '("LaTeX-Mk" "latexmk -pdf -pvc %s" TeX-run-TeX nil t
+      :help "Run LaTeX-Mk on file")
     TeX-command-list)))
 
 (add-hook 'LaTeX-mode-hook (lambda ()
@@ -252,7 +295,7 @@
       :help "Files for deletion not found")
     TeX-command-list)))
 
-(add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "LaTexMk")))
+(add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "LaTeX-Mk")))
 
 ;; use Skim as default pdf viewer
 ;; Skim's displayline is used for forward search (from .tex to .pdf)
@@ -262,8 +305,8 @@
       '(("PDF Viewer" "/Applications/Skim.app/Contents/SharedSupport/displayline -b -g %n %o %b")))
 
 ; Altera a cor dos headings (sections) do código latex para cyan ao invés de amarelo
-(with-eval-after-load 'font-latex
-  (set-face-attribute 'font-latex-sectioning-5-face nil :foreground "cyan"))
+;; (with-eval-after-load 'font-latex
+;;   (set-face-attribute 'font-latex-sectioning-5-face nil :foreground "cyan"))
 
 (server-start); start emacs in server mode so that skim can talk to it
 
@@ -288,16 +331,22 @@
   (ivy-mode 1))
 
 ; Deixa o ivy visualmente mais prático e interessante
+
+(use-package all-the-icons-ivy-rich
+  :after ivy
+  :init (all-the-icons-ivy-rich-mode 1))
+;; (all-the-icons-install-fonts)
+
 (use-package ivy-rich
   :after ivy
   :init
-  (ivy-rich-mode 1)
-  :config
-  (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line))
+  (ivy-rich-mode 1))
 
 
 ;; Pacote para funcionar com o ivy
 (use-package counsel
+  :bind (:map counsel-mode-map
+  ([remap switch-to-buffer] . counsel-switch-buffer))
   :config
   (counsel-mode 1))
 
@@ -305,6 +354,9 @@
 ;; Pacote de pesquisar que substitui isearch e usa ivy
 (use-package swiper)
 
+
+(when (string= system-type "darwin")       
+  (setq dired-use-ls-dired nil))
 
 ;; Configurações do dired
 ; Adiciona o hook / para pesquisar usando a funcao dired-isearch-filenames-regexp
@@ -343,18 +395,22 @@
 (define-key isearch-mode-map "\C-k" 'isearch-repeat-backward)
 
 
-;; Pacote all-the-icons para o dired
+;; Pacote all-the-icons para o dired (com ajuste para funcionar com install-all-the-fonts)
 (use-package all-the-icons-dired
-  :hook (dired-mode . all-the-icons-dired-mode))
+  :hook 
+  (dired-mode . all-the-icons-dired-mode)
+  (all-the-icons-dired-mode . (lambda () (setq all-the-icons-dired-monochrome nil))))
 
 
 ;; Pacote rainbow para distinguir parênteses
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode)
   :config
-  (set-face-attribute 'rainbow-delimiters-depth-1-face nil :foreground "linkColor")
-  (set-face-attribute 'rainbow-delimiters-depth-4-face nil :foreground "systemBlueColor")
-  (set-face-attribute 'rainbow-delimiters-depth-7-face nil :foreground "Purple"))
+  ;; (set-face-attribute 'rainbow-delimiters-depth-1-face nil :foreground "linkColor")
+  ;; (set-face-attribute 'rainbow-delimiters-depth-4-face nil :foreground "systemBlueColor")
+  ;; (set-face-attribute 'rainbow-delimiters-depth-7-face nil :foreground "Purple"))
+  (set-face-attribute 'rainbow-delimiters-depth-3-face nil :foreground "systemBlueColor")) ;; Fica melhor com o tema doom-moonlight
+ 
 
 
 ;; Pacote evil e configurações
@@ -367,7 +423,9 @@
   :config
   (evil-mode 1)
   (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-  (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+  (define-key evil-normal-state-map (kbd "m") (lambda () (interactive) (evil-open-below 1) (evil-normal-state)))
+  (define-key evil-normal-state-map (kbd "M") (lambda () (interactive) (evil-open-above 1) (evil-normal-state)))
+  ;; (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
 
   ;; Use visual line motions even outside of visual-line-mode buffers
   (evil-global-set-key 'motion "j" 'evil-next-visual-line)
@@ -377,9 +435,24 @@
   (evil-set-initial-state 'dashboard-mode 'normal))
 
 
+;; Pacote para aumentar a atuação do evil para keybindings
+(use-package evil-collection
+  :after evil
+  :config
+  (evil-collection-init))
+
 ;; Pacote evil-tex para utilizar evil keybindings voltados para tex
 (use-package evil-tex)
 (add-hook 'LaTeX-mode-hook #'evil-tex-mode)
+
+
+;; Pacote para melhorar as funções de desfazer e refazer
+(use-package undo-fu
+  :config
+  (global-undo-tree-mode -1)
+  :hook
+  (evil-mode . (lambda () (define-key evil-normal-state-map (kbd "u") 'undo-fu-only-undo)))
+  (evil-mode . (lambda () (define-key evil-normal-state-map (kbd "C-r") 'undo-fu-only-redo))))
 
 
 ;; Pacote lsp-mode (transforma emacs numa IDE)
@@ -389,13 +462,13 @@
 ; Utiliza o Makefile para gerar através de: compiledb -n make 
 ; Instala o compiledb com pip install compiledb
 ; Breadcrumb no topo do buffer (caminho do arquivo)
-(defun efs/lsp-mode-setup ()
+(defun jlf/lsp-mode-setup ()
   (setq lsp-headerline-breadcrumb-segments '(project path-up-to-project file symbols))
   (lsp-headerline-breadcrumb-mode))
 
 (use-package lsp-mode
   :commands (lsp lsp-deferred)
-  :hook (lsp-mode . efs/lsp-mode-setup)
+  :hook (lsp-mode . jlf/lsp-mode-setup)
   :init
   (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
   :hook (c++-mode . lsp)
@@ -430,12 +503,265 @@
 
 
 ;; Pacote eglot para servir como lsp para latex
-(use-package eglot)
-(defun my-latex-root (dir)
+(use-package eglot
+  :hook (LaTeX-mode . eglot-ensure))
+
+(defun jlf/latex-root (dir)
   (when-let ((root (locate-dominating-file dir "defesa.tex")))
     (cons 'latex-module root)))
 
-(add-hook 'project-find-functions #'my-latex-root)
+(add-hook 'project-find-functions #'jlf/latex-root)
 
 (cl-defmethod project-roots ((project (head latex-module)))
   (list (cdr project)))
+
+
+
+
+
+
+
+;; Configurações org-mode
+
+;; Melhores Font-Faces
+(defun jlf/org-font-setup ()
+  ;; Replace list hyphen with dot
+  (font-lock-add-keywords 'org-mode
+                          '(("^ *\\([-]\\) "
+                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+
+  ;; Set faces for heading levels
+  ;; É necessário baixar a fonte Cantarell e instalar no computador
+  (dolist (face '((org-level-1 . 1.5)
+                  (org-level-2 . 1.3)
+                  (org-level-3 . 1.2)
+                  (org-level-4 . 1.1)
+                  (org-level-5 . 1.1)
+                  (org-level-6 . 1.1)
+                  (org-level-7 . 1.1)
+                  (org-level-8 . 1.1)))
+    (set-face-attribute (car face) nil :font "Cantarell" :weight 'regular :height (cdr face)))
+
+  ;; Ensure that anything that should be fixed-pitch in Org files appears that way
+  (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
+  (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
+  (set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-table nil    :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch)
+  (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
+  (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch))
+
+
+
+
+
+;; Configuração Básica
+(defun jlf/org-mode-setup ()
+  (org-indent-mode)
+  (variable-pitch-mode 1)
+  (visual-line-mode 1))
+
+
+(use-package org
+  :pin org
+  :commands (org-capture org-agenda)
+  :hook (org-mode . jlf/org-mode-setup)
+  :bind 
+  ("C-c t" . counsel-org-tag)
+  ("C-c a" . org-agenda)
+  ("C-c d" . (lambda () (interactive) (org-todo "DONE"))) 
+  ("C-c w" . (lambda () (interactive) (org-todo "DONE") (org-refile))) 
+  :config
+  (setq org-ellipsis " ▾")
+  (setq org-hide-emphasis-markers t) 
+
+  (setq org-agenda-start-with-log-mode t)
+  (setq org-log-done 'time)
+  (setq org-log-into-drawer t)
+
+  (setq org-agenda-files
+        '("~/Sync/Jota/Academico/Projetos/Emacs/Org/Tarefas.org"))
+          ;; "~/Sync/Jota/Academico/Projetos/Emacs/Org/Saude.org"))
+          ;; "~/Projects/Code/emacs-from-scratch/OrgFiles/Birthdays.org"))
+
+  (require 'org-habit)
+  (add-to-list 'org-modules 'org-habit)
+  (setq org-habit-graph-column 60)
+
+  (setq org-todo-keywords
+    '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")))
+  ;;     (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
+
+  ;; (setq org-refile-targets
+  ;;   '(("~/Sync/Jota/Academico/Projetos/Emacs/Org/Arquivado.org" :maxlevel . 1)
+  ;;     ("~/Sync/Jota/Academico/Projetos/Emacs/Org/Tarefas.org" :maxlevel . 1)))
+
+  (setq org-refile-targets
+    '(("Arquivado.org" :maxlevel . 1)
+      ("Tarefas.org" :maxlevel . 1)))
+
+  ;; Save Org buffers after refiling!
+  (advice-add 'org-refile :after 'org-save-all-org-buffers)
+
+  (setq org-tag-alist
+    '((:startgroup)
+       ; Put mutually exclusive tags here
+       (:endgroup)
+       ("Saúde" . ?S)
+       ("Consulta" . ?c)
+       ("Exame" . ?e)
+       ("Trabalho" . ?T)
+       ("Mestrado" . ?m)
+       ("Lazer" . ?L)
+       ("Emacs" . ?E)))
+       ;; ("batch" . ?b)
+       ;; ("note" . ?n)
+       ;; ("idea" . ?i)))
+
+  ;; Configure custom agenda views
+  (setq org-agenda-custom-commands
+   '(("d" "Dashboard"
+     ((agenda "" ((org-deadline-warning-days 7)))
+      (todo "TODO"
+        ((org-agenda-overriding-header "TODO Tasks")))
+      (tags-todo "agenda/ACTIVE" ((org-agenda-overriding-header "Active Projects")))))
+
+    ("n" "Next Tasks"
+     ((todo "NEXT"
+        ((org-agenda-overriding-header "Next Tasks")))))
+
+    ("W" "Work Tasks" tags-todo "+work-email")
+
+    ;; Low-effort next actions
+    ("e" tags-todo "+TODO=\"NEXT\"+Effort<15&+Effort>0"
+     ((org-agenda-overriding-header "Low Effort Tasks")
+      (org-agenda-max-todos 20)
+      (org-agenda-files org-agenda-files)))
+
+    ("w" "Workflow Status"
+     ((todo "WAIT"
+            ((org-agenda-overriding-header "Waiting on External")
+             (org-agenda-files org-agenda-files)))
+      (todo "REVIEW"
+            ((org-agenda-overriding-header "In Review")
+             (org-agenda-files org-agenda-files)))
+      (todo "PLAN"
+            ((org-agenda-overriding-header "In Planning")
+             (org-agenda-todo-list-sublevels nil)
+             (org-agenda-files org-agenda-files)))
+      (todo "BACKLOG"
+            ((org-agenda-overriding-header "Project Backlog")
+             (org-agenda-todo-list-sublevels nil)
+             (org-agenda-files org-agenda-files)))
+      (todo "READY"
+            ((org-agenda-overriding-header "Ready for Work")
+             (org-agenda-files org-agenda-files)))
+      (todo "ACTIVE"
+            ((org-agenda-overriding-header "Active Projects")
+             (org-agenda-files org-agenda-files)))
+      (todo "COMPLETED"
+            ((org-agenda-overriding-header "Completed Projects")
+             (org-agenda-files org-agenda-files)))
+      (todo "CANC"
+            ((org-agenda-overriding-header "Cancelled Projects")
+             (org-agenda-files org-agenda-files)))))))
+
+  (setq org-capture-templates
+    `(("t" "Tasks / Projects")
+      ("tt" "Task" entry (file+olp "~/Projects/Code/emacs-from-scratch/OrgFiles/Tasks.org" "Inbox")
+           "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
+
+      ("j" "Journal Entries")
+      ("jj" "Journal" entry
+           (file+olp+datetree "~/Projects/Code/emacs-from-scratch/OrgFiles/Journal.org")
+           "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
+           ;; ,(dw/read-file-as-string "~/Notes/Templates/Daily.org")
+           :clock-in :clock-resume
+           :empty-lines 1)
+      ("jm" "Meeting" entry
+           (file+olp+datetree "~/Projects/Code/emacs-from-scratch/OrgFiles/Journal.org")
+           "* %<%I:%M %p> - %a :meetings:\n\n%?\n\n"
+           :clock-in :clock-resume
+           :empty-lines 1)
+
+      ("w" "Workflows")
+      ("we" "Checking Email" entry (file+olp+datetree "~/Projects/Code/emacs-from-scratch/OrgFiles/Journal.org")
+           "* Checking Email :email:\n\n%?" :clock-in :clock-resume :empty-lines 1)
+
+      ("m" "Metrics Capture")
+      ("mw" "Weight" table-line (file+headline "~/Projects/Code/emacs-from-scratch/OrgFiles/Metrics.org" "Weight")
+       "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)))
+
+  (define-key global-map (kbd "C-c j")
+    (lambda () (interactive) (org-capture nil "jj")))
+
+  (jlf/org-font-setup))
+
+
+
+
+
+;; Usar bullet em vez de hífen
+(use-package org-bullets
+  :hook (org-mode . org-bullets-mode)
+  :custom
+  (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
+
+
+
+
+
+
+;; Pacote evil-org para melhorar compatibilidade evil-org
+(use-package evil-org
+  :after org
+  :hook (org-mode . (lambda () evil-org-mode))
+  :config
+  (require 'evil-org-agenda)
+  (evil-org-agenda-set-keys))
+
+
+;; Structue templates para as linguagens mais utilizadas em org-mode
+(with-eval-after-load 'org
+  ;; This is needed as of Org 9.2
+  (require 'org-tempo)
+
+  (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
+  (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+  (add-to-list 'org-structure-template-alist '("cc" . "src C"))
+  (add-to-list 'org-structure-template-alist '("cpp" . "src C++"))
+  (add-to-list 'org-structure-template-alist '("py" . "src python")))
+
+
+;; Org-Babel
+;; Configura as linguagens de programação a serem compatíveis com org-babel
+(with-eval-after-load 'org
+  (org-babel-do-load-languages
+      'org-babel-load-languages
+      '((emacs-lisp . t)
+      (C . t)
+      (python . t))))
+
+;; Exporta automaticamente o arquivo de saída associado aos blocos de código (tangle) toda vez que o arquivo Emacs.org for salvo
+(defun jlf/org-babel-tangle-config ()
+  (when (string-equal (file-name-directory (buffer-file-name))
+                      (expand-file-name user-emacs-directory))
+    (let ((org-confirm-babel-evaluate nil))
+      (org-babel-tangle))))
+
+(add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'jlf/org-babel-tangle-config)))
+
+
+
+
+
+(defun jlf/olivetti-mode-setup ()
+  (olivetti-mode)
+  (olivetti-set-width 0.9))
+
+(use-package olivetti
+  :hook (org-mode . jlf/olivetti-mode-setup)) 

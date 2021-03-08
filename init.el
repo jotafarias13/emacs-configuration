@@ -202,13 +202,6 @@
   (add-hook 'company-mode-hook '(lambda () (define-key company-active-map (kbd "<return>") 'company-complete-selection)))
   (add-hook 'company-mode-hook '(lambda () (define-key company-active-map (kbd "C-j") 'company-select-next)))
   (add-hook 'company-mode-hook '(lambda () (define-key company-active-map (kbd "C-k") 'company-select-previous)))
-  ;; :bind (:map company-active-map
-  ;;       ("<tab>" . nil)
-  ;;       ("TAB" . nil) 
-  ;; 	("<return>" . company-complete-selection) 
-  ;; 	("C-<return>" . company-abort))
-        ;; (:map lsp-mode-map
-        ;;  ("<tab>" . company-indent-or-complete-common))
   :custom
   (company-minimum-prefix-length 1)
   (company-idle-delay 0.0))
@@ -413,6 +406,15 @@
  
 
 
+;; Pacote para melhorar as funções de desfazer e refazer do evil
+(use-package undo-fu
+  :init
+  (global-undo-tree-mode -1)
+  :config
+  (add-hook 'evil-mode-hook '(lambda () (define-key evil-normal-state-map (kbd "u") 'undo-fu-only-undo)))
+  (add-hook 'evil-mode-hook '(lambda () (define-key evil-normal-state-map (kbd "C-r") 'undo-fu-only-redo))))
+
+
 ;; Pacote evil e configurações
 (use-package evil
   :init
@@ -425,7 +427,6 @@
   (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
   (define-key evil-normal-state-map (kbd "m") (lambda () (interactive) (evil-open-below 1) (evil-normal-state)))
   (define-key evil-normal-state-map (kbd "M") (lambda () (interactive) (evil-open-above 1) (evil-normal-state)))
-  ;; (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
 
   ;; Use visual line motions even outside of visual-line-mode buffers
   (evil-global-set-key 'motion "j" 'evil-next-visual-line)
@@ -442,17 +443,10 @@
   (evil-collection-init))
 
 ;; Pacote evil-tex para utilizar evil keybindings voltados para tex
-(use-package evil-tex)
+(use-package evil-tex
+  :after evil)
 (add-hook 'LaTeX-mode-hook #'evil-tex-mode)
 
-
-;; Pacote para melhorar as funções de desfazer e refazer
-(use-package undo-fu
-  :config
-  (global-undo-tree-mode -1)
-  :hook
-  (evil-mode . (lambda () (define-key evil-normal-state-map (kbd "u") 'undo-fu-only-undo)))
-  (evil-mode . (lambda () (define-key evil-normal-state-map (kbd "C-r") 'undo-fu-only-redo))))
 
 
 ;; Pacote lsp-mode (transforma emacs numa IDE)

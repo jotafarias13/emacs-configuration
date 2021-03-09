@@ -3,6 +3,7 @@
 # !/
 /*
 !/.gitignore
+!/README.org
 !/init.el
 !/Emacs.org
 !/old-init.el

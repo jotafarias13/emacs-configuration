@@ -99,7 +99,7 @@
 (global-set-key (kbd "C-M-y") 'clipboard-yank) ;; colar do clipboard
 
 ;; Atalhos para dired, para abrir o init.el e para abrir o eshell 
-(global-set-key (kbd "C-M-0") (lambda () (interactive) (find-file "~/.emacs.d/init.el" nil)))
+(global-set-key (kbd "C-M-0") (lambda () (interactive) (find-file "~/.emacs.d/Emacs.org" nil)))
 (global-set-key (kbd "C-M-1") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Pós-Graduação/UFRN/Mestrado/Dissertação/Defesa/")))
 (global-set-key (kbd "C-M-2") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Projetos/C_C++/")))
 (global-set-key (kbd "C-M-3") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Projetos/Emacs/Org/")))
@@ -165,7 +165,8 @@
 ;; Substitui comandos para funcionar melhor com ivy
 (use-package counsel
   :bind (:map counsel-mode-map
-  ([remap switch-to-buffer] . counsel-switch-buffer))
+  ([remap switch-to-buffer] . counsel-switch-buffer)
+  ([remap dired] . counsel-dired))
   :config
   (counsel-mode 1))
 
@@ -277,6 +278,7 @@
   (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
   (define-key evil-normal-state-map (kbd "m") (lambda () (interactive) (evil-open-below 1) (evil-normal-state)))
   (define-key evil-normal-state-map (kbd "M") (lambda () (interactive) (evil-open-above 1) (evil-normal-state)))
+  (define-key evil-normal-state-map (kbd "g r") 'revert-buffer)
 
   ;; Confiura a navegação para funcionar quando visual-line-mode não está ativado
   (evil-global-set-key 'motion "j" 'evil-next-visual-line)
@@ -389,6 +391,9 @@
   :custom
   (lsp-ui-doc-position 'bottom))
 
+;; Realiza integração do ivy no lsp-mode
+(use-package lsp-ivy)
+
 ;; Funciona como um cliente LSP para Emacs, utilizado para escrever em LaTeX
 (use-package eglot
   :hook (LaTeX-mode . eglot-ensure))
@@ -443,7 +448,7 @@
 (use-package org
   :pin org
   :commands (org-capture org-agenda)
-  :hook (org-mode . jlf/gorg-mode-setup)
+  :hook (org-mode . jlf/org-mode-setup)
   :bind 
   ("C-c t" . counsel-org-tag)
   ("C-c a" . org-agenda)
@@ -602,17 +607,18 @@
 
 ;; Configura as linguagens de programação a serem compatíveis com org-babel
 (with-eval-after-load 'org
-  (org-babel-do-load-languages
-      'org-babel-load-languages
-      '((emacs-lisp . t)
-      (C . t)
-      (python . t))))
+(org-babel-do-load-languages
+    'org-babel-load-languages
+    '((emacs-lisp . t)
+    (C . t)
+    (python . t))))
 
 ;; Exporta automaticamente o arquivo de saída associado aos blocos de código (tangle) toda vez que o arquivo .org for salvo
 (defun jlf/org-babel-tangle-config ()
-  (when (string-equal (file-name-directory (buffer-file-name))
-                      (expand-file-name user-emacs-directory))
+(when (string-equal (buffer-file-name) "/Users/Jota/.emacs.d/Emacs.org")
+;; (when (string-equal (file-name-directory (buffer-file-name))
+;;                     (expand-file-name user-emacs-directory))
     (let ((org-confirm-babel-evaluate nil))
-      (org-babel-tangle))))
+    (org-babel-tangle))))
 
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'jlf/org-babel-tangle-config)))

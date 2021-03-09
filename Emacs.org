@@ -148,7 +148,7 @@ Configura alguns keybindings para facilitar a abertura de diretórios e arquivos
 (global-set-key (kbd "C-M-y") 'clipboard-yank) ;; colar do clipboard
 
 ;; Atalhos para dired, para abrir o init.el e para abrir o eshell 
-(global-set-key (kbd "C-M-0") (lambda () (interactive) (find-file "~/.emacs.d/init.el" nil)))
+(global-set-key (kbd "C-M-0") (lambda () (interactive) (find-file "~/.emacs.d/Emacs.org" nil)))
 (global-set-key (kbd "C-M-1") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Pós-Graduação/UFRN/Mestrado/Dissertação/Defesa/")))
 (global-set-key (kbd "C-M-2") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Projetos/C_C++/")))
 (global-set-key (kbd "C-M-3") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Projetos/Emacs/Org/")))
@@ -250,7 +250,8 @@ O pacote /[[https://github.com/abo-abo/swiper][ivy]]/ adiciona estrutura de auto
 ;; Substitui comandos para funcionar melhor com ivy
 (use-package counsel
   :bind (:map counsel-mode-map
-  ([remap switch-to-buffer] . counsel-switch-buffer))
+  ([remap switch-to-buffer] . counsel-switch-buffer)
+  ([remap dired] . counsel-dired))
   :config
   (counsel-mode 1))
 
@@ -404,6 +405,7 @@ O pacote /[[https://github.com/emacs-evil/evil][evil]]/ configura um major mode 
   (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
   (define-key evil-normal-state-map (kbd "m") (lambda () (interactive) (evil-open-below 1) (evil-normal-state)))
   (define-key evil-normal-state-map (kbd "M") (lambda () (interactive) (evil-open-above 1) (evil-normal-state)))
+  (define-key evil-normal-state-map (kbd "g r") 'revert-buffer)
 
   ;; Confiura a navegação para funcionar quando visual-line-mode não está ativado
   (evil-global-set-key 'motion "j" 'evil-next-visual-line)
@@ -531,7 +533,7 @@ O pacote /[[https://www.gnu.org/software/auctex/][AUCTeX]]/ auxilia e configura 
 #+end_src
 
 ** LSP Mode 
-O pacote /[[https://emacs-lsp.github.io/lsp-mode/][lsp-mode]]/ serve como um cliente de Language Server Protocol para Emacs. Necessita de um servidor para fazer comunicação com o Emacs e simular ferramentas de uma IDE. Configurado para funcionar com o /[[https://clangd.llvm.org/][clangd]]/ para programação em C++. O pacote /[[https://github.com/emacs-lsp/lsp-ui][lsp-ui]]/ acrescenta informações sobre a parte do código sobre o qual o cursor está em cima, mostrando-as no minibuffer ou em um menu.
+O pacote /[[https://emacs-lsp.github.io/lsp-mode/][lsp-mode]]/ serve como um cliente de Language Server Protocol para Emacs. Necessita de um servidor para fazer comunicação com o Emacs e simular ferramentas de uma IDE. Configurado para funcionar com o /[[https://clangd.llvm.org/][clangd]]/ para programação em C++. O pacote /[[https://github.com/emacs-lsp/lsp-ui][lsp-ui]]/ acrescenta informações sobre a parte do código sobre o qual o cursor está em cima, mostrando-as no minibuffer ou em um menu. O pacote /[[https://github.com/emacs-lsp/lsp-ivy][lsp-ivy]]/ faz a integração do /[[https://github.com/abo-abo/swiper][ivy]]/ no /[[https://emacs-lsp.github.io/lsp-mode/][lsp-mode]]/.
 
 Após instalar o /[[https://clangd.llvm.org/][clangd]]/, é preciso adicionar ele ao $PATH do terminal. Depois, criar o arquivo compile_commands.json no project root directory. Para isso, instala o /[[https://github.com/nickdiego/compiledb][compiledb]]/ e o utiliza para para gerar o .json através de um Makefile com o comando "compiledb -n make".
 
@@ -560,6 +562,9 @@ Após instalar o /[[https://clangd.llvm.org/][clangd]]/, é preciso adicionar el
   :hook (lsp-mode . lsp-ui-mode)
   :custom
   (lsp-ui-doc-position 'bottom))
+
+;; Realiza integração do ivy no lsp-mode
+(use-package lsp-ivy)
 
 #+end_src
 
@@ -641,7 +646,7 @@ Contém a configuração básica do org-mode juntamente com as configurações d
 (use-package org
   :pin org
   :commands (org-capture org-agenda)
-  :hook (org-mode . jlf/gorg-mode-setup)
+  :hook (org-mode . jlf/org-mode-setup)
   :bind 
   ("C-c t" . counsel-org-tag)
   ("C-c a" . org-agenda)
@@ -828,19 +833,21 @@ Responsável por executar ou exportar blocos de código em org-mode. Configurado
 
 ;; Configura as linguagens de programação a serem compatíveis com org-babel
 (with-eval-after-load 'org
-  (org-babel-do-load-languages
-      'org-babel-load-languages
-      '((emacs-lisp . t)
-      (C . t)
-      (python . t))))
+(org-babel-do-load-languages
+    'org-babel-load-languages
+    '((emacs-lisp . t)
+    (C . t)
+    (python . t))))
 
 ;; Exporta automaticamente o arquivo de saída associado aos blocos de código (tangle) toda vez que o arquivo .org for salvo
 (defun jlf/org-babel-tangle-config ()
-  (when (string-equal (file-name-directory (buffer-file-name))
-                      (expand-file-name user-emacs-directory))
+(when (string-equal (buffer-file-name) "/Users/Jota/.emacs.d/Emacs.org")
+;; (when (string-equal (file-name-directory (buffer-file-name))
+;;                     (expand-file-name user-emacs-directory))
     (let ((org-confirm-babel-evaluate nil))
-      (org-babel-tangle))))
+    (org-babel-tangle))))
 
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'jlf/org-babel-tangle-config)))
 
 #+end_src
+

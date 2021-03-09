@@ -1,0 +1,11 @@
+# Arquivo .gitignore específico para o diretório de configuração do Emacs
+
+# !/
+/*
+!/.gitignore
+!/init.el
+!/Emacs.org
+!/old-init.el
+!/snippets/
+
+.DS_Store

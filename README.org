@@ -1,0 +1,2 @@
+* Configuração do Emacs
+Essa é a configuração do Emacs de João Lucas Correia Barbosa de Farias, criada com muita ajuda de David Wilson ([[https://github.com/daviwil/emacs-from-scratch][Emacs From Scratch]]) do canal [[https://www.youtube.com/channel/UCAiiOTio8Yu69c3XnR7nQBQ][System Crafters]], da internet no geral, do meu irmão e de algumas poucas coisas da minha cabeça.

@@ -5,7 +5,7 @@
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
 
 * Introdução
-Esse é o arquivo com as configurações de inicialização do Emacs, escrito em Org com os blocos de código em emacs-lisp. Os bloco de código desse arquivo são exportados para o arquivo init.el. Os pacotes vem com hyperlink para facilitar o acesso às suas páginas e as configurações vem com explicações de como e porque foram feitas.
+Esse é o arquivo com as configurações de inicialização do Emacs, escrito em Org com os blocos de código em emacs-lisp. Os blocos de código desse arquivo são exportados para o arquivo init.el. Os pacotes vem com hyperlink para facilitar o acesso às suas páginas e as configurações vem com explicações de como e porque foram implementadas.
 
 * Inicialização
 Coloca como buffer de inicialização a org-agenda na visão dashboard (customizada). Além disso, coloca como diretório padrão de início o diretório "~/.emacs.d/" e determina o tamanho da janela inicial.

@@ -5,7 +5,7 @@
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
 
 * Introdução
-Essa é a configuração do Emacs de João Lucas Correia Barbosa de Farias, criada com muita ajuda de David Wilson ([[https://github.com/daviwil/emacs-from-scratch][Emacs From Scratch]]) do canal [[https://www.youtube.com/channel/UCAiiOTio8Yu69c3XnR7nQBQ][System Crafters]], da internet no geral, do meu irmão e de algumas poucas coisas da minha cabeça.
+Esse é o arquivo com as configurações de inicialização do Emacs, escrito em Org com os blocos de código em emacs-lisp. Os bloco de código desse arquivo são exportados para o arquivo init.el. Os pacotes vem com hyperlink para facilitar o acesso às suas páginas e as configurações vem com explicações de como e porque foram feitas.
 
 * Inicialização
 Coloca como buffer de inicialização a org-agenda na visão dashboard (customizada). Além disso, coloca como diretório padrão de início o diretório "~/.emacs.d/" e determina o tamanho da janela inicial.

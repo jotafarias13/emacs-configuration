@@ -1,8 +1,8 @@
 * Configuração do Emacs
-Essa é a configuração do Emacs de João Lucas Correia Barbosa de Farias, criada com muita ajuda de David Wilson ([[https://github.com/daviwil/emacs-from-scratch][Emacs From Scratch]]) do canal [[https://www.youtube.com/channel/UCAiiOTio8Yu69c3XnR7nQBQ][System Crafters]], da internet no geral, do meu irmão e de algumas poucas coisas da minha cabeça.
+Essa é a minha configuração do Emacs, criada com muita ajuda de David Wilson ([[https://github.com/daviwil/emacs-from-scratch][Emacs From Scratch]]) do canal [[https://www.youtube.com/channel/UCAiiOTio8Yu69c3XnR7nQBQ][System Crafters]], da internet no geral, do meu irmão e de algumas poucas coisas da minha cabeça.
 
 Estão nesse repositório:
-- Os snippets próprios criados por mim e utilizados no Emacs;
+- Meus snippets próprios utilizados no Emacs e organizados em modos no diretório snippets;
 - O arquivo de inicialização antigo que eu utilizava antes de migrar para o org-mode, old-init.el;
 - A configuração de inicialização utilizada no meu Emacs escrita em org, Emacs.org; e
 - O arquivo de inicialização propriamente dito, isto é, o arquivo de saída associado aos blocos de cógido do Emacs.org, init.el.
@@ -11,12 +11,12 @@ Estão nesse repositório:
 
 
 * Emacs Configuration
-This is the Emacs configuration of João Lucas Correia Barbosa de Farias, created with a lot of help from David Wilson ([[https://github.com/daviwil/emacs-from-scratch][Emacs From Scratch]]) from the [[https://www.youtube.com/channel/UCAiiOTio8Yu69c3XnR7nQBQ][System Crafters]] channel, from the internet in general, from my brother and from some of my own ideas.
+This is my Emacs configuration, created with a lot of help from David Wilson ([[https://github.com/daviwil/emacs-from-scratch][Emacs From Scratch]]) from the [[https://www.youtube.com/channel/UCAiiOTio8Yu69c3XnR7nQBQ][System Crafters]] channel, from the internet in general, from my brother and from some of my own ideas.
 
 This repository has:
-- My own personal snippets used in Emacs;
+- My own personal snippets used in Emacs and organized in different modes inside the snippets directory;
 - The old initialization file that I used before migrating to org-mode, old-init.el;
 - The initialization configuration I use on Emacs written in org, Emacs.org; and
-- The initialization file itself, that is, the output file generated from the code blocks in Emacs,org, init.el.
+- The initialization file itself, that is, the output file generated from the code blocks in Emacs.org, init.el.
 
 Ps: the Emacs.org file is written entirely in Portuguese. For those who don't understand it and have questions, doubts or suggestions about my configuration, feel free to contact me through my GitHub account and I'll gladly assist in any way I can.

@@ -280,7 +280,7 @@
   (define-key evil-normal-state-map (kbd "M") (lambda () (interactive) (evil-open-above 1) (evil-normal-state)))
   (define-key evil-normal-state-map (kbd "g r") 'revert-buffer)
 
-  ;; Confiura a navegação para funcionar quando visual-line-mode não está ativado
+  ;; Configura a navegação para funcionar quando visual-line-mode não está ativado
   (evil-global-set-key 'motion "j" 'evil-next-visual-line)
   (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
 
@@ -292,6 +292,25 @@
   :after evil
   :config
   (evil-collection-init))
+
+;; Emula a ação surround do vim
+(use-package evil-surround
+  :config
+    (global-evil-surround-mode 1))
+
+;; Adiciona "linha" como um text-obj (w,W,b,B etc)
+(use-package evil-textobj-line)
+
+;; Adiciona o comandos "gc" para comentar como uma ação (d,c,y etc)
+(use-package evil-commentary
+  :config
+  (evil-commentary-mode))
+
+;; Destaca a parte do texto onde um comando foi efetuado
+(use-package evil-goggles
+  :config
+  (evil-goggles-mode)
+  (evil-goggles-use-diff-faces))
 
 ;; Altera o padrão para separação de sentenças para ser apenas um espaço
 (setq sentence-end-double-space nil)
@@ -327,13 +346,13 @@
 (add-hook 'LaTeX-mode-hook 'visual-line-mode)
 (add-hook 'LaTeX-mode-hook 'flyspell-mode)
 (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
-(add-hook 'LaTeX-mode-hook 'turn-on-reftex)
 (setq reftex-plug-into-AUCTeX t)
 (setq TeX-PDF-mode t)
 
 ;; Ativa algumas configurações do AUCTeX para melhorar a escrita do código
 (setq TeX-electric-sub-and-superscript t)
 (setq LaTeX-electric-left-right-brace t)
+(setq TeX-electric-math (cons "$" "$"))
 
 ;; Coloca LaTeX-Mk disponível via C-c C-c
 ;; SyncTeX é configurado no arquivo "~/.latexmkrc"
@@ -362,10 +381,10 @@
 (server-start)
 
 ;; Habilita evil keybindings voltados para TeX
-;; (Não está funcionando como esperado)
 (use-package evil-tex
-  :after evil)
-(add-hook 'LaTeX-mode-hook #'evil-tex-mode)
+  :hook (LaTeX-mode . evil-tex-mode))
+(setq evil-tex-toggle-override-m nil)
+(setq evil-tex-toggle-override-t t)
 
 ;; Instalação do clangd: brew install llvm
 ;; Instalação do compiledb: pip install compiledb
@@ -405,8 +424,8 @@
 
 (add-hook 'project-find-functions #'jlf/latex-root)
 
-(cl-defmethod project-roots ((project (head latex-module)))
-  (list (cdr project)))
+(cl-defmethod project-root ((project (head latex-module)))
+   (cdr project))
 
 ;; Congifuração das fontes e faces
 (defun jlf/org-font-setup ()

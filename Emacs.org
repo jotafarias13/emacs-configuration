@@ -483,6 +483,37 @@ O pacote /[[https://github.com/magit/magit][Magit]]/ facilita a utilização de 
 
 #+end_src
 
+*NOTA*
+Para evitar escrever a senha do ssh à cada interação com o remote, foi feita a adição da chave para o ssh-agent por um tempo *limitado*. Para isso, foi necessário instalar o /[[https://github.com/funtoo/keychain][keychain]]/ no computador (não no Emacs) através do homebrew (talvez não precise mas não testei sem ele).
+
+#+begin_src shell :tangle no
+
+brew install keychain
+
+#+end_src
+
+Em seguida, para possibilitar que, sempre que eu der /pull/ ou /push/ para o remoto, o computador adicione a chave no ssh-agent, é preciso verificar se ela já existe ou não. Por isso, foram criados /global hooks/ para o git. É preciso configurar o arquivo global de configuração do git para determinar o diretório onde ele irá procurar pelos hooks globais.
+
+#+begin_src shell :tangle no
+
+git config --global core.hooksPath ~/.githooks/
+
+#+end_src
+
+Primeiramente, os /global hooks/ verificam se existe o arquivo GLOBAL_HOOKS no diretório .git do repositório local e se está escrito "no" dentro dele. Essa foi a forma temporária (feia e triste, diga-se de passagem) que eu encontrei para evitar que os /global hooks/ sejam executados em repositórios que eu não quero que eles sejam executados. Depois, eles verificam se a chave já está no ssh-agent e, se não estiver, a adicionam. Por fim, executam /local hooks/, se existirem. 
+
+Para que a senha da chave pudesse ser digitada (dentro do Emacs) para adicioná-la ao ssh-agent foi preciso instalar o /[[https://github.com/theseal/ssh-askpass][ssh-askpass]]/ que abre uma janela do MacOS para digitar a senha. Sem isso, o Emacs não oferece maneira de digitar a senha e, portanto, não é possível adicionar a chave ao ssh-agent. A instalação foi feita através do homebrew.
+
+#+begin_src shell :tangle no
+
+brew tap theseal/ssh-askpass
+brew install ssh-askpass
+
+# Alternativamente, baixa os arquivos e move o binário para /usr/X11/bin/ (ou para o diretório que o seu computador requisitar)
+sudo mv ssh-askpass /usr/X11R6/bin/
+
+#+end_src
+
 ** Eshell 
 O pacote /[[https://github.com/purcell/exec-path-from-shell][exec-path-from-shell]]/ configura o eshell do Emacs para utilizar o mesmo $PATH do terminal do computador.
 

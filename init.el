@@ -290,6 +290,8 @@
 ;; Aumenta a atuação dos keybindings do evil
 (use-package evil-collection
   :after evil
+  :custom
+  (evil-collection-company-use-tng nil)   ;; evita o bug de completion de funções do clangd
   :config
   (evil-collection-init))
 

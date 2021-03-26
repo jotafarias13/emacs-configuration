@@ -417,6 +417,8 @@ O pacote /[[https://github.com/emacs-evil/evil][evil]]/ configura um major mode 
 ;; Aumenta a atuação dos keybindings do evil
 (use-package evil-collection
   :after evil
+  :custom
+  (evil-collection-company-use-tng nil)   ;; evita o bug de completion de funções do clangd
   :config
   (evil-collection-init))
 

@@ -406,6 +406,9 @@
   :config
   (lsp-enable-which-key-integration t))
 
+;; Feature do clangd que possibilita a escolha do overload de uma função no company-box
+(setq lsp-clients-clangd-args '("--completion-style=detailed"))
+
 ;; Pacote para adicionar explicação do código à medida que o cursor navega pelo buffer 
 (use-package lsp-ui
   :hook (lsp-mode . lsp-ui-mode)

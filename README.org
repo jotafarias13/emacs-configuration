@@ -9,6 +9,7 @@ Estão nesse repositório:
 
 
 
+
 * Emacs Configuration
 This is my Emacs configuration, created with a lot of help from David Wilson ([[https://github.com/daviwil/emacs-from-scratch][Emacs From Scratch]]) from the [[https://www.youtube.com/channel/UCAiiOTio8Yu69c3XnR7nQBQ][System Crafters]] channel, from the internet in general, from my brother and from some of my own ideas.
 
@@ -19,5 +20,3 @@ This repository has:
 - The initialization file itself, that is, the output file generated from the code blocks in Emacs.org, init.el.
 
 Ps: the Emacs.org file is written entirely in Portuguese. For those who don't understand it and have questions, doubts or suggestions about my configuration, feel free to contact me through my GitHub account and I'll gladly assist in any way I can.
-* License
-Released under the [[file:LICENSE][GNU General Public License v3.0]].

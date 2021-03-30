@@ -314,6 +314,11 @@
   (evil-goggles-mode)
   (evil-goggles-use-diff-faces))
 
+(use-package evil-exchange)
+(setq evil-exchange-key (kbd "gz"))
+(setq evil-exchange-cancel-key (kbd "gZ"))
+(evil-exchange-install)
+
 ;; Altera o padrão para separação de sentenças para ser apenas um espaço
 (setq sentence-end-double-space nil)
 

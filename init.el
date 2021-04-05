@@ -101,7 +101,7 @@
 ;; Atalhos para dired, para abrir o init.el e para abrir o eshell 
 (global-set-key (kbd "C-M-0") (lambda () (interactive) (find-file "~/.emacs.d/Emacs.org" nil)))
 (global-set-key (kbd "C-M-1") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Pós-Graduação/UFRN/Mestrado/Dissertação/Defesa/")))
-(global-set-key (kbd "C-M-2") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Projetos/C_C++/")))
+(global-set-key (kbd "C-M-2") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Projetos/C++/")))
 (global-set-key (kbd "C-M-3") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Projetos/Emacs/Org/")))
 (global-set-key (kbd "C-M-s") (lambda () (interactive) (eshell nil)))
 
@@ -641,6 +641,7 @@
     'org-babel-load-languages
     '((emacs-lisp . t)
     (C . t)
+    (latex . t)
     (python . t))))
 
 ;; Exporta automaticamente o arquivo de saída associado aos blocos de código (tangle) toda vez que o arquivo .org for salvo

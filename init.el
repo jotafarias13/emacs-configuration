@@ -407,6 +407,7 @@
   :hook (lsp-mode . jlf/lsp-mode-setup)
   :init
   (setq lsp-keymap-prefix "C-c l") 
+  (setq lsp-diagnostics-provider :none)
   :hook (c++-mode . lsp)
   :config
   (lsp-enable-which-key-integration t))

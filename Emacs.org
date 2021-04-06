@@ -592,7 +592,7 @@ O pacote /[[https://www.gnu.org/software/auctex/][AUCTeX]]/ auxilia e configura 
 ** LSP Mode 
 O pacote /[[https://emacs-lsp.github.io/lsp-mode/][lsp-mode]]/ serve como um cliente de Language Server Protocol para Emacs. Necessita de um servidor para fazer comunicação com o Emacs e simular ferramentas de uma IDE. Configurado para funcionar com o /[[https://clangd.llvm.org/][clangd]]/ para programação em C++. O pacote /[[https://github.com/emacs-lsp/lsp-ui][lsp-ui]]/ acrescenta informações sobre a parte do código sobre o qual o cursor está em cima, mostrando-as no minibuffer ou em um menu. O pacote /[[https://github.com/emacs-lsp/lsp-ivy][lsp-ivy]]/ faz a integração do /[[https://github.com/abo-abo/swiper][ivy]]/ no /[[https://emacs-lsp.github.io/lsp-mode/][lsp-mode]]/.
 
-Após instalar o /[[https://clangd.llvm.org/][clangd]]/, é preciso adicionar ele ao $PATH do terminal. Depois, criar o arquivo compile_commands.json no project root directory. Para isso, instala o /[[https://github.com/nickdiego/compiledb][compiledb]]/ e o utiliza para para gerar o .json através de um Makefile com o comando "compiledb -n make".
+Após instalar o /[[https://clangd.llvm.org/][clangd]]/, é preciso adicionar ele ao $PATH do terminal. Depois, criar o arquivo compile_commands.json no project root directory. Para isso, instala o /[[https://github.com/nickdiego/compiledb][compiledb]]/ e o utiliza para gerar o .json através de um Makefile com o comando "compiledb -n make".
 
 #+begin_src emacs-lisp
 

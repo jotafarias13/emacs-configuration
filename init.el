@@ -424,6 +424,14 @@
 ;; Realiza integração do ivy no lsp-mode
 (use-package lsp-ivy)
 
+;; Configura o estilo de formatação de buffer para linguagens em C e similares
+;; (setq c-default-style '(c++-mode  . “cc-mode”))
+(setq c-default-style
+      '((java-mode . "java")
+        (awk-mode . "awk")
+        (c++-mode . "cc-mode")
+        (other . "gnu")))
+
 ;; Funciona como um cliente LSP para Emacs, utilizado para escrever em LaTeX
 (use-package eglot
   :hook (LaTeX-mode . eglot-ensure))

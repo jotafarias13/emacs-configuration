@@ -590,42 +590,50 @@ O pacote /[[https://www.gnu.org/software/auctex/][AUCTeX]]/ auxilia e configura 
 #+end_src
 
 ** LSP Mode 
-O pacote /[[https://emacs-lsp.github.io/lsp-mode/][lsp-mode]]/ serve como um cliente de Language Server Protocol para Emacs. Necessita de um servidor para fazer comunicação com o Emacs e simular ferramentas de uma IDE. Configurado para funcionar com o /[[https://clangd.llvm.org/][clangd]]/ para programação em C++. O pacote /[[https://github.com/emacs-lsp/lsp-ui][lsp-ui]]/ acrescenta informações sobre a parte do código sobre o qual o cursor está em cima, mostrando-as no minibuffer ou em um menu. O pacote /[[https://github.com/emacs-lsp/lsp-ivy][lsp-ivy]]/ faz a integração do /[[https://github.com/abo-abo/swiper][ivy]]/ no /[[https://emacs-lsp.github.io/lsp-mode/][lsp-mode]]/.
+O pacote /[[https://emacs-lsp.github.io/lsp-mode/][lsp-mode]]/ serve como um cliente de Language Server Protocol para Emacs. Necessita de um servidor para fazer comunicação com o Emacs e simular ferramentas de uma IDE. Configurado para funcionar com o /[[https://clangd.llvm.org/][clangd]]/ para programação em C++. O pacote /[[https://github.com/emacs-lsp/lsp-ui][lsp-ui]]/ acrescenta informações sobre a parte do código sobre o qual o cursor está em cima, mostrando-as no minibuffer ou em um menu. O pacote /[[https://github.com/emacs-lsp/lsp-ivy][lsp-ivy]]/ faz a integração do /[[https://github.com/abo-abo/swiper][ivy]]/ no /[[https://emacs-lsp.github.io/lsp-mode/][lsp-mode]]/. Como o /[[https://emacs-lsp.github.io/lsp-mode/][lsp-mode]]/ é usado para programação em C/C++, a configuração do estilo de formatação do buffer é feita abaixo, modificando a variável /c-default-style/.
 
 Após instalar o /[[https://clangd.llvm.org/][clangd]]/, é preciso adicionar ele ao $PATH do terminal. Depois, criar o arquivo compile_commands.json no project root directory. Para isso, instala o /[[https://github.com/nickdiego/compiledb][compiledb]]/ e o utiliza para gerar o .json através de um Makefile com o comando "compiledb -n make".
 
 #+begin_src emacs-lisp
 
-;; Instalação do clangd: brew install llvm
-;; Instalação do compiledb: pip install compiledb
+  ;; Instalação do clangd: brew install llvm
+  ;; Instalação do compiledb: pip install compiledb
 
-;; Breadcrumb no topo do buffer (caminho do arquivo)
-(defun jlf/lsp-mode-setup ()
-  (setq lsp-headerline-breadcrumb-segments '(project path-up-to-project file symbols))
-  (lsp-headerline-breadcrumb-mode))
+  ;; Breadcrumb no topo do buffer (caminho do arquivo)
+  (defun jlf/lsp-mode-setup ()
+    (setq lsp-headerline-breadcrumb-segments '(project path-up-to-project file symbols))
+    (lsp-headerline-breadcrumb-mode))
 
-;; Adiciona funcionalidades de IDE para o Emacs
-(use-package lsp-mode
-  :commands (lsp lsp-deferred)
-  :hook (lsp-mode . jlf/lsp-mode-setup)
-  :init
-  (setq lsp-keymap-prefix "C-c l") 
-  (setq lsp-diagnostics-provider :none)
-  :hook (c++-mode . lsp)
-  :config
-  (lsp-enable-which-key-integration t))
+  ;; Adiciona funcionalidades de IDE para o Emacs
+  (use-package lsp-mode
+    :commands (lsp lsp-deferred)
+    :hook (lsp-mode . jlf/lsp-mode-setup)
+    :init
+    (setq lsp-keymap-prefix "C-c l") 
+    (setq lsp-diagnostics-provider :none)
+    :hook (c++-mode . lsp)
+    :config
+    (lsp-enable-which-key-integration t))
 
-;; Feature do clangd que possibilita a escolha do overload de uma função no company-box
-(setq lsp-clients-clangd-args '("--completion-style=detailed"))
+  ;; Feature do clangd que possibilita a escolha do overload de uma função no company-box
+  (setq lsp-clients-clangd-args '("--completion-style=detailed"))
 
-;; Pacote para adicionar explicação do código à medida que o cursor navega pelo buffer 
-(use-package lsp-ui
-  :hook (lsp-mode . lsp-ui-mode)
-  :custom
-  (lsp-ui-doc-position 'bottom))
+  ;; Pacote para adicionar explicação do código à medida que o cursor navega pelo buffer 
+  (use-package lsp-ui
+    :hook (lsp-mode . lsp-ui-mode)
+    :custom
+    (lsp-ui-doc-position 'bottom))
 
-;; Realiza integração do ivy no lsp-mode
-(use-package lsp-ivy)
+  ;; Realiza integração do ivy no lsp-mode
+  (use-package lsp-ivy)
+
+  ;; Configura o estilo de formatação de buffer para linguagens em C e similares
+  ;; (setq c-default-style '(c++-mode  . “cc-mode”))
+  (setq c-default-style
+        '((java-mode . "java")
+          (awk-mode . "awk")
+          (c++-mode . "cc-mode")
+          (other . "gnu")))
 
 #+end_src
 

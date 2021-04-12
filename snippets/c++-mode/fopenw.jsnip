@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
-# name: fopen
+# name: fopenw
 # key: fopenw
 # --
 FILE* ${1:p} = fopen(${2:const char * filename}, "w");

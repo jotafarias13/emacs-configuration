@@ -616,7 +616,7 @@ Após instalar o /[[https://clangd.llvm.org/][clangd]]/, é preciso adicionar el
     (lsp-enable-which-key-integration t))
 
   ;; Feature do clangd que possibilita a escolha do overload de uma função no company-box
-  (setq lsp-clients-clangd-args '("--completion-style=detailed"))
+  (setq lsp-clients-clangd-args '("--completion-style=detailed" "--header-insertion=never"))
 
   ;; Pacote para adicionar explicação do código à medida que o cursor navega pelo buffer 
   (use-package lsp-ui

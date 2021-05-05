@@ -319,6 +319,24 @@
 (setq evil-exchange-cancel-key (kbd "gZ"))
 (evil-exchange-install)
 
+(use-package evil-easymotion
+  :config
+  (evilem-default-keybindings "SPC"))
+
+(evilem-define (kbd "SPC f") (list 'evil-repeat-find-char
+				     'evil-repeat-find-char-reverse)
+	       :pre-hook (save-excursion
+			   (setq evil-this-type 'inclusive)
+			   (call-interactively #'evil-find-char))
+	       :bind ((evil-cross-lines t)))
+
+(evilem-define (kbd "SPC t") (list 'evil-repeat-find-char
+				   'evil-repeat-find-char-reverse)
+	       :pre-hook (save-excursion
+			   (setq evil-this-type 'inclusive)
+			   (call-interactively #'evil-find-char-to))
+	       :bind ((evil-cross-lines t)))
+
 ;; Altera o padrão para separação de sentenças para ser apenas um espaço
 (setq sentence-end-double-space nil)
 

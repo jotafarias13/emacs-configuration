@@ -337,7 +337,9 @@
 
 ;; Interface Git
 (use-package magit
-  :custom (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+  :custom 
+  (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
+  (magit-diff-refine-hunk 'all))
 
 ;; Utiliza $PATH do terminal
 (use-package exec-path-from-shell) ; torna o PATH do shell igual do temrinal

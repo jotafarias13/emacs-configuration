@@ -486,7 +486,9 @@ O pacote /[[https://github.com/magit/magit][Magit]]/ facilita a utilização de 
 
 ;; Interface Git
 (use-package magit
-  :custom (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))  
+  :custom 
+  (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
+  (magit-diff-refine-hunk 'all)) 
 
 #+end_src
 

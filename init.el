@@ -110,18 +110,49 @@
   (setq mac-right-command-modifier 'meta))
 
 ;; Tamanho das fontes
-(defvar jlf/default-font-size 120)
-(defvar jlf/default-variable-font-size 120)
+(defvar jlf/default-font-size 130)
+(defvar jlf/default-variable-font-size 130)
+(defvar jlf/monitor-font-size 180)
+(defvar jlf/monitor-variable-font-size 180)
 
 ;; Fontes utilizadas
 ;; É necessário baixar as fontes Fira Code e Cantarell
-(set-face-attribute 'default nil :font "Fira Code" :height jlf/default-font-size)
-(set-face-attribute 'fixed-pitch nil :font "Fira Code" :height jlf/default-font-size)
-(set-face-attribute 'variable-pitch nil :font "Cantarell" :height jlf/default-variable-font-size :weight 'regular)   
+;; A função criada possibilita trocar os tamanhos das fontes para diferentes tipos de telas
+(defun jlf/switch-font-size (&optional INIT)
+  "Possibilita trocar o tamanho da fonte para diferentes tipos de telas."
+  (interactive)
+  (if INIT
+    (progn
+      (set-face-attribute 'default nil :font "Fira Code" :height jlf/default-font-size)
+      (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height jlf/default-font-size)
+      (set-face-attribute 'variable-pitch nil :font "Cantarell" :height jlf/default-variable-font-size :weight 'regular))
+    (let* ((screen-type-list '("Default" "Monitor" "Custom"))
+           (screen-type (completing-read "Screen" screen-type-list)))
+      (pcase screen-type
+        ("Monitor" 
+              (progn
+                (set-face-attribute 'default nil :font "Fira Code" :height jlf/monitor-font-size)
+                (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height jlf/monitor-font-size)
+                (set-face-attribute 'variable-pitch nil :font "Cantarell" :height jlf/monitor-variable-font-size :weight 'regular)))
+        ("Custom" 
+              (call-interactively
+	    (lambda (fixed-font-size variable-font-size)
+	      (interactive "nFixed Font Size: \nnVariable Font Size: ")
+                  (set-face-attribute 'default nil :font "Fira Code" :height fixed-font-size)
+                  (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height fixed-font-size)
+                  (set-face-attribute 'variable-pitch nil :font "Cantarell" :height variable-font-size :weight 'regular))))
+        (_ 
+	  (progn
+                (set-face-attribute 'default nil :font "Fira Code" :height jlf/default-font-size)
+                (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height jlf/default-font-size)
+                (set-face-attribute 'variable-pitch nil :font "Cantarell" :height jlf/default-variable-font-size :weight 'regular)))))))
+        
+;; Utiliza os valores 'Default' de tamanhos de fontes na inicialização
+(jlf/switch-font-size t)
 
 ;; Tema doom-moonlight
 (use-package doom-themes
-  :init (load-theme 'doom-moonlight t))
+:init (load-theme 'doom-moonlight t))
 
 (use-package which-key
   :config

@@ -621,7 +621,7 @@
 ;; Melhora a integração do evil com org
 (use-package evil-org
   :after org
-  :hook (org-mode . (lambda () evil-org-mode))
+  :hook (org-mode . evil-org-mode)
   :config
   (require 'evil-org-agenda)
   (evil-org-agenda-set-keys))

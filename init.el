@@ -103,6 +103,7 @@
 (global-set-key (kbd "C-M-1") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Pós-Graduação/UFRN/Mestrado/Dissertação/Defesa/")))
 (global-set-key (kbd "C-M-2") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Projetos/C++/")))
 (global-set-key (kbd "C-M-3") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Projetos/Emacs/Org/")))
+(global-set-key (kbd "C-M-4") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/")))
 (global-set-key (kbd "C-M-s") (lambda () (interactive) (eshell nil)))
 
 (when (eq system-type 'darwin) ;; verifica se está no Mac

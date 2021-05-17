@@ -182,35 +182,37 @@ Configura a fonte e seu tamanho, assim como o tema /[[https://github.com/hlissne
 
 ;; Fontes utilizadas
 ;; É necessário baixar as fontes Fira Code e Cantarell
-;; A função criada possibilita trocar os tamanhos das fontes para diferentes tipos de telas
+;; A função criada possibilita trocar os tamanhos das fontes para diferentes tipos de telas (sem alterar frame size ou modeline size)
 (defun jlf/switch-font-size (&optional INIT)
   "Possibilita trocar o tamanho da fonte para diferentes tipos de telas."
   (interactive)
-  (if INIT
-    (progn
-      (set-face-attribute 'default nil :font "Fira Code" :height jlf/default-font-size)
-      (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height jlf/default-font-size)
-      (set-face-attribute 'variable-pitch nil :font "Cantarell" :height jlf/default-variable-font-size :weight 'regular))
-    (let* ((screen-type-list '("Default" "Monitor" "Custom"))
-           (screen-type (completing-read "Screen" screen-type-list)))
-      (pcase screen-type
-        ("Monitor" 
-              (progn
-                (set-face-attribute 'default nil :font "Fira Code" :height jlf/monitor-font-size)
-                (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height jlf/monitor-font-size)
-                (set-face-attribute 'variable-pitch nil :font "Cantarell" :height jlf/monitor-variable-font-size :weight 'regular)))
-        ("Custom" 
-              (call-interactively
-	    (lambda (fixed-font-size variable-font-size)
-	      (interactive "nFixed Font Size: \nnVariable Font Size: ")
-                  (set-face-attribute 'default nil :font "Fira Code" :height fixed-font-size)
-                  (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height fixed-font-size)
-                  (set-face-attribute 'variable-pitch nil :font "Cantarell" :height variable-font-size :weight 'regular))))
-        (_ 
-	  (progn
-                (set-face-attribute 'default nil :font "Fira Code" :height jlf/default-font-size)
-                (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height jlf/default-font-size)
-                (set-face-attribute 'variable-pitch nil :font "Cantarell" :height jlf/default-variable-font-size :weight 'regular)))))))
+    (let ((frame-inhibit-implied-resize t)) 
+    (if INIT
+      (progn
+        (set-face-attribute 'default nil :font "Fira Code" :height jlf/default-font-size)
+        (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height jlf/default-font-size)
+        (set-face-attribute 'variable-pitch nil :font "Cantarell" :height jlf/default-variable-font-size :weight 'regular))
+      (let* ((screen-type-list '("Default" "Monitor" "Custom"))
+             (screen-type (completing-read "Screen" screen-type-list)))
+        (pcase screen-type
+          ("Monitor" 
+                (progn
+                  (set-face-attribute 'default nil :font "Fira Code" :height jlf/monitor-font-size)
+                  (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height jlf/monitor-font-size)
+                  (set-face-attribute 'variable-pitch nil :font "Cantarell" :height jlf/monitor-variable-font-size :weight 'regular)))
+          ("Custom" 
+                (call-interactively
+              (lambda (fixed-font-size variable-font-size)
+                (interactive "nFixed Font Size: \nnVariable Font Size: ")
+                    (set-face-attribute 'default nil :font "Fira Code" :height fixed-font-size)
+                    (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height fixed-font-size)
+                    (set-face-attribute 'variable-pitch nil :font "Cantarell" :height variable-font-size :weight 'regular))))
+          (_ 
+            (progn
+                  (set-face-attribute 'default nil :font "Fira Code" :height jlf/default-font-size)
+                  (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height jlf/default-font-size)
+                  (set-face-attribute 'variable-pitch nil :font "Cantarell" :height jlf/default-variable-font-size :weight 'regular)))))) 
+    (doom-modeline-refresh-font-width-cache)))
         
 ;; Utiliza os valores 'Default' de tamanhos de fontes na inicialização
 (jlf/switch-font-size t)

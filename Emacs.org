@@ -590,54 +590,51 @@ O pacote /[[https://www.gnu.org/software/auctex/][AUCTeX]]/ auxilia e configura 
 
 #+begin_src emacs-lisp
 
-;; AUCTeX
-(use-package tex
-  :ensure auctex)
-(setq TeX-auto-save t)
-(setq TeX-parse-self t)
-(setq-default TeX-master nil)
-(add-hook 'LaTeX-mode-hook 'visual-line-mode)
-(add-hook 'LaTeX-mode-hook 'flyspell-mode)
-(add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
-(setq reftex-plug-into-AUCTeX t)
-(setq TeX-PDF-mode t)
+  ;; AUCTeX
+  (use-package tex
+    :ensure auctex)
+  (setq TeX-auto-save t)
+  (setq TeX-parse-self t)
+  (setq-default TeX-master nil)
+  (add-hook 'LaTeX-mode-hook 'visual-line-mode)
+  (add-hook 'LaTeX-mode-hook 'flyspell-mode)
+  (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
+  (setq reftex-plug-into-AUCTeX t)
+  (setq TeX-PDF-mode t)
 
-;; Ativa algumas configurações do AUCTeX para melhorar a escrita do código
-(setq TeX-electric-sub-and-superscript t)
-(setq LaTeX-electric-left-right-brace t)
-(setq TeX-electric-math (cons "$" "$"))
+  ;; Ativa algumas configurações do AUCTeX para melhorar a escrita do código
+  (setq TeX-electric-sub-and-superscript t)
+  (setq LaTeX-electric-left-right-brace t)
+  (setq TeX-electric-math (cons "$" "$"))
 
-;; Coloca LaTeX-Mk disponível via C-c C-c
-;; SyncTeX é configurado no arquivo "~/.latexmkrc"
-(add-hook 'LaTeX-mode-hook (lambda ()
-  (push
-    '("LaTeX-Mk" "latexmk -pdf -pvc %s" TeX-run-TeX nil t
-      :help "Run LaTeX-Mk on file")
-    TeX-command-list)))
+  ;; Coloca LaTeX-Mk disponível via C-c C-c
+  ;; SyncTeX é configurado no arquivo "~/.latexmkrc"
+  (eval-after-load "tex" (lambda ()
+    (push
+      '("LaTeX-Mk" "latexmk -pdf -pvc %s" TeX-run-TeX nil t
+        :help "Run LaTeX-Mk on file")
+      TeX-command-list)
+    (push
+      '("CleanAll" "latexmk -c" TeX-run-TeX nil t
+        :help "Files for deletion not found")
+      TeX-command-list)
+    (setq-default TeX-command-default "LaTeX-Mk")))
 
-(add-hook 'LaTeX-mode-hook (lambda ()
-  (push
-    '("CleanAll" "latexmk -c; rm -f *.bbl *.brf" TeX-run-TeX nil t
-      :help "Files for deletion not found")
-    TeX-command-list)))
+  ;; Usa Skim como visualizador padrão, habilita PDF Sync
+  ;; Displayline do Skim é usado para pesquisa .tex -> .pdf
+  ;; Opção -b grifa a lina atual e -g abre o Skim no background
+  (setq TeX-view-program-selection '((output-pdf "PDF Viewer")))
+  (setq TeX-view-program-list
+        '(("PDF Viewer" "/Applications/Skim.app/Contents/SharedSupport/displayline -b -g %n %o %b")))
 
-(add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "LaTeX-Mk")))
+  ;; Inicializa o modo servidor no Emacs para possibilitar a comunicação com o Skim
+  (server-start)
 
-;; Usa Skim como visualizador padrão, habilita PDF Sync
-;; Displayline do Skim é usado para pesquisa .tex -> .pdf
-;; Opção -b grifa a lina atual e -g abre o Skim no background
-(setq TeX-view-program-selection '((output-pdf "PDF Viewer")))
-(setq TeX-view-program-list
-      '(("PDF Viewer" "/Applications/Skim.app/Contents/SharedSupport/displayline -b -g %n %o %b")))
-
-;; Inicializa o modo servidor no Emacs para possibilitar a comunicação com o Skim
-(server-start)
-
-;; Habilita evil keybindings voltados para TeX
-(use-package evil-tex
-  :hook (LaTeX-mode . evil-tex-mode))
-(setq evil-tex-toggle-override-m nil)
-(setq evil-tex-toggle-override-t t)
+  ;; Habilita evil keybindings voltados para TeX
+  (use-package evil-tex
+    :hook (LaTeX-mode . evil-tex-mode))
+  (setq evil-tex-toggle-override-m nil)
+  (setq evil-tex-toggle-override-t t)
 
 #+end_src
 

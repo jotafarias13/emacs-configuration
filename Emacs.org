@@ -711,6 +711,63 @@ Após baixar o /[[https://github.com/astoff/digestif][Digestif]]/, é preciso ad
 
 #+end_src
 
+** MyWorkSpace
+A ferramenta /MyWorkSpace/ é uma função de minha autoria que me auxilia na abertura de arquivos e diretórios dos projetos nos quais trabalho. Ela foi criada por que os pacotes tradicionais e famosos que servem esse propósito são muito rebuscados e minha necessidade é suprida pelas poucas funcionalidades desta ferramenta.
+
+#+begin_src emacs-lisp
+
+(defun jlf/my-workspace ()
+  "Ferrameta para facilitar abertura de arquivos e diretórios dos projetos nos quais trabalho."
+  (interactive)
+    (let* ((my-workspace-list '("Agenda" "Artigo" "Dissertação C++" "Dissertação TeX" "Emacs"))
+           (my-workspace (completing-read "WorkSpace: " my-workspace-list)))
+      (pcase my-workspace
+        ("Agenda"
+              (progn
+	  (org-agenda nil "d")
+	  (delete-other-windows)
+	  ))
+        ("Artigo"
+              (progn
+	  (let ((default-directory "~/Sync/Jota/Academico/Artigos/2021/EJPC/"))
+	    (call-interactively
+	      (lambda (file-name)
+		(interactive "fArtigo: ")
+		(find-file file-name nil))))
+	  ))
+        ("Dissertação C++"
+              (progn
+	  (let ((default-directory "~/Sync/Jota/Academico/Projetos/C++/pancreasArtificial/"))
+	    (call-interactively
+	      (lambda (file-name)
+		(interactive "fDissertação C++: ")
+		(find-file file-name nil))))
+	  ))
+        ("Dissertação TeX"
+              (progn
+	  (let ((default-directory "~/Sync/Jota/Academico/Pós-Graduação/UFRN/Mestrado/Dissertação/Defesa/"))
+	    (call-interactively
+	      (lambda (file-name)
+		(interactive "fDissertação TeX: ")
+		(find-file file-name nil))))
+	  ))
+        ("Emacs"
+              (progn
+	  (let ((default-directory "~/.emacs.d/"))
+	    (call-interactively
+	      (lambda (file-name)
+		(interactive "fEmacs: ")
+		(find-file file-name nil))))
+	  ))
+        (_
+          (progn
+	    (message "Argumento Inválido!")
+	    )))))
+
+(global-set-key (kbd "C-+") 'jlf/my-workspace) ;; Keybinding para ferramenta MyWorkSpace
+
+#+end_src
+
 * Org Mode
  /[[https://orgmode.org/][Org Mode]]/ é um editor de documentos, planejador de projetos e tarefas e ambiente de programação muito útil e customizável, sendo de extrema importância para as tarefas e projetos do dia-a-dia.
 

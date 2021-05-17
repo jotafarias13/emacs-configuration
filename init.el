@@ -118,35 +118,37 @@
 
 ;; Fontes utilizadas
 ;; É necessário baixar as fontes Fira Code e Cantarell
-;; A função criada possibilita trocar os tamanhos das fontes para diferentes tipos de telas
+;; A função criada possibilita trocar os tamanhos das fontes para diferentes tipos de telas (sem alterar frame size ou modeline size)
 (defun jlf/switch-font-size (&optional INIT)
   "Possibilita trocar o tamanho da fonte para diferentes tipos de telas."
   (interactive)
-  (if INIT
-    (progn
-      (set-face-attribute 'default nil :font "Fira Code" :height jlf/default-font-size)
-      (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height jlf/default-font-size)
-      (set-face-attribute 'variable-pitch nil :font "Cantarell" :height jlf/default-variable-font-size :weight 'regular))
-    (let* ((screen-type-list '("Default" "Monitor" "Custom"))
-           (screen-type (completing-read "Screen" screen-type-list)))
-      (pcase screen-type
-        ("Monitor" 
-              (progn
-                (set-face-attribute 'default nil :font "Fira Code" :height jlf/monitor-font-size)
-                (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height jlf/monitor-font-size)
-                (set-face-attribute 'variable-pitch nil :font "Cantarell" :height jlf/monitor-variable-font-size :weight 'regular)))
-        ("Custom" 
-              (call-interactively
-	    (lambda (fixed-font-size variable-font-size)
-	      (interactive "nFixed Font Size: \nnVariable Font Size: ")
-                  (set-face-attribute 'default nil :font "Fira Code" :height fixed-font-size)
-                  (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height fixed-font-size)
-                  (set-face-attribute 'variable-pitch nil :font "Cantarell" :height variable-font-size :weight 'regular))))
-        (_ 
-	  (progn
-                (set-face-attribute 'default nil :font "Fira Code" :height jlf/default-font-size)
-                (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height jlf/default-font-size)
-                (set-face-attribute 'variable-pitch nil :font "Cantarell" :height jlf/default-variable-font-size :weight 'regular)))))))
+    (let ((frame-inhibit-implied-resize t)) 
+    (if INIT
+      (progn
+        (set-face-attribute 'default nil :font "Fira Code" :height jlf/default-font-size)
+        (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height jlf/default-font-size)
+        (set-face-attribute 'variable-pitch nil :font "Cantarell" :height jlf/default-variable-font-size :weight 'regular))
+      (let* ((screen-type-list '("Default" "Monitor" "Custom"))
+             (screen-type (completing-read "Screen" screen-type-list)))
+        (pcase screen-type
+          ("Monitor" 
+                (progn
+                  (set-face-attribute 'default nil :font "Fira Code" :height jlf/monitor-font-size)
+                  (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height jlf/monitor-font-size)
+                  (set-face-attribute 'variable-pitch nil :font "Cantarell" :height jlf/monitor-variable-font-size :weight 'regular)))
+          ("Custom" 
+                (call-interactively
+              (lambda (fixed-font-size variable-font-size)
+                (interactive "nFixed Font Size: \nnVariable Font Size: ")
+                    (set-face-attribute 'default nil :font "Fira Code" :height fixed-font-size)
+                    (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height fixed-font-size)
+                    (set-face-attribute 'variable-pitch nil :font "Cantarell" :height variable-font-size :weight 'regular))))
+          (_ 
+            (progn
+                  (set-face-attribute 'default nil :font "Fira Code" :height jlf/default-font-size)
+                  (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height jlf/default-font-size)
+                  (set-face-attribute 'variable-pitch nil :font "Cantarell" :height jlf/default-variable-font-size :weight 'regular)))))) 
+    (doom-modeline-refresh-font-width-cache)))
         
 ;; Utiliza os valores 'Default' de tamanhos de fontes na inicialização
 (jlf/switch-font-size t)
@@ -415,19 +417,16 @@
 
 ;; Coloca LaTeX-Mk disponível via C-c C-c
 ;; SyncTeX é configurado no arquivo "~/.latexmkrc"
-(add-hook 'LaTeX-mode-hook (lambda ()
+(eval-after-load "tex" (lambda ()
   (push
     '("LaTeX-Mk" "latexmk -pdf -pvc %s" TeX-run-TeX nil t
       :help "Run LaTeX-Mk on file")
-    TeX-command-list)))
-
-(add-hook 'LaTeX-mode-hook (lambda ()
+    TeX-command-list)
   (push
-    '("CleanAll" "latexmk -c; rm -f *.bbl *.brf" TeX-run-TeX nil t
+    '("CleanAll" "latexmk -c" TeX-run-TeX nil t
       :help "Files for deletion not found")
-    TeX-command-list)))
-
-(add-hook 'TeX-mode-hook '(lambda () (setq TeX-command-default "LaTeX-Mk")))
+    TeX-command-list)
+  (setq-default TeX-command-default "LaTeX-Mk")))
 
 ;; Usa Skim como visualizador padrão, habilita PDF Sync
 ;; Displayline do Skim é usado para pesquisa .tex -> .pdf
@@ -497,6 +496,56 @@
 
 (cl-defmethod project-root ((project (head latex-module)))
    (cdr project))
+
+(defun jlf/my-workspace ()
+  "Ferrameta para facilitar abertura de arquivos e diretórios dos projetos nos quais trabalho."
+  (interactive)
+    (let* ((my-workspace-list '("Agenda" "Artigo" "Dissertação C++" "Dissertação TeX" "Emacs"))
+           (my-workspace (completing-read "WorkSpace: " my-workspace-list)))
+      (pcase my-workspace
+        ("Agenda"
+              (progn
+	  (org-agenda nil "d")
+	  (delete-other-windows)
+	  ))
+        ("Artigo"
+              (progn
+	  (let ((default-directory "~/Sync/Jota/Academico/Artigos/2021/EJPC/"))
+	    (call-interactively
+	      (lambda (file-name)
+		(interactive "fArtigo: ")
+		(find-file file-name nil))))
+	  ))
+        ("Dissertação C++"
+              (progn
+	  (let ((default-directory "~/Sync/Jota/Academico/Projetos/C++/pancreasArtificial/"))
+	    (call-interactively
+	      (lambda (file-name)
+		(interactive "fDissertação C++: ")
+		(find-file file-name nil))))
+	  ))
+        ("Dissertação TeX"
+              (progn
+	  (let ((default-directory "~/Sync/Jota/Academico/Pós-Graduação/UFRN/Mestrado/Dissertação/Defesa/"))
+	    (call-interactively
+	      (lambda (file-name)
+		(interactive "fDissertação TeX: ")
+		(find-file file-name nil))))
+	  ))
+        ("Emacs"
+              (progn
+	  (let ((default-directory "~/.emacs.d/"))
+	    (call-interactively
+	      (lambda (file-name)
+		(interactive "fEmacs: ")
+		(find-file file-name nil))))
+	  ))
+        (_
+          (progn
+	    (message "Argumento Inválido!")
+	    )))))
+
+(global-set-key (kbd "C-+") 'jlf/my-workspace) ;; Keybinding para ferramenta MyWorkSpace
 
 ;; Congifuração das fontes e faces
 (defun jlf/org-font-setup ()

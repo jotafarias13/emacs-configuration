@@ -853,6 +853,151 @@ O pacote /[[https://github.com/politza/pdf-tools][PDF-Tools]]/ habilita a visual
     (setq pdf-view-restore-filename "~/.emacs.d/.pdf-view-restore"))
   
 #+end_src
+
+** Pesquisa
+*** org-roam
+
+#+begin_src emacs-lisp
+  
+(use-package org-roam
+      :hook
+      (after-init . org-roam-mode)
+      :custom
+      (org-roam-directory (file-truename "~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/"))
+      :bind (:map org-roam-mode-map
+              (("C-c n l" . org-roam)
+               ("C-c n f" . org-roam-find-file)
+               ("C-c n g" . org-roam-graph))
+              :map org-mode-map
+              (("C-c n i" . org-roam-insert))
+              (("C-c n I" . org-roam-insert-immediate))))  
+  
+#+end_src
+
+*** org-noter
+
+#+begin_src emacs-lisp
+  
+  (use-package org-noter
+    :custom
+    (org-noter-notes-search-path '("~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/"))
+    (org-noter-doc-split-fraction '(0.7 . 0.3))
+    ;; (org-noter-insert-note-no-questions t)
+    ;; (org-noter-hide-other nil)
+    (org-noter-always-create-frame nil)
+    (org-noter-kill-frame-at-session-end nil))
+  
+#+end_src
+
+*** org-pdftools
+
+#+begin_src emacs-lisp
+  
+  (use-package org-pdftools
+    :hook (org-mode . org-pdftools-setup-link)
+    :custom
+    ;; (org-pdftools-use-isearch-link t)
+    (org-pdftools-use-freepointer-annot t))
+  
+#+end_src
+
+*** org-noter-pdftools
+
+#+begin_src emacs-lisp
+  
+  (use-package org-noter-pdftools
+    :after org-noter
+    :custom
+    (org-noter-pdftools-markup-pointer-color "yellow")
+    (org-noter-pdftools-free-pointer-icon "Note")
+    (org-noter-pdftools-free-pointer-color "yellow")
+    :config
+    ;; Configuração "extra" sugerida pelo próprio mantenedor do pacote
+    ;; Add a function to ensure precise note is inserted
+    (defun org-noter-pdftools-insert-precise-note (&optional toggle-no-questions)
+      (interactive "P")
+      (org-noter--with-valid-session
+       (let ((org-noter-insert-note-no-questions (if toggle-no-questions
+                                                     (not org-noter-insert-note-no-questions)
+                                                   org-noter-insert-note-no-questions))
+             (org-pdftools-use-isearch-link t)
+             (org-pdftools-use-freestyle-annot t))
+         (org-noter-insert-note (org-noter--get-precise-info)))))
+  
+    ;; fix https://github.com/weirdNox/org-noter/pull/93/commits/f8349ae7575e599f375de1be6be2d0d5de4e6cbf
+    (defun org-noter-set-start-location (&optional arg)
+      "When opening a session with this document, go to the current location.
+  With a prefix ARG, remove start location."
+      (interactive "P")
+      (org-noter--with-valid-session
+       (let ((inhibit-read-only t)
+             (ast (org-noter--parse-root))
+             (location (org-noter--doc-approx-location (when (called-interactively-p 'any) 'interactive))))
+         (with-current-buffer (org-noter--session-notes-buffer session)
+           (org-with-wide-buffer
+            (goto-char (org-element-property :begin ast))
+            (if arg
+                (org-entry-delete nil org-noter-property-note-location)
+              (org-entry-put nil org-noter-property-note-location
+                             (org-noter--pretty-print-location location))))))))
+    (with-eval-after-load 'pdf-annot
+      (add-hook 'pdf-annot-activate-handler-functions #'org-noter-pdftools-jump-to-note)))
+  
+#+end_src
+
+*** ivy-bibtex
+
+#+begin_src emacs-lisp
+  
+  (use-package ivy-bibtex
+    :custom
+    (bibtex-completion-bibliography '("~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/bibliography.bib"))
+    (bibtex-completion-library-path '("~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/"))
+    (bibtex-completion-find-note-functions '(orb-find-note-file)))
+  
+#+end_src
+
+*** org-ref
+
+#+begin_src emacs-lisp
+  
+  (use-package org-ref
+    :custom
+    (org-ref-default-bibliography '("~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/bibliography.bib"))
+    (org-ref-pdf-directory "~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/")
+    (org-ref-note-title-format "* TODO %y - %t\n :PROPERTIES:\n  :Custom_ID: %k\n  :NOTER_DOCUMENT: %F\n :ROAM_KEY: cite:%k\n  :AUTHOR: %9a\n  :JOURNAL: %j\n  :YEAR: %y\n  :VOLUME: %v\n  :PAGES: %p\n  :DOI: %D\n  :URL: %U\n :END:\n\n")
+    (org-ref-notes-directory "~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/")
+    (org-ref-notes-function 'orb-edit-notes))
+  
+#+end_src
+
+*** org-roam-bibtex
+
+#+begin_src emacs-lisp
+  
+  (use-package org-roam-bibtex
+    :after org-roam
+    :hook (org-roam-mode . org-roam-bibtex-mode)
+    :custom
+    (orb-preformat-keywords
+     '("=key=" "title" "url" "file" "author-or-editor" "keywords"))
+    (orb-templates
+     '(("r" "ref" plain (function org-roam-capture--get-point)
+        ""
+        :file-name "${=key=}"
+        :head "#+TITLE: ${=key=}: ${title}\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: article\n- tags ::\n- keywords :: ${keywords}\n* ${title}\n:PROPERTIES:\n:Custom_ID: ${=key=}\n:URL: ${url}\n:AUTHOR: ${author-or-editor}\n:NOTER_DOCUMENT: %(file-relative-name (orb-process-file-field \"${=key=}\") (print org-directory))\n:NOTER_PAGE:\n:END:\n** CATALOG\n*** Motivation :springGreen:\n*** Model :lightSkyblue:\n*** Remarks\n*** Applications\n*** Expressions\n*** References :violet:\n** NOTES\n"
+        :unnarrowed t))))
+    ;; (orb-templates
+    ;;       '(("r" "ref" plain #'org-roam-capture--get-point
+    ;;          ""
+    ;;          :file-name "${citekey}"
+    ;;          :head "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}\n"
+    ;;          :unnarrowed t)))
+
+    (org-roam-bibtex-mode)
+  
+#+end_src
+
 * Org Mode
  /[[https://orgmode.org/][Org Mode]]/ é um editor de documentos, planejador de projetos e tarefas e ambiente de programação muito útil e customizável, sendo de extrema importância para as tarefas e projetos do dia-a-dia.
 

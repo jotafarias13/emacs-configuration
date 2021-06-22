@@ -179,9 +179,9 @@ Configura a fonte e seu tamanho, assim como o tema /[[https://github.com/hlissne
 (defvar jlf/default-font-size 150)
 (defvar jlf/default-fixed-font-size 130)
 (defvar jlf/default-variable-font-size 150)
-(defvar jlf/monitor-font-size 200)
-(defvar jlf/monitor-fixed-font-size 180)
-(defvar jlf/monitor-variable-font-size 200)
+(defvar jlf/monitor-font-size 190)
+(defvar jlf/monitor-fixed-font-size 170)
+(defvar jlf/monitor-variable-font-size 190)
 
 ;; Fontes utilizadas
 ;; É necessário baixar as fontes Fira Code e Cantarell

@@ -176,10 +176,12 @@ Configura a fonte e seu tamanho, assim como o tema /[[https://github.com/hlissne
 #+begin_src emacs-lisp
 
 ;; Tamanho das fontes
-(defvar jlf/default-font-size 130)
-(defvar jlf/default-variable-font-size 130)
-(defvar jlf/monitor-font-size 180)
-(defvar jlf/monitor-variable-font-size 180)
+(defvar jlf/default-font-size 150)
+(defvar jlf/default-fixed-font-size 130)
+(defvar jlf/default-variable-font-size 150)
+(defvar jlf/monitor-font-size 200)
+(defvar jlf/monitor-fixed-font-size 180)
+(defvar jlf/monitor-variable-font-size 200)
 
 ;; Fontes utilizadas
 ;; É necessário baixar as fontes Fira Code e Cantarell
@@ -190,29 +192,29 @@ Configura a fonte e seu tamanho, assim como o tema /[[https://github.com/hlissne
     (let ((frame-inhibit-implied-resize t)) 
     (if INIT
       (progn
-        (set-face-attribute 'default nil :font "Fira Code" :height jlf/default-font-size)
-        (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height jlf/default-font-size)
-        (set-face-attribute 'variable-pitch nil :font "Cantarell" :height jlf/default-variable-font-size :weight 'regular))
+        (set-face-attribute 'default nil :family "Inconsolata" :height jlf/default-font-size)
+        (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height jlf/default-fixed-font-size)
+        (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height jlf/default-variable-font-size :weight 'regular))
       (let* ((screen-type-list '("Default" "Monitor" "Custom"))
-             (screen-type (completing-read "Screen" screen-type-list)))
+             (screen-type (completing-read "Screen " screen-type-list)))
         (pcase screen-type
           ("Monitor" 
                 (progn
-                  (set-face-attribute 'default nil :font "Fira Code" :height jlf/monitor-font-size)
-                  (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height jlf/monitor-font-size)
-                  (set-face-attribute 'variable-pitch nil :font "Cantarell" :height jlf/monitor-variable-font-size :weight 'regular)))
+                  (set-face-attribute 'default nil :family "Inconsolata" :height jlf/monitor-font-size)
+                  (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height jlf/monitor-fixed-font-size)
+                  (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height jlf/monitor-variable-font-size :weight 'regular)))
           ("Custom" 
                 (call-interactively
               (lambda (fixed-font-size variable-font-size)
                 (interactive "nFixed Font Size: \nnVariable Font Size: ")
-                    (set-face-attribute 'default nil :font "Fira Code" :height fixed-font-size)
-                    (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height fixed-font-size)
-                    (set-face-attribute 'variable-pitch nil :font "Cantarell" :height variable-font-size :weight 'regular))))
+                    (set-face-attribute 'default nil :family "Inconsolata" :height fixed-font-size)
+                    (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height fixed-font-size)
+                    (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height variable-font-size :weight 'regular))))
           (_ 
             (progn
-                  (set-face-attribute 'default nil :font "Fira Code" :height jlf/default-font-size)
-                  (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height jlf/default-font-size)
-                  (set-face-attribute 'variable-pitch nil :font "Cantarell" :height jlf/default-variable-font-size :weight 'regular)))))) 
+                  (set-face-attribute 'default nil :family "Inconsolata" :height jlf/default-font-size)
+                  (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height jlf/default-fixed-font-size)
+                  (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height jlf/default-variable-font-size :weight 'regular)))))) 
     (doom-modeline-refresh-font-width-cache)))
         
 ;; Utiliza os valores 'Default' de tamanhos de fontes na inicialização

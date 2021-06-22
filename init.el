@@ -27,6 +27,7 @@
                 term-mode-hook
                 shell-mode-hook
                 treemacs-mode-hook
+                pdf-view-mode-hook
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
@@ -111,10 +112,12 @@
   (setq mac-right-command-modifier 'meta))
 
 ;; Tamanho das fontes
-(defvar jlf/default-font-size 130)
-(defvar jlf/default-variable-font-size 130)
-(defvar jlf/monitor-font-size 180)
-(defvar jlf/monitor-variable-font-size 180)
+(defvar jlf/default-font-size 150)
+(defvar jlf/default-fixed-font-size 130)
+(defvar jlf/default-variable-font-size 150)
+(defvar jlf/monitor-font-size 200)
+(defvar jlf/monitor-fixed-font-size 180)
+(defvar jlf/monitor-variable-font-size 200)
 
 ;; Fontes utilizadas
 ;; É necessário baixar as fontes Fira Code e Cantarell
@@ -125,29 +128,29 @@
     (let ((frame-inhibit-implied-resize t)) 
     (if INIT
       (progn
-        (set-face-attribute 'default nil :font "Fira Code" :height jlf/default-font-size)
-        (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height jlf/default-font-size)
-        (set-face-attribute 'variable-pitch nil :font "Cantarell" :height jlf/default-variable-font-size :weight 'regular))
+        (set-face-attribute 'default nil :family "Inconsolata" :height jlf/default-font-size)
+        (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height jlf/default-fixed-font-size)
+        (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height jlf/default-variable-font-size :weight 'regular))
       (let* ((screen-type-list '("Default" "Monitor" "Custom"))
-             (screen-type (completing-read "Screen" screen-type-list)))
+             (screen-type (completing-read "Screen " screen-type-list)))
         (pcase screen-type
           ("Monitor" 
                 (progn
-                  (set-face-attribute 'default nil :font "Fira Code" :height jlf/monitor-font-size)
-                  (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height jlf/monitor-font-size)
-                  (set-face-attribute 'variable-pitch nil :font "Cantarell" :height jlf/monitor-variable-font-size :weight 'regular)))
+                  (set-face-attribute 'default nil :family "Inconsolata" :height jlf/monitor-font-size)
+                  (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height jlf/monitor-fixed-font-size)
+                  (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height jlf/monitor-variable-font-size :weight 'regular)))
           ("Custom" 
                 (call-interactively
               (lambda (fixed-font-size variable-font-size)
                 (interactive "nFixed Font Size: \nnVariable Font Size: ")
-                    (set-face-attribute 'default nil :font "Fira Code" :height fixed-font-size)
-                    (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height fixed-font-size)
-                    (set-face-attribute 'variable-pitch nil :font "Cantarell" :height variable-font-size :weight 'regular))))
+                    (set-face-attribute 'default nil :family "Inconsolata" :height fixed-font-size)
+                    (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height fixed-font-size)
+                    (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height variable-font-size :weight 'regular))))
           (_ 
             (progn
-                  (set-face-attribute 'default nil :font "Fira Code" :height jlf/default-font-size)
-                  (set-face-attribute 'fixed-pitch nil :font "Fira Code" :height jlf/default-font-size)
-                  (set-face-attribute 'variable-pitch nil :font "Cantarell" :height jlf/default-variable-font-size :weight 'regular)))))) 
+                  (set-face-attribute 'default nil :family "Inconsolata" :height jlf/default-font-size)
+                  (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height jlf/default-fixed-font-size)
+                  (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height jlf/default-variable-font-size :weight 'regular)))))) 
     (doom-modeline-refresh-font-width-cache)))
         
 ;; Utiliza os valores 'Default' de tamanhos de fontes na inicialização
@@ -500,7 +503,7 @@
 (defun jlf/my-workspace ()
   "Ferrameta para facilitar abertura de arquivos e diretórios dos projetos nos quais trabalho."
   (interactive)
-    (let* ((my-workspace-list '("Agenda" "Artigo" "Dissertação C++" "Dissertação TeX" "Emacs"))
+    (let* ((my-workspace-list '("Agenda" "Artigo" "Dissertação C++" "Dissertação TeX" "Emacs" "Roam"))
            (my-workspace (completing-read "WorkSpace: " my-workspace-list)))
       (pcase my-workspace
         ("Agenda"
@@ -540,12 +543,189 @@
 		(interactive "fEmacs: ")
 		(find-file file-name nil))))
 	  ))
+        ("Roam"
+              (progn
+	  (let ((default-directory "~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/"))
+	    (call-interactively
+	      (lambda (file-name)
+		(interactive "fRoam: ")
+		(find-file file-name nil))))
+	  ))
         (_
           (progn
 	    (message "Argumento Inválido!")
 	    )))))
 
 (global-set-key (kbd "C-+") 'jlf/my-workspace) ;; Keybinding para ferramenta MyWorkSpace
+
+;; Pacotes necessários para utilização do PDF-Tools
+(use-package let-alist)
+(use-package tablist)
+
+;; Necessário instalar o libpng e poppler (homebrew ou macports)
+;; Configurar a variável PKG_CONFIG_PATH no Shell Profile (bash ou zsh)
+;; O path deve ser onde se encontra a biblioteca do pkgconfig
+;; export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig/"
+;; Preferencialmente instalar o pdf-tools pelo MELPA (list-packages)
+;; Executar o comando 'pdf-tools-install' antes de configurar o pacote
+(use-package pdf-tools
+  :pin manual ;; não sei a explicação
+  :config
+  (pdf-tools-install) ;; executa antes de configurar pela primeira vez
+  ;; Centraliza na largura do PDF
+  (setq-default pdf-view-display-size 'fit-width)
+  ;; Anotar automaticamente os highlights
+  ;; Comentado pois gera conflito com o org-noter-pdftools
+  ;; (setq pdf-annot-activate-created-annotations t)
+  ;; Configuração da pesquisa dentro do PDF buffer
+  (define-key pdf-view-mode-map (kbd "C-s") 'isearch-forward)
+  (define-key pdf-view-mode-map (kbd "C-r") 'isearch-backward)
+  ;; Ativa midnight-mode automaticamente para PDF's (inversão de cores)
+  (add-hook 'pdf-view-mode-hook (lambda ()
+    (pdf-view-midnight-minor-mode t)))) 
+
+;; Função para otimizar os espaços laterais "em branco" do buffer
+(defun guto/pdf-view-slice-vertical (&optional window)
+  "Minha versão do slice para cortar só as laterais e deixar espaço vertical"
+  (interactive)
+  (let* ((bb (pdf-cache-boundingbox (pdf-view-current-page window)))
+         (margin (max 0 (or pdf-view-bounding-box-margin 0)))
+         (slice (list (- (nth 0 bb)
+                         (/ margin 2.0))
+                      (- (nth 1 bb)
+                         (/ margin 1.0))
+                      (+ (- (nth 2 bb) (nth 0 bb))
+                         margin)
+                      (+ (- (nth 3 bb) (nth 1 bb))
+                         (* 4.0 margin)))))
+    (apply 'pdf-view-set-slice
+           (append slice (and window (list window))))))
+
+;; Adiciona a função criada acima para o pdf-view-mode-map como "sv"
+(define-key pdf-view-mode-map (kbd "sv") 'guto/pdf-view-slice-vertical)
+
+;; Adiciona a função criada acima para o pdf-view-mode-map como "sv" dentro do evil-normal-mode
+(with-eval-after-load "evil"
+  (evil-define-key 'normal pdf-view-mode-map (kbd "sv") 'guto/pdf-view-slice-vertical))
+
+;; Conserta o bug do pdf-tools ao utilizar o pacote evil (borda do buffer piscando)
+(add-hook 'pdf-view-mode-hook
+  (lambda ()
+    (set (make-local-variable 'evil-normal-state-cursor) (list nil))
+    (internal-show-cursor nil nil)))
+
+;; Configura atalhos para movimentação de e para hyperlinks no PDF buffer
+(evil-define-key 'normal pdf-view-mode-map (kbd ";") 'pdf-history-backward)
+(evil-define-key 'normal pdf-view-mode-map (kbd ",") 'pdf-history-forward)
+
+;; Salva a localização (página) do PDF para quando abrir novamente
+;; A informação fica salva em ".pdf-view-restore" no mesmo diretório do Emacs "~/.emacs.d/"
+(use-package pdf-view-restore
+  :after pdf-tools
+  :config
+  (add-hook 'pdf-view-mode-hook 'pdf-view-restore-mode)
+  (setq pdf-view-restore-filename "~/.emacs.d/.pdf-view-restore"))
+
+(use-package org-roam
+      :hook
+      (after-init . org-roam-mode)
+      :custom
+      (org-roam-directory (file-truename "~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/"))
+      :bind (:map org-roam-mode-map
+              (("C-c n l" . org-roam)
+               ("C-c n f" . org-roam-find-file)
+               ("C-c n g" . org-roam-graph))
+              :map org-mode-map
+              (("C-c n i" . org-roam-insert))
+              (("C-c n I" . org-roam-insert-immediate))))
+
+(use-package org-noter
+  :custom
+  (org-noter-notes-search-path '("~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/"))
+  (org-noter-doc-split-fraction '(0.7 . 0.3))
+  ;; (org-noter-insert-note-no-questions t)
+  ;; (org-noter-hide-other nil)
+  (org-noter-always-create-frame nil)
+  (org-noter-kill-frame-at-session-end nil))
+
+(use-package org-pdftools
+  :hook (org-mode . org-pdftools-setup-link)
+  :custom
+  ;; (org-pdftools-use-isearch-link t)
+  (org-pdftools-use-freepointer-annot t))
+
+(use-package org-noter-pdftools
+  :after org-noter
+  :custom
+  (org-noter-pdftools-markup-pointer-color "yellow")
+  (org-noter-pdftools-free-pointer-icon "Note")
+  (org-noter-pdftools-free-pointer-color "yellow")
+  :config
+  ;; Configuração "extra" sugerida pelo próprio mantenedor do pacote
+  ;; Add a function to ensure precise note is inserted
+  (defun org-noter-pdftools-insert-precise-note (&optional toggle-no-questions)
+    (interactive "P")
+    (org-noter--with-valid-session
+     (let ((org-noter-insert-note-no-questions (if toggle-no-questions
+                                                   (not org-noter-insert-note-no-questions)
+                                                 org-noter-insert-note-no-questions))
+           (org-pdftools-use-isearch-link t)
+           (org-pdftools-use-freestyle-annot t))
+       (org-noter-insert-note (org-noter--get-precise-info)))))
+
+  ;; fix https://github.com/weirdNox/org-noter/pull/93/commits/f8349ae7575e599f375de1be6be2d0d5de4e6cbf
+  (defun org-noter-set-start-location (&optional arg)
+    "When opening a session with this document, go to the current location.
+With a prefix ARG, remove start location."
+    (interactive "P")
+    (org-noter--with-valid-session
+     (let ((inhibit-read-only t)
+           (ast (org-noter--parse-root))
+           (location (org-noter--doc-approx-location (when (called-interactively-p 'any) 'interactive))))
+       (with-current-buffer (org-noter--session-notes-buffer session)
+         (org-with-wide-buffer
+          (goto-char (org-element-property :begin ast))
+          (if arg
+              (org-entry-delete nil org-noter-property-note-location)
+            (org-entry-put nil org-noter-property-note-location
+                           (org-noter--pretty-print-location location))))))))
+  (with-eval-after-load 'pdf-annot
+    (add-hook 'pdf-annot-activate-handler-functions #'org-noter-pdftools-jump-to-note)))
+
+(use-package ivy-bibtex
+  :custom
+  (bibtex-completion-bibliography '("~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/bibliography.bib"))
+  (bibtex-completion-library-path '("~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/"))
+  (bibtex-completion-find-note-functions '(orb-find-note-file)))
+
+(use-package org-ref
+  :custom
+  (org-ref-default-bibliography '("~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/bibliography.bib"))
+  (org-ref-pdf-directory "~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/")
+  (org-ref-note-title-format "* TODO %y - %t\n :PROPERTIES:\n  :Custom_ID: %k\n  :NOTER_DOCUMENT: %F\n :ROAM_KEY: cite:%k\n  :AUTHOR: %9a\n  :JOURNAL: %j\n  :YEAR: %y\n  :VOLUME: %v\n  :PAGES: %p\n  :DOI: %D\n  :URL: %U\n :END:\n\n")
+  (org-ref-notes-directory "~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/")
+  (org-ref-notes-function 'orb-edit-notes))
+
+(use-package org-roam-bibtex
+  :after org-roam
+  :hook (org-roam-mode . org-roam-bibtex-mode)
+  :custom
+  (orb-preformat-keywords
+   '("=key=" "title" "url" "file" "author-or-editor" "keywords"))
+  (orb-templates
+   '(("r" "ref" plain (function org-roam-capture--get-point)
+      ""
+      :file-name "${=key=}"
+      :head "#+TITLE: ${=key=}: ${title}\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: article\n- tags ::\n- keywords :: ${keywords}\n* ${title}\n:PROPERTIES:\n:Custom_ID: ${=key=}\n:URL: ${url}\n:AUTHOR: ${author-or-editor}\n:NOTER_DOCUMENT: %(file-relative-name (orb-process-file-field \"${=key=}\") (print org-directory))\n:NOTER_PAGE:\n:END:\n** CATALOG\n*** Motivation :springGreen:\n*** Model :lightSkyblue:\n*** Remarks\n*** Applications\n*** Expressions\n*** References :violet:\n** NOTES\n"
+      :unnarrowed t))))
+  ;; (orb-templates
+  ;;       '(("r" "ref" plain #'org-roam-capture--get-point
+  ;;          ""
+  ;;          :file-name "${citekey}"
+  ;;          :head "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}\n"
+  ;;          :unnarrowed t)))
+
+  (org-roam-bibtex-mode)
 
 ;; Congifuração das fontes e faces
 (defun jlf/org-font-setup ()
@@ -556,18 +736,25 @@
                              (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
 
   ;; Configura as faces dos headings
-  (dolist (face '((org-level-1 . 1.5)
-                  (org-level-2 . 1.3)
-                  (org-level-3 . 1.2)
+  (dolist (face '((org-level-1 . 1.4)
+                  (org-level-2 . 1.2)
+                  (org-level-3 . 1.15)
                   (org-level-4 . 1.1)
                   (org-level-5 . 1.1)
                   (org-level-6 . 1.1)
                   (org-level-7 . 1.1)
                   (org-level-8 . 1.1)))
-    (set-face-attribute (car face) nil :font "Cantarell" :weight 'regular :height (cdr face)))
+    (set-face-attribute (car face) nil :family "Inconsolata" :weight 'regular :width 'condensed :height (cdr face)))
+
+  ;; Configura as faces de título e keywords
+  (dolist (face '((org-document-title . 1.45)
+                  (org-document-info-keyword . 1.0)
+                  (org-document-info . 1.0)))
+    (set-face-attribute (car face) nil :family "Inconsolata" :weight 'regular :height (cdr face)))
 
   ;; Assegura que o que deve ser fixed-pitch no org-mode fique dessa forma
   (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))
   (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
   (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
   (set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
@@ -577,7 +764,16 @@
   (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
   (set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch)
   (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
-  (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch))
+  (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch)
+
+  (custom-theme-set-faces
+   'user
+   '(org-document-info ((t (:foreground "dark orange"))))
+   '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
+   '(org-link ((t (:foreground "royal blue" :underline t))))
+   '(org-property-value ((t (:inherit fixed-pitch))) t)
+   '(org-table ((t (:inherit fixed-pitch :foreground "#83a598"))))
+   '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))))
 
 (defun jlf/org-mode-setup ()
   (org-indent-mode)

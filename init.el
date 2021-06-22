@@ -115,9 +115,9 @@
 (defvar jlf/default-font-size 150)
 (defvar jlf/default-fixed-font-size 130)
 (defvar jlf/default-variable-font-size 150)
-(defvar jlf/monitor-font-size 200)
-(defvar jlf/monitor-fixed-font-size 180)
-(defvar jlf/monitor-variable-font-size 200)
+(defvar jlf/monitor-font-size 190)
+(defvar jlf/monitor-fixed-font-size 170)
+(defvar jlf/monitor-variable-font-size 190)
 
 ;; Fontes utilizadas
 ;; É necessário baixar as fontes Fira Code e Cantarell
@@ -699,12 +699,21 @@ With a prefix ARG, remove start location."
   (bibtex-completion-find-note-functions '(orb-find-note-file)))
 
 (use-package org-ref
+  :after ivy-bibtex
+  :init
+  (setq org-ref-completion-library 'org-ref-ivy-cite)
   :custom
   (org-ref-default-bibliography '("~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/bibliography.bib"))
   (org-ref-pdf-directory "~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/")
   (org-ref-note-title-format "* TODO %y - %t\n :PROPERTIES:\n  :Custom_ID: %k\n  :NOTER_DOCUMENT: %F\n :ROAM_KEY: cite:%k\n  :AUTHOR: %9a\n  :JOURNAL: %j\n  :YEAR: %y\n  :VOLUME: %v\n  :PAGES: %p\n  :DOI: %D\n  :URL: %U\n :END:\n\n")
   (org-ref-notes-directory "~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/")
-  (org-ref-notes-function 'orb-edit-notes))
+  (org-ref-notes-function 'orb-edit-notes)
+  :config
+  ;; Adicionei essas funções pra deixar o org-ref na cara do ivy-bibtex
+  (bibtex-completion-init) ;; primeiro precisa inicializar o ivy-bibtex
+  ;; Em seguida faz esse comando pra deixar o org-ref com a cara do ivy-bibtex
+  (ivy-configure 'org-ref-ivy-insert-cite-link
+    :display-transformer-fn 'ivy-bibtex-display-transformer))
 
 (use-package org-roam-bibtex
   :after org-roam

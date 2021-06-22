@@ -777,6 +777,82 @@ A ferramenta /MyWorkSpace/ é uma função de minha autoria que me auxilia na ab
 
 #+end_src
 
+** PDF-Tools
+O pacote /[[https://github.com/politza/pdf-tools][PDF-Tools]]/ habilita a visualização de arquivos PDF como um buffer no Emacs. Para utilizá-lo, é preciso instalar o /libpng/ e o /poppler/ seja pelo homebrew ou Macports. Também, é preciso exportar a variável /PGK_CONFIG_PATH/ no Shell Profile (bash ou zsh) para a localização da biblioteca do /pkgconfig/. Em seguida, instalar os pacotes /let-alist/ e /tablist/ e instalar o /pdf-tools/ (preferencialmente pelo MELPA através da função /list-packages/). Depois, antes de configurar o pacote, é necessário executar o comando /pdf-tools-install/ para que o pacote consiga encontrar o /poppler/ e o /pkg-config/ no computador. Por fim, pode ser feita a configuração do pacote.
+
+É configurada a centralização automática na largura do PDF; a pesquisa dentro do PDF buffer; a visualização no midnight-mode (inversão de cores) para PDF's; o comando "sv" para chamar uma função personalizada que otimiza os espações laterais "em branco" do buffer; uma função para consertar o bug do pdf-tools ao utilizar o pacote evil (borda do buffer piscando) e os atalhos para movimentação de e para hyperlinks no PDF buffer. Por fim, o pacote /[[https://github.com/007kevin/pdf-view-restore/][pdf-view-restore]]/ possibilita que fique salva a localização (página) do PDF para quando ele for aberto novamente. Essa informação é salva em ".pdf-view-restore" no diretório do Emacs "~/.emacs.d".
+
+#+begin_src emacs-lisp
+  
+  ;; Pacotes necessários para utilização do PDF-Tools
+  (use-package let-alist)
+  (use-package tablist)
+  
+  ;; Necessário instalar o libpng e poppler (homebrew ou macports)
+  ;; Configurar a variável PKG_CONFIG_PATH no Shell Profile (bash ou zsh)
+  ;; O path deve ser onde se encontra a biblioteca do pkgconfig
+  ;; export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig/"
+  ;; Preferencialmente instalar o pdf-tools pelo MELPA (list-packages)
+  ;; Executar o comando 'pdf-tools-install' antes de configurar o pacote
+  (use-package pdf-tools
+    :pin manual ;; não sei a explicação
+    :config
+    (pdf-tools-install) ;; executa antes de configurar pela primeira vez
+    ;; Centraliza na largura do PDF
+    (setq-default pdf-view-display-size 'fit-width)
+    ;; Anotar automaticamente os highlights
+    ;; Comentado pois gera conflito com o org-noter-pdftools
+    ;; (setq pdf-annot-activate-created-annotations t)
+    ;; Configuração da pesquisa dentro do PDF buffer
+    (define-key pdf-view-mode-map (kbd "C-s") 'isearch-forward)
+    (define-key pdf-view-mode-map (kbd "C-r") 'isearch-backward)
+    ;; Ativa midnight-mode automaticamente para PDF's (inversão de cores)
+    (add-hook 'pdf-view-mode-hook (lambda ()
+      (pdf-view-midnight-minor-mode t)))) 
+  
+  ;; Função para otimizar os espaços laterais "em branco" do buffer
+  (defun guto/pdf-view-slice-vertical (&optional window)
+    "Minha versão do slice para cortar só as laterais e deixar espaço vertical"
+    (interactive)
+    (let* ((bb (pdf-cache-boundingbox (pdf-view-current-page window)))
+           (margin (max 0 (or pdf-view-bounding-box-margin 0)))
+           (slice (list (- (nth 0 bb)
+                           (/ margin 2.0))
+                        (- (nth 1 bb)
+                           (/ margin 1.0))
+                        (+ (- (nth 2 bb) (nth 0 bb))
+                           margin)
+                        (+ (- (nth 3 bb) (nth 1 bb))
+                           (* 4.0 margin)))))
+      (apply 'pdf-view-set-slice
+             (append slice (and window (list window))))))
+  
+  ;; Adiciona a função criada acima para o pdf-view-mode-map como "sv"
+  (define-key pdf-view-mode-map (kbd "sv") 'guto/pdf-view-slice-vertical)
+  
+  ;; Adiciona a função criada acima para o pdf-view-mode-map como "sv" dentro do evil-normal-mode
+  (with-eval-after-load "evil"
+    (evil-define-key 'normal pdf-view-mode-map (kbd "sv") 'guto/pdf-view-slice-vertical))
+  
+  ;; Conserta o bug do pdf-tools ao utilizar o pacote evil (borda do buffer piscando)
+  (add-hook 'pdf-view-mode-hook
+    (lambda ()
+      (set (make-local-variable 'evil-normal-state-cursor) (list nil))
+      (internal-show-cursor nil nil)))
+  
+  ;; Configura atalhos para movimentação de e para hyperlinks no PDF buffer
+  (evil-define-key 'normal pdf-view-mode-map (kbd ";") 'pdf-history-backward)
+  (evil-define-key 'normal pdf-view-mode-map (kbd ",") 'pdf-history-forward)
+  
+  ;; Salva a localização (página) do PDF para quando abrir novamente
+  ;; A informação fica salva em ".pdf-view-restore" no mesmo diretório do Emacs "~/.emacs.d/"
+  (use-package pdf-view-restore
+    :after pdf-tools
+    :config
+    (add-hook 'pdf-view-mode-hook 'pdf-view-restore-mode)
+    (setq pdf-view-restore-filename "~/.emacs.d/.pdf-view-restore"))
+  
+#+end_src
 * Org Mode
  /[[https://orgmode.org/][Org Mode]]/ é um editor de documentos, planejador de projetos e tarefas e ambiente de programação muito útil e customizável, sendo de extrema importância para as tarefas e projetos do dia-a-dia.
 

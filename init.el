@@ -120,45 +120,81 @@
 (defvar jlf/monitor-variable-font-size 190)
 
 ;; Fontes utilizadas
-;; É necessário baixar as fontes Fira Code e Cantarell
-;; A função criada possibilita trocar os tamanhos das fontes para diferentes tipos de telas (sem alterar frame size ou modeline size)
-(defun jlf/switch-font-size (&optional INIT)
-  "Possibilita trocar o tamanho da fonte para diferentes tipos de telas."
+;; É necessário baixar as fontes Fira Code e Inconsolata
+;; As funções criadas com namespace 'sscreen' (switch-screen) possibilitam trocar os tamanhos das fontes para diferentes tipos de telas (sem alterar frame size ou modeline size)
+
+(defvar sscreen--current-screen-type-index 0
+  "Index of the current screen type according to sscreen--screen-types.")
+
+(defvar sscreen-screen-types '("Default" "Monitor")
+  "All screen types available for user setup.")
+
+(defun sscreen-switch-screen-type ()
+  "Switches screen type changing font sizes accordingly."
   (interactive)
-    (let ((frame-inhibit-implied-resize t)) 
-    (if INIT
-      (progn
-        (set-face-attribute 'default nil :family "Inconsolata" :height jlf/default-font-size)
-        (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height jlf/default-fixed-font-size)
-        (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height jlf/default-variable-font-size :weight 'regular))
-      (let* ((screen-type-list '("Default" "Monitor" "Custom"))
-             (screen-type (completing-read "Screen " screen-type-list)))
-        (pcase screen-type
-          ("Monitor" 
-                (progn
-                  (set-face-attribute 'default nil :family "Inconsolata" :height jlf/monitor-font-size)
-                  (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height jlf/monitor-fixed-font-size)
-                  (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height jlf/monitor-variable-font-size :weight 'regular)))
-          ("Custom" 
-                (call-interactively
-              (lambda (fixed-font-size variable-font-size)
-                (interactive "nFixed Font Size: \nnVariable Font Size: ")
-                    (set-face-attribute 'default nil :family "Inconsolata" :height fixed-font-size)
-                    (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height fixed-font-size)
-                    (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height variable-font-size :weight 'regular))))
-          (_ 
-            (progn
-                  (set-face-attribute 'default nil :family "Inconsolata" :height jlf/default-font-size)
-                  (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height jlf/default-fixed-font-size)
-                  (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height jlf/default-variable-font-size :weight 'regular)))))) 
-    (doom-modeline-refresh-font-width-cache)))
-        
-;; Utiliza os valores 'Default' de tamanhos de fontes na inicialização
-(jlf/switch-font-size t)
+  (let* ((frame-inhibit-implied-resize t)
+         (screen-type-list (append sscreen-screen-types '("Custom")))
+         (screen-type (completing-read "Screen " screen-type-list)))
+    (pcase screen-type
+      ("Monitor" 
+       (progn
+         (set-face-attribute 'default nil :family "Inconsolata" :height jlf/monitor-font-size)
+         (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height jlf/monitor-fixed-font-size)
+         (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height jlf/monitor-variable-font-size :weight 'regular)))
+      ("Custom" 
+       (call-interactively
+        (lambda (default-font-size fixed-font-size variable-font-size)
+          (interactive "nDefault Font Size: \nnFixed Font Size: \nnVariable Font Size: ")
+          (set-face-attribute 'default nil :family "Inconsolata" :height default-font-size)
+          (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height fixed-font-size)
+          (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height variable-font-size :weight 'regular))))
+      (_ 
+       (progn
+         (set-face-attribute 'default nil :family "Inconsolata" :height jlf/default-font-size)
+         (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height jlf/default-fixed-font-size)
+         (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height jlf/default-variable-font-size :weight 'regular))))) 
+  (doom-modeline-refresh-font-width-cache)) 
+
+(defun sscreen--change-screen-type (screen-type)
+  "Updates font sizes according to screen-type."
+  (let ((frame-inhibit-implied-resize t)) 
+    (pcase screen-type
+      ("Monitor" 
+       (progn
+         (set-face-attribute 'default nil :family "Inconsolata" :height jlf/monitor-font-size)
+         (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height jlf/monitor-fixed-font-size)
+         (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height jlf/monitor-variable-font-size :weight 'regular)))
+      ("Custom" 
+       (call-interactively
+        (lambda (default-font-size fixed-font-size variable-font-size)
+          (interactive "nDefault Font Size: \nnFixed Font Size: \nnVariable Font Size: ")
+          (set-face-attribute 'default nil :family "Inconsolata" :height default-font-size)
+          (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height fixed-font-size)
+          (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height variable-font-size :weight 'regular))))
+      (_ 
+       (progn
+         (set-face-attribute 'default nil :family "Inconsolata" :height jlf/default-font-size)
+         (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height jlf/default-fixed-font-size)
+         (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height jlf/default-variable-font-size :weight 'regular))))) 
+  (doom-modeline-refresh-font-width-cache))
+
+(defun sscreen-toggle-screen-type ()
+  "Updates the index of the current screen type to the next value in sscreen-screen-types and calls sscreen--change-screen-type to change the font sizes accordingly."
+  (interactive)
+  (setq sscreen--current-screen-type-index (+ sscreen--current-screen-type-index 1))
+  (if (>= sscreen--current-screen-type-index (length sscreen-screen-types))
+      (setq sscreen--current-screen-type-index 0))
+  (let ((screen-type (nth sscreen--current-screen-type-index sscreen-screen-types)))
+    (sscreen--change-screen-type screen-type)))
+
+(sscreen--change-screen-type "Default")
+
+;; Keybinding para chamar a função
+(global-set-key (kbd "M-+") 'sscreen-toggle-screen-type)
 
 ;; Tema doom-moonlight
 (use-package doom-themes
-:init (load-theme 'doom-moonlight t))
+  :init (load-theme 'doom-moonlight t))
 
 (use-package which-key
   :config
@@ -627,11 +663,17 @@
   (setq pdf-view-restore-filename "~/.emacs.d/.pdf-view-restore"))
 
 (use-package org-roam
-      :hook
-      (after-init . org-roam-mode)
-      :custom
-      (org-roam-directory (file-truename "~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/"))
-      :bind (:map org-roam-mode-map
+  :hook
+  (after-init . org-roam-mode)
+  :custom
+  (org-roam-directory (file-truename "~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/"))
+  (org-roam-capture-templates
+   '(("d" "default" plain (function org-roam--capture-get-point)
+      ""
+      :file-name "${slug}"
+      :head "#+TITLE: ${title}\n:PROPERTIES:\n:CREATED: <%<%d-%m-%Y %a %H:%M:%S>>\n:END:\n#+ROAM_TAGS: \n\n- *LINK TAGS* ::\n\n* %?"
+      :unnarrowed t)))
+  :bind (:map org-roam-mode-map
               (("C-c n l" . org-roam)
                ("C-c n f" . org-roam-find-file)
                ("C-c n g" . org-roam-graph))
@@ -647,6 +689,20 @@
   ;; (org-noter-hide-other nil)
   (org-noter-always-create-frame nil)
   (org-noter-kill-frame-at-session-end nil))
+
+;; Função para ajeitar o bug do visual-line-mode no org-noter
+(defun zp/org-noter-visual-line-mode ()
+  "Enable visual-line-mode in ‘org-noter’ notes.
+Workaround to counter race conditions with the margins."
+  (let ((parent (current-buffer))
+        (refresh (lambda (parent)
+                   (with-current-buffer parent
+                     (visual-line-mode 'toggle)
+                     (visual-line-mode 'toggle)))))
+    (run-at-time "1 sec" nil refresh parent)
+    (run-at-time "5 sec" nil refresh parent)))
+
+(add-hook 'org-noter-notes-mode-hook #'zp/org-noter-visual-line-mode)
 
 (use-package org-pdftools
   :hook (org-mode . org-pdftools-setup-link)
@@ -720,21 +776,31 @@ With a prefix ARG, remove start location."
   :hook (org-roam-mode . org-roam-bibtex-mode)
   :custom
   (orb-preformat-keywords
-   '("=key=" "title" "url" "file" "author-or-editor" "keywords"))
+   '("=key=" "file" "title" "author-or-editor" "journal" "doi" "url" "keywords" "abstract"))
   (orb-templates
    '(("r" "ref" plain (function org-roam-capture--get-point)
       ""
       :file-name "${=key=}"
-      :head "#+TITLE: ${=key=}: ${title}\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: article\n- tags ::\n- keywords :: ${keywords}\n* ${title}\n:PROPERTIES:\n:Custom_ID: ${=key=}\n:URL: ${url}\n:AUTHOR: ${author-or-editor}\n:NOTER_DOCUMENT: %(file-relative-name (orb-process-file-field \"${=key=}\") (print org-directory))\n:NOTER_PAGE:\n:END:\n** CATALOG\n*** Motivation :springGreen:\n*** Model :lightSkyblue:\n*** Remarks\n*** Applications\n*** Expressions\n*** References :violet:\n** NOTES\n"
+      :head "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: \n\n- *LINK TAGS* ::\n\n* Info\n:PROPERTIES:\n:ID: ${=key=}\n:NOTER_DOCUMENT: %(file-relative-name (orb-process-file-field \"${=key=}\") (print org-roam-directory))\n:CREATED: <%<%d-%m-%Y %a %H:%M:%S>>\n:AUTHOR: ${author-or-editor}\n:JOURNAL: ${journal}\n:DOI: %(if (string-equal \"${doi}\" \"\") \"---\" \"${doi}\")\n:URL: %(if (string-equal \"${url}\" \"\") \"---\" \"${url}\")\n:KEYWORDS: %(if (string-equal \"${keywords}\" \"\") \"---\" \"${keywords}\")\n%(if (string-equal \"${abstract}\" \"\") \":ABSTRACT: ---\\n\"):END:\n%(unless (string-equal \"${abstract}\" \"\") \":ABSTRACT:\\n${abstract}\\n:END:\\n\")\n* %?Notes\n:PROPERTIES:\n:NOTER_DOCUMENT: %(file-relative-name (orb-process-file-field \"${=key=}\") (print org-roam-directory))\n:END:\n"
       :unnarrowed t))))
-  ;; (orb-templates
-  ;;       '(("r" "ref" plain #'org-roam-capture--get-point
-  ;;          ""
-  ;;          :file-name "${citekey}"
-  ;;          :head "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}\n"
-  ;;          :unnarrowed t)))
 
-  (org-roam-bibtex-mode)
+(org-roam-bibtex-mode)
+
+(defcustom org-research-keymap-prefix "C-c r"
+  "The prefix for org-research key bindings."
+  :type 'string
+  :group 'org-research)
+
+(defun org-research--key (key)
+  (kbd (concat org-research-keymap-prefix " " key)))
+
+(global-set-key (org-research--key "b") 'ivy-bibtex)
+(global-set-key (org-research--key "t") 'org-noter)
+(global-set-key (org-research--key "l") 'org-roam-insert)
+(global-set-key (org-research--key "L") 'org-roam-insert-immediate)
+(global-set-key (org-research--key "n") 'org-noter-insert-note)
+(global-set-key (org-research--key "c") 'org-ref-insert-link)
+(global-set-key (org-research--key "r") 'org-roam)
 
 ;; Congifuração das fontes e faces
 (defun jlf/org-font-setup ()
@@ -763,7 +829,6 @@ With a prefix ARG, remove start location."
 
   ;; Assegura que o que deve ser fixed-pitch no org-mode fique dessa forma
   (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))
   (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
   (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
   (set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
@@ -783,6 +848,9 @@ With a prefix ARG, remove start location."
    '(org-property-value ((t (:inherit fixed-pitch))) t)
    '(org-table ((t (:inherit fixed-pitch :foreground "#83a598"))))
    '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))))
+
+;; Gambiarra para alterar a face org-indent já que alterar no :config gera erro
+(add-hook 'org-mode-hook '(lambda () (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))))
 
 (defun jlf/org-mode-setup ()
   (org-indent-mode)

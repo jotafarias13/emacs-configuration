@@ -171,59 +171,95 @@ Coloca o /mac-command-modifier/ como Control e o /mac-right-command-modifier/ co
 #+end_src
 
 ** Fonte e Tema
-Configura a fonte e seu tamanho, assim como o tema /[[https://github.com/hlissner/emacs-doom-themes][doom-moonlight]]/ utilizado no Emacs. 
+Configura o tipo de tela, a fonte e seu tamanho, assim como o tema /[[https://github.com/hlissner/emacs-doom-themes][doom-moonlight]]/ utilizado no Emacs. 
 
 #+begin_src emacs-lisp
-
-;; Tamanho das fontes
-(defvar jlf/default-font-size 150)
-(defvar jlf/default-fixed-font-size 130)
-(defvar jlf/default-variable-font-size 150)
-(defvar jlf/monitor-font-size 190)
-(defvar jlf/monitor-fixed-font-size 170)
-(defvar jlf/monitor-variable-font-size 190)
-
-;; Fontes utilizadas
-;; É necessário baixar as fontes Fira Code e Cantarell
-;; A função criada possibilita trocar os tamanhos das fontes para diferentes tipos de telas (sem alterar frame size ou modeline size)
-(defun jlf/switch-font-size (&optional INIT)
-  "Possibilita trocar o tamanho da fonte para diferentes tipos de telas."
-  (interactive)
+  
+  ;; Tamanho das fontes
+  (defvar jlf/default-font-size 150)
+  (defvar jlf/default-fixed-font-size 130)
+  (defvar jlf/default-variable-font-size 150)
+  (defvar jlf/monitor-font-size 190)
+  (defvar jlf/monitor-fixed-font-size 170)
+  (defvar jlf/monitor-variable-font-size 190)
+  
+  ;; Fontes utilizadas
+  ;; É necessário baixar as fontes Fira Code e Inconsolata
+  ;; As funções criadas com namespace 'sscreen' (switch-screen) possibilitam trocar os tamanhos das fontes para diferentes tipos de telas (sem alterar frame size ou modeline size)
+  
+  (defvar sscreen--current-screen-type-index 0
+    "Index of the current screen type according to sscreen--screen-types.")
+  
+  (defvar sscreen-screen-types '("Default" "Monitor")
+    "All screen types available for user setup.")
+  
+  (defun sscreen-switch-screen-type ()
+    "Switches screen type changing font sizes accordingly."
+    (interactive)
+    (let* ((frame-inhibit-implied-resize t)
+           (screen-type-list (append sscreen-screen-types '("Custom")))
+           (screen-type (completing-read "Screen " screen-type-list)))
+      (pcase screen-type
+        ("Monitor" 
+         (progn
+           (set-face-attribute 'default nil :family "Inconsolata" :height jlf/monitor-font-size)
+           (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height jlf/monitor-fixed-font-size)
+           (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height jlf/monitor-variable-font-size :weight 'regular)))
+        ("Custom" 
+         (call-interactively
+          (lambda (default-font-size fixed-font-size variable-font-size)
+            (interactive "nDefault Font Size: \nnFixed Font Size: \nnVariable Font Size: ")
+            (set-face-attribute 'default nil :family "Inconsolata" :height default-font-size)
+            (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height fixed-font-size)
+            (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height variable-font-size :weight 'regular))))
+        (_ 
+         (progn
+           (set-face-attribute 'default nil :family "Inconsolata" :height jlf/default-font-size)
+           (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height jlf/default-fixed-font-size)
+           (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height jlf/default-variable-font-size :weight 'regular))))) 
+    (doom-modeline-refresh-font-width-cache)) 
+  
+  (defun sscreen--change-screen-type (screen-type)
+    "Updates font sizes according to screen-type."
     (let ((frame-inhibit-implied-resize t)) 
-    (if INIT
-      (progn
-        (set-face-attribute 'default nil :family "Inconsolata" :height jlf/default-font-size)
-        (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height jlf/default-fixed-font-size)
-        (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height jlf/default-variable-font-size :weight 'regular))
-      (let* ((screen-type-list '("Default" "Monitor" "Custom"))
-             (screen-type (completing-read "Screen " screen-type-list)))
-        (pcase screen-type
-          ("Monitor" 
-                (progn
-                  (set-face-attribute 'default nil :family "Inconsolata" :height jlf/monitor-font-size)
-                  (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height jlf/monitor-fixed-font-size)
-                  (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height jlf/monitor-variable-font-size :weight 'regular)))
-          ("Custom" 
-                (call-interactively
-              (lambda (fixed-font-size variable-font-size)
-                (interactive "nFixed Font Size: \nnVariable Font Size: ")
-                    (set-face-attribute 'default nil :family "Inconsolata" :height fixed-font-size)
-                    (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height fixed-font-size)
-                    (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height variable-font-size :weight 'regular))))
-          (_ 
-            (progn
-                  (set-face-attribute 'default nil :family "Inconsolata" :height jlf/default-font-size)
-                  (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height jlf/default-fixed-font-size)
-                  (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height jlf/default-variable-font-size :weight 'regular)))))) 
-    (doom-modeline-refresh-font-width-cache)))
-        
-;; Utiliza os valores 'Default' de tamanhos de fontes na inicialização
-(jlf/switch-font-size t)
-
-;; Tema doom-moonlight
-(use-package doom-themes
-:init (load-theme 'doom-moonlight t))
-
+      (pcase screen-type
+        ("Monitor" 
+         (progn
+           (set-face-attribute 'default nil :family "Inconsolata" :height jlf/monitor-font-size)
+           (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height jlf/monitor-fixed-font-size)
+           (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height jlf/monitor-variable-font-size :weight 'regular)))
+        ("Custom" 
+         (call-interactively
+          (lambda (default-font-size fixed-font-size variable-font-size)
+            (interactive "nDefault Font Size: \nnFixed Font Size: \nnVariable Font Size: ")
+            (set-face-attribute 'default nil :family "Inconsolata" :height default-font-size)
+            (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height fixed-font-size)
+            (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height variable-font-size :weight 'regular))))
+        (_ 
+         (progn
+           (set-face-attribute 'default nil :family "Inconsolata" :height jlf/default-font-size)
+           (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height jlf/default-fixed-font-size)
+           (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height jlf/default-variable-font-size :weight 'regular))))) 
+    (doom-modeline-refresh-font-width-cache))
+  
+  (defun sscreen-toggle-screen-type ()
+    "Updates the index of the current screen type to the next value in sscreen-screen-types and calls sscreen--change-screen-type to change the font sizes accordingly."
+    (interactive)
+    (setq sscreen--current-screen-type-index (+ sscreen--current-screen-type-index 1))
+    (if (>= sscreen--current-screen-type-index (length sscreen-screen-types))
+        (setq sscreen--current-screen-type-index 0))
+    (let ((screen-type (nth sscreen--current-screen-type-index sscreen-screen-types)))
+      (sscreen--change-screen-type screen-type)))
+  
+  (sscreen--change-screen-type "Default")
+  
+  ;; Keybinding para chamar a função
+  (global-set-key (kbd "M-+") 'sscreen-toggle-screen-type)
+  
+  ;; Tema doom-moonlight
+  (use-package doom-themes
+    :init (load-theme 'doom-moonlight t))
+  
 #+end_src
 
 ** Whick-Key 

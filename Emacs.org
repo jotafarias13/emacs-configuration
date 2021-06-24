@@ -897,18 +897,24 @@ O pacote /[[https://github.com/politza/pdf-tools][PDF-Tools]]/ habilita a visual
 
 #+begin_src emacs-lisp
   
-(use-package org-roam
-      :hook
-      (after-init . org-roam-mode)
-      :custom
-      (org-roam-directory (file-truename "~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/"))
-      :bind (:map org-roam-mode-map
-              (("C-c n l" . org-roam)
-               ("C-c n f" . org-roam-find-file)
-               ("C-c n g" . org-roam-graph))
-              :map org-mode-map
-              (("C-c n i" . org-roam-insert))
-              (("C-c n I" . org-roam-insert-immediate))))  
+  (use-package org-roam
+    :hook
+    (after-init . org-roam-mode)
+    :custom
+    (org-roam-directory (file-truename "~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/"))
+    (org-roam-capture-templates
+     '(("d" "default" plain (function org-roam--capture-get-point)
+        ""
+        :file-name "${slug}"
+        :head "#+TITLE: ${title}\n:PROPERTIES:\n:CREATED: <%<%d-%m-%Y %a %H:%M:%S>>\n:END:\n#+ROAM_TAGS: \n\n- *LINK TAGS* ::\n\n* %?"
+        :unnarrowed t)))
+    :bind (:map org-roam-mode-map
+                (("C-c n l" . org-roam)
+                 ("C-c n f" . org-roam-find-file)
+                 ("C-c n g" . org-roam-graph))
+                :map org-mode-map
+                (("C-c n i" . org-roam-insert))
+                (("C-c n I" . org-roam-insert-immediate))))  
   
 #+end_src
 

@@ -1047,21 +1047,18 @@ O pacote /[[https://github.com/politza/pdf-tools][PDF-Tools]]/ habilita a visual
     :hook (org-roam-mode . org-roam-bibtex-mode)
     :custom
     (orb-preformat-keywords
-     '("=key=" "title" "url" "file" "author-or-editor" "keywords"))
+     '("=key=" "file" "title" "author-or-editor" "journal" "doi" "url" "keywords" "abstract"))
     (orb-templates
      '(("r" "ref" plain (function org-roam-capture--get-point)
         ""
         :file-name "${=key=}"
-        :head "#+TITLE: ${=key=}: ${title}\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: article\n- tags ::\n- keywords :: ${keywords}\n* ${title}\n:PROPERTIES:\n:Custom_ID: ${=key=}\n:URL: ${url}\n:AUTHOR: ${author-or-editor}\n:NOTER_DOCUMENT: %(file-relative-name (orb-process-file-field \"${=key=}\") (print org-directory))\n:NOTER_PAGE:\n:END:\n** CATALOG\n*** Motivation :springGreen:\n*** Model :lightSkyblue:\n*** Remarks\n*** Applications\n*** Expressions\n*** References :violet:\n** NOTES\n"
+        :head "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: \n\n- *LINK TAGS* ::\n\n* Info\n:PROPERTIES:\n:ID: ${=key=}\n:NOTER_DOCUMENT: %(file-relative-name (orb-process-file-field \"${=key=}\") (print org-roam-directory))\n:CREATED: <%<%d-%m-%Y %a %H:%M:%S>>\n:AUTHOR: ${author-or-editor}\n:JOURNAL: ${journal}\n:DOI: %(if (string-equal \"${doi}\" \"\") \"---\" \"${doi}\")\n:URL: %(if (string-equal \"${url}\" \"\") \"---\" \"${url}\")\n:KEYWORDS: %(if (string-equal \"${keywords}\" \"\") \"---\" \"${keywords}\")\n%(if (string-equal \"${abstract}\" \"\") \":ABSTRACT: ---\\n\"):END:\n%(unless (string-equal \"${abstract}\" \"\") \":ABSTRACT:\\n${abstract}\\n:END:\\n\")\n* %?Notes\n:PROPERTIES:\n:NOTER_DOCUMENT: %(file-relative-name (orb-process-file-field \"${=key=}\") (print org-roam-directory))\n:END:\n"
         :unnarrowed t))))
-    ;; (orb-templates
-    ;;       '(("r" "ref" plain #'org-roam-capture--get-point
-    ;;          ""
-    ;;          :file-name "${citekey}"
-    ;;          :head "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}\n"
-    ;;          :unnarrowed t)))
+  
+  (org-roam-bibtex-mode)
+  
+#+end_src
 
-    (org-roam-bibtex-mode)
   
 #+end_src
 

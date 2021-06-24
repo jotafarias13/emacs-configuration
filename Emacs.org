@@ -1118,7 +1118,6 @@ Configuração de várias faces de texto para ajustar os tamanhos dos headings e
   
     ;; Assegura que o que deve ser fixed-pitch no org-mode fique dessa forma
     (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
-    (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))
     (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
     (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
     (set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
@@ -1138,6 +1137,9 @@ Configuração de várias faces de texto para ajustar os tamanhos dos headings e
      '(org-property-value ((t (:inherit fixed-pitch))) t)
      '(org-table ((t (:inherit fixed-pitch :foreground "#83a598"))))
      '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))))
+  
+  ;; Gambiarra para alterar a face org-indent já que alterar no :config gera erro
+  (add-hook 'org-mode-hook '(lambda () (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))))
   
 #+end_src
 

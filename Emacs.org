@@ -931,6 +931,20 @@ O pacote /[[https://github.com/politza/pdf-tools][PDF-Tools]]/ habilita a visual
     (org-noter-always-create-frame nil)
     (org-noter-kill-frame-at-session-end nil))
   
+  ;; Função para ajeitar o bug do visual-line-mode no org-noter
+  (defun zp/org-noter-visual-line-mode ()
+    "Enable visual-line-mode in ‘org-noter’ notes.
+  Workaround to counter race conditions with the margins."
+    (let ((parent (current-buffer))
+          (refresh (lambda (parent)
+                     (with-current-buffer parent
+                       (visual-line-mode 'toggle)
+                       (visual-line-mode 'toggle)))))
+      (run-at-time "1 sec" nil refresh parent)
+      (run-at-time "5 sec" nil refresh parent)))
+  
+  (add-hook 'org-noter-notes-mode-hook #'zp/org-noter-visual-line-mode)
+  
 #+end_src
 
 *** org-pdftools

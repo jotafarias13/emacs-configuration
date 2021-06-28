@@ -8,6 +8,11 @@
 (add-to-list 'initial-frame-alist '(height . 1.0))
 (add-to-list 'initial-frame-alist '(width . 1.0))
 
+;; Dados de usuário
+(setq user-full-name "João Lucas Correia Barbosa de Farias")
+(setq user-mail-address "fariasjota09@gmail.com")
+(defvar user-url "https://github.com/jotafarias13")
+
 ;; Remove de mensagem de boas-vindas
 (setq inhibit-startup-message t)
 
@@ -539,7 +544,7 @@
 (defun jlf/my-workspace ()
   "Ferrameta para facilitar abertura de arquivos e diretórios dos projetos nos quais trabalho."
   (interactive)
-    (let* ((my-workspace-list '("Agenda" "Artigo" "Dissertação C++" "Dissertação TeX" "Emacs" "Roam"))
+    (let* ((my-workspace-list '("Agenda" "Artigo" "Dissertação C++" "Dissertação TeX" "Emacs" "Zettelkasten"))
            (my-workspace (completing-read "WorkSpace: " my-workspace-list)))
       (pcase my-workspace
         ("Agenda"
@@ -579,9 +584,9 @@
 		(interactive "fEmacs: ")
 		(find-file file-name nil))))
 	  ))
-        ("Roam"
+        ("Zettelkasten"
               (progn
-	  (let ((default-directory "~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/"))
+	  (let ((default-directory jlf/zettelkasten-directory))
 	    (call-interactively
 	      (lambda (file-name)
 		(interactive "fRoam: ")
@@ -662,17 +667,36 @@
   (add-hook 'pdf-view-mode-hook 'pdf-view-restore-mode)
   (setq pdf-view-restore-filename "~/.emacs.d/.pdf-view-restore"))
 
+;; Variável do diretório root dos arquivos referentes ao Zettelkasten
+(defvar jlf/zettelkasten-directory "~/Sync/Jota/Academico/Projetos/Zettelkasten/"
+  "Directory of Zettelkasten related files.")
+
+;; Variável do diretório dos arquivos de referência do Zettelkasten
+(defvar jlf/zettelkasten-refs-directory "~/Sync/Jota/Academico/Projetos/Zettelkasten/Refs/"
+  "Directory of Zettelkasten ref files.")
+
+;; Variável do diretório dos dailies do Zettelkasten
+(defvar jlf/zettelkasten-dailies-directory "~/Sync/Jota/Academico/Projetos/Zettelkasten/Dailies/"
+  "Directory of Zettelkasten dailies files.")
+
 (use-package org-roam
   :hook
   (after-init . org-roam-mode)
   :custom
-  (org-roam-directory (file-truename "~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/"))
+  (org-roam-directory (file-truename jlf/zettelkasten-directory))
   (org-roam-capture-templates
    '(("d" "default" plain (function org-roam--capture-get-point)
       ""
       :file-name "${slug}"
-      :head "#+TITLE: ${title}\n:PROPERTIES:\n:CREATED: <%<%d-%m-%Y %a %H:%M:%S>>\n:END:\n#+ROAM_TAGS: \n\n- *LINK TAGS* ::\n\n* %?"
+      :head "#+TITLE: ${title}\n#+AUTHOR: %(print user-full-name)\n#+EMAIL: %(print user-mail-address)\n#+URL: %(print user-url)\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+ROAM_TAGS: \n\n- *LINK TAGS* ::\n\n* %?"
       :unnarrowed t)))
+  (org-roam-dailies-directory jlf/zettelkasten-dailies-directory)
+  (org-roam-dailies-capture-templates
+        '(("d" "default" entry
+           #'org-roam-capture--get-point
+           "* %?"
+           :file-name "Dailies/%<%Y-%m-%d>"
+           :head "#+TITLE: %<%Y-%m-%d>\n\n")))
   :bind (:map org-roam-mode-map
               (("C-c n l" . org-roam)
                ("C-c n f" . org-roam-find-file)
@@ -681,9 +705,38 @@
               (("C-c n i" . org-roam-insert))
               (("C-c n I" . org-roam-insert-immediate))))
 
+;; Função para atualizar campos em um org buffer. Usada para atualizar o #+LAST_MODIFIED
+(defun jlf/org-update-field (REGEXP_FIELD NEW &optional ANYWHERE)
+  "Update any field that starts at the beginning of a line in an org buffer.
+  REGEXP_FIELD is a string with regexp match to the desired field. Beware that, as it is a string, any time you use the escape character (\\) you need to insert two of them for the match to occur. For example, if you want to match the field #+LAST_MODIFIED: you need to pass #\\\\+LAST_MODIFIED: as a string to REGEXP_FIELD.
+  NEW is a string with the new value for the field.
+  If ANYWHERE is t, the match can occur anywhere inside the buffer. If it is nil or ommited, the match can only occur before the first heading."
+  (save-excursion
+    (goto-char (point-min))
+    (let ((first-heading
+           (save-excursion
+             (re-search-forward org-outline-regexp-bol nil t))))
+      (if (re-search-forward (concat "^" REGEXP_FIELD) (if ANYWHERE nil first-heading) t)
+          (progn
+            (if (looking-at-p " ")
+                (forward-char)
+              (insert " "))
+            (delete-region (point) (line-end-position))
+            (insert NEW))
+        nil))))
+
+;; Função para atualizar o campo #+LAST_MODIFIED em org buffers
+(defun jlf/org-update-last-modified ()
+  "Update #+LAST_MODIFIED field in org buffers."
+  (when (derived-mode-p 'org-mode)
+    (jlf/org-update-field "#\\+LAST_MODIFIED:" (format-time-string "[%d-%m-%Y %a %H:%M:%S]") nil)))
+
+;; Hook para atualizar 
+(add-hook 'before-save-hook 'jlf/org-update-last-modified)
+
 (use-package org-noter
   :custom
-  (org-noter-notes-search-path '("~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/"))
+  (org-noter-notes-search-path (list jlf/zettelkasten-refs-directory))
   (org-noter-doc-split-fraction '(0.7 . 0.3))
   ;; (org-noter-insert-note-no-questions t)
   ;; (org-noter-hide-other nil)
@@ -750,8 +803,8 @@ With a prefix ARG, remove start location."
 
 (use-package ivy-bibtex
   :custom
-  (bibtex-completion-bibliography '("~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/bibliography.bib"))
-  (bibtex-completion-library-path '("~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/"))
+  (bibtex-completion-bibliography (list (concat jlf/zettelkasten-refs-directory "bibliography.bib")))
+  (bibtex-completion-library-path (list jlf/zettelkasten-refs-directory))
   (bibtex-completion-find-note-functions '(orb-find-note-file)))
 
 (use-package org-ref
@@ -759,10 +812,10 @@ With a prefix ARG, remove start location."
   :init
   (setq org-ref-completion-library 'org-ref-ivy-cite)
   :custom
-  (org-ref-default-bibliography '("~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/bibliography.bib"))
-  (org-ref-pdf-directory "~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/")
+  (org-ref-default-bibliography (list (concat jlf/zettelkasten-refs-directory "bibliography.bib")))
+  (org-ref-pdf-directory jlf/zettelkasten-refs-directory)
   (org-ref-note-title-format "* TODO %y - %t\n :PROPERTIES:\n  :Custom_ID: %k\n  :NOTER_DOCUMENT: %F\n :ROAM_KEY: cite:%k\n  :AUTHOR: %9a\n  :JOURNAL: %j\n  :YEAR: %y\n  :VOLUME: %v\n  :PAGES: %p\n  :DOI: %D\n  :URL: %U\n :END:\n\n")
-  (org-ref-notes-directory "~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/")
+  (org-ref-notes-directory jlf/zettelkasten-refs-directory)
   (org-ref-notes-function 'orb-edit-notes)
   :config
   ;; Adicionei essas funções pra deixar o org-ref na cara do ivy-bibtex
@@ -776,12 +829,17 @@ With a prefix ARG, remove start location."
   :hook (org-roam-mode . org-roam-bibtex-mode)
   :custom
   (orb-preformat-keywords
-   '("=key=" "file" "title" "author-or-editor" "journal" "doi" "url" "keywords" "abstract"))
+   '("=key=" "file" "title" "=type=" "author-or-editor" "year" "journal" "doi" "url" "keywords" "abstract"))
   (orb-templates
-   '(("r" "ref" plain (function org-roam-capture--get-point)
+   '(("a" "article" plain (function org-roam-capture--get-point)
       ""
-      :file-name "${=key=}"
-      :head "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: \n\n- *LINK TAGS* ::\n\n* Info\n:PROPERTIES:\n:ID: ${=key=}\n:NOTER_DOCUMENT: %(file-relative-name (orb-process-file-field \"${=key=}\") (print org-roam-directory))\n:CREATED: <%<%d-%m-%Y %a %H:%M:%S>>\n:AUTHOR: ${author-or-editor}\n:JOURNAL: ${journal}\n:DOI: %(if (string-equal \"${doi}\" \"\") \"---\" \"${doi}\")\n:URL: %(if (string-equal \"${url}\" \"\") \"---\" \"${url}\")\n:KEYWORDS: %(if (string-equal \"${keywords}\" \"\") \"---\" \"${keywords}\")\n%(if (string-equal \"${abstract}\" \"\") \":ABSTRACT: ---\\n\"):END:\n%(unless (string-equal \"${abstract}\" \"\") \":ABSTRACT:\\n${abstract}\\n:END:\\n\")\n* %?Notes\n:PROPERTIES:\n:NOTER_DOCUMENT: %(file-relative-name (orb-process-file-field \"${=key=}\") (print org-roam-directory))\n:END:\n"
+      :file-name "Refs/${=key=}"
+      :head "#+TITLE: ${title}\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: \n\n- *LINK TAGS* ::\n\n* Info\n:PROPERTIES:\n:ID: ${=key=}\n:DOCUMENT_PATH: %(file-relative-name (orb-process-file-field \"${=key=}\") (print org-roam-directory))\n:TYPE: %(capitalize \"${=type=}\")\n:AUTHOR: ${author-or-editor}\n:YEAR: ${year}\n:JOURNAL: ${journal}\n:DOI: %(if (string-equal \"${doi}\" \"\") \"---\" \"${doi}\")\n:URL: %(if (string-equal \"${url}\" \"\") \"---\" \"${url}\")\n:KEYWORDS: %(if (string-equal \"${keywords}\" \"\") \"---\" \"${keywords}\")\n%(if (string-equal \"${abstract}\" \"\") \":ABSTRACT: ---\\n\"):END:\n%(unless (string-equal \"${abstract}\" \"\") \":ABSTRACT:\\n${abstract}\\n:END:\\n\")\n* %?Notes\n:PROPERTIES:\n:NOTER_DOCUMENT: %(file-relative-name (orb-process-file-field \"${=key=}\") (print org-roam-directory))\n:END:\n"
+      :unnarrowed t)
+     ("b" "book" plain (function org-roam-capture--get-point)
+      ""
+      :file-name "Refs/${=key=}"
+      :head "#+TITLE: ${title}\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: \n\n- *LINK TAGS* ::\n\n* Info\n:PROPERTIES:\n:ID: ${=key=}\n:DOCUMENT_PATH: %(file-relative-name (orb-process-file-field \"${=key=}\") (print org-roam-directory))\n:TYPE: %(capitalize \"${=type=}\")\n:AUTHOR: ${author-or-editor}\n:YEAR: ${year}\n:END:\n\n* %?Notes\n:PROPERTIES:\n:NOTER_DOCUMENT: %(file-relative-name (orb-process-file-field \"${=key=}\") (print org-roam-directory))\n:END:\n"
       :unnarrowed t))))
 
 (org-roam-bibtex-mode)
@@ -811,7 +869,8 @@ With a prefix ARG, remove start location."
                              (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
 
   ;; Configura as faces dos headings
-  (dolist (face '((org-level-1 . 1.4)
+  (dolist (face '((org-document-title . 1.42)
+                  (org-level-1 . 1.4)
                   (org-level-2 . 1.2)
                   (org-level-3 . 1.15)
                   (org-level-4 . 1.1)
@@ -822,8 +881,7 @@ With a prefix ARG, remove start location."
     (set-face-attribute (car face) nil :family "Inconsolata" :weight 'regular :width 'condensed :height (cdr face)))
 
   ;; Configura as faces de título e keywords
-  (dolist (face '((org-document-title . 1.45)
-                  (org-document-info-keyword . 1.0)
+  (dolist (face '((org-document-info-keyword . 1.0)
                   (org-document-info . 1.0)))
     (set-face-attribute (car face) nil :family "Inconsolata" :weight 'regular :height (cdr face)))
 
@@ -844,7 +902,7 @@ With a prefix ARG, remove start location."
    'user
    '(org-document-info ((t (:foreground "dark orange"))))
    '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
-   '(org-link ((t (:foreground "royal blue" :underline t))))
+   '(org-link ((t (:foreground "linkColor" :underline t))))
    '(org-property-value ((t (:inherit fixed-pitch))) t)
    '(org-table ((t (:inherit fixed-pitch :foreground "#83a598"))))
    '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))))

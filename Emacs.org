@@ -763,7 +763,7 @@ A ferramenta /MyWorkSpace/ é uma função de minha autoria que me auxilia na ab
 (defun jlf/my-workspace ()
   "Ferrameta para facilitar abertura de arquivos e diretórios dos projetos nos quais trabalho."
   (interactive)
-    (let* ((my-workspace-list '("Agenda" "Artigo" "Dissertação C++" "Dissertação TeX" "Emacs" "Roam"))
+    (let* ((my-workspace-list '("Agenda" "Artigo" "Dissertação C++" "Dissertação TeX" "Emacs" "Zettelkasten"))
            (my-workspace (completing-read "WorkSpace: " my-workspace-list)))
       (pcase my-workspace
         ("Agenda"
@@ -803,9 +803,9 @@ A ferramenta /MyWorkSpace/ é uma função de minha autoria que me auxilia na ab
 		(interactive "fEmacs: ")
 		(find-file file-name nil))))
 	  ))
-        ("Roam"
+        ("Zettelkasten"
               (progn
-	  (let ((default-directory "~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/"))
+	  (let ((default-directory jlf/zettelkasten-directory))
 	    (call-interactively
 	      (lambda (file-name)
 		(interactive "fRoam: ")

@@ -902,24 +902,44 @@ O pacote /[[https://github.com/politza/pdf-tools][PDF-Tools]]/ habilita a visual
 
 #+begin_src emacs-lisp
   
+  ;; Variável do diretório root dos arquivos referentes ao Zettelkasten
+  (defvar jlf/zettelkasten-directory "~/Sync/Jota/Academico/Projetos/Zettelkasten/"
+    "Directory of Zettelkasten related files.")
+  
+  ;; Variável do diretório dos arquivos de referência do Zettelkasten
+  (defvar jlf/zettelkasten-refs-directory "~/Sync/Jota/Academico/Projetos/Zettelkasten/Refs/"
+    "Directory of Zettelkasten ref files.")
+  
+  ;; Variável do diretório dos dailies do Zettelkasten
+  (defvar jlf/zettelkasten-dailies-directory "~/Sync/Jota/Academico/Projetos/Zettelkasten/Dailies/"
+    "Directory of Zettelkasten dailies files.")
+  
   (use-package org-roam
     :hook
     (after-init . org-roam-mode)
     :custom
-    (org-roam-directory (file-truename "~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/"))
+    (org-roam-directory (file-truename jlf/zettelkasten-directory))
     (org-roam-capture-templates
      '(("d" "default" plain (function org-roam--capture-get-point)
         ""
         :file-name "${slug}"
-        :head "#+TITLE: ${title}\n:PROPERTIES:\n:CREATED: <%<%d-%m-%Y %a %H:%M:%S>>\n:END:\n#+ROAM_TAGS: \n\n- *LINK TAGS* ::\n\n* %?"
+        :head "#+TITLE: ${title}\n#+AUTHOR: %(print user-full-name)\n#+EMAIL: %(print user-mail-address)\n#+URL: %(print user-url)\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+ROAM_TAGS: \n\n- *LINK TAGS* ::\n\n* %?"
         :unnarrowed t)))
+    (org-roam-dailies-directory jlf/zettelkasten-dailies-directory)
+    (org-roam-dailies-capture-templates
+          '(("d" "default" entry
+             #'org-roam-capture--get-point
+             "* %?"
+             :file-name "Dailies/%<%Y-%m-%d>"
+             :head "#+TITLE: %<%Y-%m-%d>\n\n")))
     :bind (:map org-roam-mode-map
                 (("C-c n l" . org-roam)
                  ("C-c n f" . org-roam-find-file)
                  ("C-c n g" . org-roam-graph))
                 :map org-mode-map
                 (("C-c n i" . org-roam-insert))
-                (("C-c n I" . org-roam-insert-immediate))))  
+                (("C-c n I" . org-roam-insert-immediate))))
+  
   ;; Função para atualizar campos em um org buffer. Usada para atualizar o #+LAST_MODIFIED
   (defun jlf/org-update-field (REGEXP_FIELD NEW &optional ANYWHERE)
     "Update any field that starts at the beginning of a line in an org buffer.
@@ -957,7 +977,7 @@ O pacote /[[https://github.com/politza/pdf-tools][PDF-Tools]]/ habilita a visual
   
   (use-package org-noter
     :custom
-    (org-noter-notes-search-path '("~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/"))
+    (org-noter-notes-search-path (list jlf/zettelkasten-refs-directory))
     (org-noter-doc-split-fraction '(0.7 . 0.3))
     ;; (org-noter-insert-note-no-questions t)
     ;; (org-noter-hide-other nil)
@@ -1042,8 +1062,8 @@ O pacote /[[https://github.com/politza/pdf-tools][PDF-Tools]]/ habilita a visual
   
   (use-package ivy-bibtex
     :custom
-    (bibtex-completion-bibliography '("~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/bibliography.bib"))
-    (bibtex-completion-library-path '("~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/"))
+    (bibtex-completion-bibliography (list (concat jlf/zettelkasten-refs-directory "bibliography.bib")))
+    (bibtex-completion-library-path (list jlf/zettelkasten-refs-directory))
     (bibtex-completion-find-note-functions '(orb-find-note-file)))
   
 #+end_src
@@ -1057,10 +1077,10 @@ O pacote /[[https://github.com/politza/pdf-tools][PDF-Tools]]/ habilita a visual
     :init
     (setq org-ref-completion-library 'org-ref-ivy-cite)
     :custom
-    (org-ref-default-bibliography '("~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/bibliography.bib"))
-    (org-ref-pdf-directory "~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/")
+    (org-ref-default-bibliography (list (concat jlf/zettelkasten-refs-directory "bibliography.bib")))
+    (org-ref-pdf-directory jlf/zettelkasten-refs-directory)
     (org-ref-note-title-format "* TODO %y - %t\n :PROPERTIES:\n  :Custom_ID: %k\n  :NOTER_DOCUMENT: %F\n :ROAM_KEY: cite:%k\n  :AUTHOR: %9a\n  :JOURNAL: %j\n  :YEAR: %y\n  :VOLUME: %v\n  :PAGES: %p\n  :DOI: %D\n  :URL: %U\n :END:\n\n")
-    (org-ref-notes-directory "~/Sync/Jota/Academico/Projetos/Emacs/Org-Roam/")
+    (org-ref-notes-directory jlf/zettelkasten-refs-directory)
     (org-ref-notes-function 'orb-edit-notes)
     :config
     ;; Adicionei essas funções pra deixar o org-ref na cara do ivy-bibtex
@@ -1115,7 +1135,6 @@ O pacote /[[https://github.com/politza/pdf-tools][PDF-Tools]]/ habilita a visual
   
 #+end_src
 
-
 * Org Mode
  /[[https://orgmode.org/][Org Mode]]/ é um editor de documentos, planejador de projetos e tarefas e ambiente de programação muito útil e customizável, sendo de extrema importância para as tarefas e projetos do dia-a-dia.
 
@@ -1133,7 +1152,8 @@ Configuração de várias faces de texto para ajustar os tamanhos dos headings e
                                (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
   
     ;; Configura as faces dos headings
-    (dolist (face '((org-level-1 . 1.4)
+    (dolist (face '((org-document-title . 1.42)
+                    (org-level-1 . 1.4)
                     (org-level-2 . 1.2)
                     (org-level-3 . 1.15)
                     (org-level-4 . 1.1)
@@ -1144,8 +1164,7 @@ Configuração de várias faces de texto para ajustar os tamanhos dos headings e
       (set-face-attribute (car face) nil :family "Inconsolata" :weight 'regular :width 'condensed :height (cdr face)))
   
     ;; Configura as faces de título e keywords
-    (dolist (face '((org-document-title . 1.45)
-                    (org-document-info-keyword . 1.0)
+    (dolist (face '((org-document-info-keyword . 1.0)
                     (org-document-info . 1.0)))
       (set-face-attribute (car face) nil :family "Inconsolata" :weight 'regular :height (cdr face)))
   
@@ -1166,7 +1185,7 @@ Configuração de várias faces de texto para ajustar os tamanhos dos headings e
      'user
      '(org-document-info ((t (:foreground "dark orange"))))
      '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
-     '(org-link ((t (:foreground "royal blue" :underline t))))
+     '(org-link ((t (:foreground "linkColor" :underline t))))
      '(org-property-value ((t (:inherit fixed-pitch))) t)
      '(org-table ((t (:inherit fixed-pitch :foreground "#83a598"))))
      '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))))

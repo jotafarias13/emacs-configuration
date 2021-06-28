@@ -8,20 +8,25 @@
 Esse é o arquivo com as configurações de inicialização do Emacs, escrito em Org com os blocos de código em emacs-lisp. Os blocos de código desse arquivo são exportados para o arquivo init.el. Os pacotes vem com hyperlink para facilitar o acesso às suas páginas e as configurações vem com explicações de como e porque foram implementadas.
 
 * Inicialização
-Coloca como buffer de inicialização a org-agenda na visão dashboard (customizada). Além disso, coloca como diretório padrão de início o diretório "~/.emacs.d/" e determina o tamanho da janela inicial.
+Coloca como buffer de inicialização a org-agenda na visão dashboard (customizada). Além disso, coloca como diretório padrão de início o diretório "~/.emacs.d/", determina o tamanho da janela inicial e informa os dados do usuário.
 
 #+begin_src emacs-lisp
-
-;; Buffer de inicialização
-(add-hook 'after-init-hook (lambda () (org-agenda nil "d") (delete-other-windows)))
-
-;; Diretório de inicialização
-(setq default-directory "~/.emacs.d/")
-
-;; Tamanho da janela de inicialização
-(add-to-list 'initial-frame-alist '(height . 1.0))
-(add-to-list 'initial-frame-alist '(width . 1.0))
-
+  
+  ;; Buffer de inicialização
+  (add-hook 'after-init-hook (lambda () (org-agenda nil "d") (delete-other-windows)))
+  
+  ;; Diretório de inicialização
+  (setq default-directory "~/.emacs.d/")
+  
+  ;; Tamanho da janela de inicialização
+  (add-to-list 'initial-frame-alist '(height . 1.0))
+  (add-to-list 'initial-frame-alist '(width . 1.0))
+  
+  ;; Dados de usuário
+  (setq user-full-name "João Lucas Correia Barbosa de Farias")
+  (setq user-mail-address "fariasjota09@gmail.com")
+  (defvar user-url "https://github.com/jotafarias13")
+  
 #+end_src
 
 * Interface de Usuário (UI)

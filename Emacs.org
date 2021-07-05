@@ -1355,6 +1355,56 @@ Contém a configuração básica do org-mode juntamente com as configurações d
 
   (jlf/org-font-setup))
 
+** Protocol
+#+begin_src emacs-lisp
+  
+  (use-package org-protocol
+    :ensure nil
+    :init
+    (server-start)
+    :config
+    (add-to-list 'org-capture-templates
+                 '("p" "Protocol"))
+    (add-to-list 'org-capture-templates
+                 '("pb" "Bookmark" plain
+                   (file+function "~/Sync/Jota/Academico/Projetos/Org/Protocol/bookmarks.org" jlf/org-protocol--capture-template-headline-target)
+                   "** %(if (string-empty-p \"\%:description\") \"\%^{Title: }\" \"\%:description\")\n:LINK: %:link\n:ACCESS: [%<%d-%m-%Y %a %H:%M:%S>]\n%^{Description: }"
+                   :empty-lines 1
+                   :immediate-finish t) t)
+    (add-to-list 'org-capture-templates
+                 '("pr" "Read List" entry
+                   (file "~/Sync/Jota/Academico/Projetos/Org/Protocol/read_list.org")
+                   "* TODO %(if (string-empty-p \"\%:description\") \"\%^{Title: }\" \"\%:description\")\n:LINK: %:link\n:ACCESS: [%<%d-%m-%Y %a %H:%M:%S>]\n%^{Description: }"
+                   :empty-lines 1
+                   :immediate-finish t) t))
+  
+  ;; Função que retorna uma lista com todos os headings level 1 de um org-buffer
+  (defun jlf/org--return-level-1-headings ()
+    (org-element-map (org-element-parse-buffer) 'headline
+      (lambda (item)
+        (when (= (org-element-property :level item) 1) (org-element-property :raw-value item)))))
+  
+  ;; Função que retorna o buffer-point para inserção de um novo favorito
+  (defun jlf/org-protocol--capture-template-headline-target ()
+    (let* ((options (jlf/org--return-level-1-headings))
+           (heading (completing-read "Bookmark Section: " (add-to-list 'options "* ADD NEW SECTION *"))))
+      (if (string-equal heading "* ADD NEW SECTION *")
+          (progn
+            (call-interactively
+             (lambda (new-bookmark-section)
+               (interactive "sNew Bookmark Section: ")
+               (goto-char (point-min))
+               (re-search-forward "^* Others")
+               (beginning-of-line)
+               (newline)
+               (previous-line)
+               (insert (concat "* " new-bookmark-section "\n")))))
+        (progn
+          (goto-char (point-min))
+          (re-search-forward (concat "^* " heading))
+          (org-end-of-subtree)
+          (org-return)))))
+  
 #+end_src
 
 ** Evil-Org

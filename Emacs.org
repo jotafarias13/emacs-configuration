@@ -294,48 +294,49 @@ O pacote /[[https://github.com/abo-abo/ace-window][ace-window]]/ gerencia a troc
 O pacote /[[https://github.com/abo-abo/swiper][ivy]]/ adiciona estrutura de autocompletion melhor para o Emacs e menus para abertura de arquivos, troca de buffer etc. O /[[https://github.com/Yevgnen/ivy-rich][ivy-rich]]/  adiciona uma coluna no minibuffer com descrições de cada comando, assim como keybindings existentes. O /[[https://github.com/seagle0128/all-the-icons-ivy-rich][all-the-icons-ivy-rich]]/ melhora a visualização do ivy, exibindo ícones para os buffers. O /[[https://github.com/abo-abo/swiper][counsel]]/ substitui alguns comandos do Emacs (como /find-file/, /switch-buffer/ etc) por comandos que funcionam bem com o /[[https://github.com/abo-abo/swiper][ivy]]/, facilitando a utilização dos comandos. O /[[https://github.com/abo-abo/swiper][swiper]]/ substitui o comando /isearch/  que melhora a ferramenta de pesquisa e tem integração com o /[[https://github.com/abo-abo/swiper][ivy]]/.
 
 #+begin_src emacs-lisp
-
-;; Configuração do ivy (autocompletar no minibuffer)
-(use-package ivy
-  :diminish 
-  :bind (("C-s" . swiper)
-         :map ivy-minibuffer-map
-         ("TAB" . ivy-alt-done)	
-         ("C-l" . ivy-alt-done)
-         ("C-j" . ivy-next-line)
-         ("C-k" . ivy-previous-line)
-         :map ivy-switch-buffer-map
-         ("C-k" . ivy-previous-line)
-         ("C-l" . ivy-done)
-         ("C-d" . ivy-switch-buffer-kill)
-         :map ivy-reverse-i-search-map
-         ("C-k" . ivy-previous-line)
-         ("C-d" . ivy-reverse-i-search-kill))
-  :config
-  (ivy-mode 1))
-
-;; Exibe ícones para todos os buffer no ivy
-(use-package all-the-icons-ivy-rich
-  :after ivy
-  :init (all-the-icons-ivy-rich-mode 1))
-
-;; Adiciona informações sobre cada comando no ivy
-(use-package ivy-rich
-  :after ivy
-  :init
-  (ivy-rich-mode 1))
-
-;; Substitui comandos para funcionar melhor com ivy
-(use-package counsel
-  :bind (:map counsel-mode-map
-  ([remap switch-to-buffer] . counsel-switch-buffer)
-  ([remap dired] . counsel-dired))
-  :config
-  (counsel-mode 1))
-
-;; Ferramenta de pesquisa que substitui isearch e tem integração com ivy
-(use-package swiper)
-
+  
+  ;; Configuração do ivy (autocompletar no minibuffer)
+  (use-package ivy
+    :diminish 
+    :bind (("C-s" . swiper)
+           :map ivy-minibuffer-map
+           ("TAB" . ivy-alt-done)	
+           ("C-l" . ivy-alt-done)
+           ("C-j" . ivy-next-line)
+           ("C-k" . ivy-previous-line)
+           ("C-RET" . ivy-immediate-done)
+           :map ivy-switch-buffer-map
+           ("C-k" . ivy-previous-line)
+           ("C-l" . ivy-done)
+           ("C-d" . ivy-switch-buffer-kill)
+           :map ivy-reverse-i-search-map
+           ("C-k" . ivy-previous-line)
+           ("C-d" . ivy-reverse-i-search-kill))
+    :config
+    (ivy-mode 1))
+  
+  ;; Exibe ícones para todos os buffer no ivy
+  (use-package all-the-icons-ivy-rich
+    :after ivy
+    :init (all-the-icons-ivy-rich-mode 1))
+  
+  ;; Adiciona informações sobre cada comando no ivy
+  (use-package ivy-rich
+    :after ivy
+    :init
+    (ivy-rich-mode 1))
+  
+  ;; Substitui comandos para funcionar melhor com ivy
+  (use-package counsel
+    :bind (:map counsel-mode-map
+    ([remap switch-to-buffer] . counsel-switch-buffer)
+    ([remap dired] . counsel-dired))
+    :config
+    (counsel-mode 1))
+  
+  ;; Ferramenta de pesquisa que substitui isearch e tem integração com ivy
+  (use-package swiper)
+  
 #+end_src
 
 ** Company

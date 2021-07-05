@@ -485,6 +485,7 @@ O pacote /[[https://github.com/emacs-evil/evil][evil]]/ configura um major mode 
   (define-key evil-normal-state-map (kbd "m") (lambda () (interactive) (evil-open-below 1) (evil-normal-state)))
   (define-key evil-normal-state-map (kbd "M") (lambda () (interactive) (evil-open-above 1) (evil-normal-state)))
   (define-key evil-normal-state-map (kbd "g r") 'revert-buffer)
+  (define-key evil-motion-state-map (kbd "C-u") 'evil-scroll-up)
 
   ;; Configura a navegação para funcionar quando visual-line-mode não está ativado
   (evil-global-set-key 'motion "j" 'evil-next-visual-line)

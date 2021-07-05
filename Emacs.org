@@ -740,21 +740,25 @@ O pacote /[[https://github.com/joaotavora/eglot][Eglot]]/ serve como um cliente 
 Após baixar o /[[https://github.com/astoff/digestif][Digestif]]/, é preciso adicionar ele ao $PATH do terminal, torná-lo executável (chmod +x path-to-digestif) e executá-lo uma vez para que baixe o pacote.
 
 #+begin_src emacs-lisp
-
-;; Funciona como um cliente LSP para Emacs, utilizado para escrever em LaTeX
-(use-package eglot
-  :hook (LaTeX-mode . eglot-ensure))
-
-;; Auxilia o Eglot a reconhecer projetos com arquivos em diretórios distintos
-(defun jlf/latex-root (dir)
-  (when-let ((root (locate-dominating-file dir "defesa.tex")))
-    (cons 'latex-module root)))
-
-(add-hook 'project-find-functions #'jlf/latex-root)
-
-(cl-defmethod project-root ((project (head latex-module)))
-   (cdr project))
-
+  
+  ;; Funciona como um cliente LSP para Emacs, utilizado para escrever em LaTeX
+  (use-package eglot
+    :hook (LaTeX-mode . eglot-ensure))
+  
+  ;; Auxilia o Eglot a reconhecer projetos com arquivos em diretórios distintos
+  
+  ;; (defvar main-tex "defesa.tex")
+  (defvar main-tex "projeto-pesquisa.tex")
+  
+  (defun jlf/latex-root (dir)
+    (when-let ((root (locate-dominating-file dir main-tex)))
+      (cons 'latex-module root)))
+  
+  (add-hook 'project-find-functions #'jlf/latex-root)
+  
+  (cl-defmethod project-root ((project (head latex-module)))
+     (cdr project))
+  
 #+end_src
 
 ** MyWorkSpace

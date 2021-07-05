@@ -356,7 +356,7 @@ O pacote /[[https://company-mode.github.io/][company]]/ substitui a ferramenta p
   (add-hook 'company-mode-hook '(lambda () (define-key company-active-map (kbd "C-k") 'company-select-previous)))
   :custom
   (company-minimum-prefix-length 1)
-  (company-idle-delay 0.0))
+  (company-idle-delay 0.2))
 
 ;; Melhora aparência do menu de autocompletion
 (use-package company-box

@@ -219,6 +219,7 @@
          ("C-l" . ivy-alt-done)
          ("C-j" . ivy-next-line)
          ("C-k" . ivy-previous-line)
+         ("C-RET" . ivy-immediate-done)
          :map ivy-switch-buffer-map
          ("C-k" . ivy-previous-line)
          ("C-l" . ivy-done)
@@ -263,7 +264,7 @@
   (add-hook 'company-mode-hook '(lambda () (define-key company-active-map (kbd "C-k") 'company-select-previous)))
   :custom
   (company-minimum-prefix-length 1)
-  (company-idle-delay 0.0))
+  (company-idle-delay 0.2))
 
 ;; Melhora aparência do menu de autocompletion
 (use-package company-box
@@ -357,6 +358,7 @@
   (define-key evil-normal-state-map (kbd "m") (lambda () (interactive) (evil-open-below 1) (evil-normal-state)))
   (define-key evil-normal-state-map (kbd "M") (lambda () (interactive) (evil-open-above 1) (evil-normal-state)))
   (define-key evil-normal-state-map (kbd "g r") 'revert-buffer)
+  (define-key evil-motion-state-map (kbd "C-u") 'evil-scroll-up)
 
   ;; Configura a navegação para funcionar quando visual-line-mode não está ativado
   (evil-global-set-key 'motion "j" 'evil-next-visual-line)
@@ -532,8 +534,12 @@
   :hook (LaTeX-mode . eglot-ensure))
 
 ;; Auxilia o Eglot a reconhecer projetos com arquivos em diretórios distintos
+
+;; (defvar main-tex "defesa.tex")
+(defvar main-tex "projeto-pesquisa.tex")
+
 (defun jlf/latex-root (dir)
-  (when-let ((root (locate-dominating-file dir "defesa.tex")))
+  (when-let ((root (locate-dominating-file dir main-tex)))
     (cons 'latex-module root)))
 
 (add-hook 'project-find-functions #'jlf/latex-root)
@@ -734,6 +740,9 @@
 ;; Hook para atualizar 
 (add-hook 'before-save-hook 'jlf/org-update-last-modified)
 
+;; org-roam-protocol
+(require 'org-roam-protocol)
+
 (use-package org-noter
   :custom
   (org-noter-notes-search-path (list jlf/zettelkasten-refs-directory))
@@ -859,6 +868,7 @@ With a prefix ARG, remove start location."
 (global-set-key (org-research--key "n") 'org-noter-insert-note)
 (global-set-key (org-research--key "c") 'org-ref-insert-link)
 (global-set-key (org-research--key "r") 'org-roam)
+(global-set-key (org-research--key "f") 'org-roam-find-file)
 
 ;; Congifuração das fontes e faces
 (defun jlf/org-font-setup ()
@@ -934,15 +944,15 @@ With a prefix ARG, remove start location."
 
   (setq org-agenda-files
         '("~/Sync/Jota/Academico/Projetos/Emacs/Org/Tarefas.org"))
-          ;; "~/Sync/Jota/Academico/Projetos/Emacs/Org/Saude.org"))
-          ;; "~/Projects/Code/emacs-from-scratch/OrgFiles/Birthdays.org"))
+  ;; "~/Sync/Jota/Academico/Projetos/Emacs/Org/Saude.org"))
+  ;; "~/Projects/Code/emacs-from-scratch/OrgFiles/Birthdays.org"))
 
   (require 'org-habit)
   (add-to-list 'org-modules 'org-habit)
   (setq org-habit-graph-column 60)
 
   (setq org-todo-keywords
-    '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")))
+        '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")))
   ;;     (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
 
   ;; (setq org-refile-targets
@@ -950,105 +960,152 @@ With a prefix ARG, remove start location."
   ;;     ("~/Sync/Jota/Academico/Projetos/Emacs/Org/Tarefas.org" :maxlevel . 1)))
 
   (setq org-refile-targets
-    '(("Arquivado.org" :maxlevel . 1)
-      ("Tarefas.org" :maxlevel . 1)))
+        '(("Arquivado.org" :maxlevel . 1)
+          ("Tarefas.org" :maxlevel . 1)))
 
   ;; Salva os buffers de org depois de executar o refile
   (advice-add 'org-refile :after 'org-save-all-org-buffers)
 
   (setq org-tag-alist
-    '((:startgroup)
-       ;; Tags customizadas
-       (:endgroup)
-       ("Saúde" . ?S)
-       ("Consulta" . ?c)
-       ("Exame" . ?e)
-       ("Trabalho" . ?T)
-       ("Mestrado" . ?m)
-       ("Lazer" . ?L)
-       ("Emacs" . ?E)))
-       ;; ("batch" . ?b)
-       ;; ("note" . ?n)
-       ;; ("idea" . ?i)))
+        '((:startgroup)
+          ;; Tags customizadas
+          (:endgroup)
+          ("Saúde" . ?S)
+          ("Consulta" . ?c)
+          ("Exame" . ?e)
+          ("Trabalho" . ?T)
+          ("Mestrado" . ?m)
+          ("Lazer" . ?L)
+          ("Emacs" . ?E)))
+  ;; ("batch" . ?b)
+  ;; ("note" . ?n)
+  ;; ("idea" . ?i)))
 
   ;; Configure custom agenda views
   (setq org-agenda-custom-commands
-   '(("d" "Dashboard"
-     ((agenda "" ((org-deadline-warning-days 7)))
-      (todo "TODO"
-        ((org-agenda-overriding-header "TODO Tasks")))
-      (tags-todo "agenda/ACTIVE" ((org-agenda-overriding-header "Active Projects")))))
+        '(("d" "Dashboard"
+           ((agenda "" ((org-deadline-warning-days 7)))
+            (todo "TODO"
+                  ((org-agenda-overriding-header "TODO Tasks")))
+            (tags-todo "agenda/ACTIVE" ((org-agenda-overriding-header "Active Projects")))))
 
-    ("n" "Next Tasks"
-     ((todo "NEXT"
-        ((org-agenda-overriding-header "Next Tasks")))))
+          ("n" "Next Tasks"
+           ((todo "NEXT"
+                  ((org-agenda-overriding-header "Next Tasks")))))
 
-    ("W" "Work Tasks" tags-todo "+work-email")
+          ("W" "Work Tasks" tags-todo "+work-email")
 
-    ;; Ações NEXT de baixo esforço (low-effort)
-    ("e" tags-todo "+TODO=\"NEXT\"+Effort<15&+Effort>0"
-     ((org-agenda-overriding-header "Low Effort Tasks")
-      (org-agenda-max-todos 20)
-      (org-agenda-files org-agenda-files)))
+          ;; Ações NEXT de baixo esforço (low-effort)
+          ("e" tags-todo "+TODO=\"NEXT\"+Effort<15&+Effort>0"
+           ((org-agenda-overriding-header "Low Effort Tasks")
+            (org-agenda-max-todos 20)
+            (org-agenda-files org-agenda-files)))
 
-    ("w" "Workflow Status"
-     ((todo "WAIT"
-            ((org-agenda-overriding-header "Waiting on External")
-             (org-agenda-files org-agenda-files)))
-      (todo "REVIEW"
-            ((org-agenda-overriding-header "In Review")
-             (org-agenda-files org-agenda-files)))
-      (todo "PLAN"
-            ((org-agenda-overriding-header "In Planning")
-             (org-agenda-todo-list-sublevels nil)
-             (org-agenda-files org-agenda-files)))
-      (todo "BACKLOG"
-            ((org-agenda-overriding-header "Project Backlog")
-             (org-agenda-todo-list-sublevels nil)
-             (org-agenda-files org-agenda-files)))
-      (todo "READY"
-            ((org-agenda-overriding-header "Ready for Work")
-             (org-agenda-files org-agenda-files)))
-      (todo "ACTIVE"
-            ((org-agenda-overriding-header "Active Projects")
-             (org-agenda-files org-agenda-files)))
-      (todo "COMPLETED"
-            ((org-agenda-overriding-header "Completed Projects")
-             (org-agenda-files org-agenda-files)))
-      (todo "CANC"
-            ((org-agenda-overriding-header "Cancelled Projects")
-             (org-agenda-files org-agenda-files)))))))
+          ("w" "Workflow Status"
+           ((todo "WAIT"
+                  ((org-agenda-overriding-header "Waiting on External")
+                   (org-agenda-files org-agenda-files)))
+            (todo "REVIEW"
+                  ((org-agenda-overriding-header "In Review")
+                   (org-agenda-files org-agenda-files)))
+            (todo "PLAN"
+                  ((org-agenda-overriding-header "In Planning")
+                   (org-agenda-todo-list-sublevels nil)
+                   (org-agenda-files org-agenda-files)))
+            (todo "BACKLOG"
+                  ((org-agenda-overriding-header "Project Backlog")
+                   (org-agenda-todo-list-sublevels nil)
+                   (org-agenda-files org-agenda-files)))
+            (todo "READY"
+                  ((org-agenda-overriding-header "Ready for Work")
+                   (org-agenda-files org-agenda-files)))
+            (todo "ACTIVE"
+                  ((org-agenda-overriding-header "Active Projects")
+                   (org-agenda-files org-agenda-files)))
+            (todo "COMPLETED"
+                  ((org-agenda-overriding-header "Completed Projects")
+                   (org-agenda-files org-agenda-files)))
+            (todo "CANC"
+                  ((org-agenda-overriding-header "Cancelled Projects")
+                   (org-agenda-files org-agenda-files)))))))
 
   (setq org-capture-templates
-    `(("t" "Tasks / Projects")
-      ("tt" "Task" entry (file+olp "~/Projects/Code/emacs-from-scratch/OrgFiles/Tasks.org" "Inbox")
+        `(("t" "Tasks / Projects")
+          ("tt" "Task" entry (file+olp "~/Projects/Code/emacs-from-scratch/OrgFiles/Tasks.org" "Inbox")
            "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
 
-      ("j" "Journal Entries")
-      ("jj" "Journal" entry
+          ("j" "Journal Entries")
+          ("jj" "Journal" entry
            (file+olp+datetree "~/Projects/Code/emacs-from-scratch/OrgFiles/Journal.org")
            "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
            ;; ,(dw/read-file-as-string "~/Notes/Templates/Daily.org")
            :clock-in :clock-resume
            :empty-lines 1)
-      ("jm" "Meeting" entry
+          ("jm" "Meeting" entry
            (file+olp+datetree "~/Projects/Code/emacs-from-scratch/OrgFiles/Journal.org")
            "* %<%I:%M %p> - %a :meetings:\n\n%?\n\n"
            :clock-in :clock-resume
            :empty-lines 1)
 
-      ("w" "Workflows")
-      ("we" "Checking Email" entry (file+olp+datetree "~/Projects/Code/emacs-from-scratch/OrgFiles/Journal.org")
+          ("w" "Workflows")
+          ("we" "Checking Email" entry (file+olp+datetree "~/Projects/Code/emacs-from-scratch/OrgFiles/Journal.org")
            "* Checking Email :email:\n\n%?" :clock-in :clock-resume :empty-lines 1)
 
-      ("m" "Metrics Capture")
-      ("mw" "Weight" table-line (file+headline "~/Projects/Code/emacs-from-scratch/OrgFiles/Metrics.org" "Weight")
-       "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)))
+          ("m" "Metrics Capture")
+          ("mw" "Weight" table-line (file+headline "~/Projects/Code/emacs-from-scratch/OrgFiles/Metrics.org" "Weight")
+           "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)))
 
   (define-key global-map (kbd "C-c j")
     (lambda () (interactive) (org-capture nil "jj")))
 
   (jlf/org-font-setup))
+
+(use-package org-protocol
+  :ensure nil
+  :init
+  (server-start)
+  :config
+  (add-to-list 'org-capture-templates
+               '("p" "Protocol"))
+  (add-to-list 'org-capture-templates
+               '("pb" "Bookmark" plain
+                 (file+function "~/Sync/Jota/Academico/Projetos/Org/Protocol/bookmarks.org" jlf/org-protocol--capture-template-headline-target)
+                 "** %(if (string-empty-p \"\%:description\") \"\%^{Title: }\" \"\%:description\")\n:LINK: %:link\n:ACCESS: [%<%d-%m-%Y %a %H:%M:%S>]\n%^{Description: }"
+                 :empty-lines 1
+                 :immediate-finish t) t)
+  (add-to-list 'org-capture-templates
+               '("pr" "Read List" entry
+                 (file "~/Sync/Jota/Academico/Projetos/Org/Protocol/read_list.org")
+                 "* TODO %(if (string-empty-p \"\%:description\") \"\%^{Title: }\" \"\%:description\")\n:LINK: %:link\n:ACCESS: [%<%d-%m-%Y %a %H:%M:%S>]\n%^{Description: }"
+                 :empty-lines 1
+                 :immediate-finish t) t))
+
+;; Função que retorna uma lista com todos os headings level 1 de um org-buffer
+(defun jlf/org--return-level-1-headings ()
+  (org-element-map (org-element-parse-buffer) 'headline
+    (lambda (item)
+      (when (= (org-element-property :level item) 1) (org-element-property :raw-value item)))))
+
+;; Função que retorna o buffer-point para inserção de um novo favorito
+(defun jlf/org-protocol--capture-template-headline-target ()
+  (let* ((options (jlf/org--return-level-1-headings))
+         (heading (completing-read "Bookmark Section: " (add-to-list 'options "* ADD NEW SECTION *"))))
+    (if (string-equal heading "* ADD NEW SECTION *")
+        (progn
+          (call-interactively
+           (lambda (new-bookmark-section)
+             (interactive "sNew Bookmark Section: ")
+             (goto-char (point-min))
+             (re-search-forward "^* Others")
+             (beginning-of-line)
+             (newline)
+             (previous-line)
+             (insert (concat "* " new-bookmark-section "\n")))))
+      (progn
+        (goto-char (point-min))
+        (re-search-forward (concat "^* " heading))
+        (org-end-of-subtree)
+        (org-return)))))
 
 ;; Melhora a integração do evil com org
 (use-package evil-org

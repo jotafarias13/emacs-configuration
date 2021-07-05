@@ -1145,6 +1145,7 @@ O pacote /[[https://github.com/politza/pdf-tools][PDF-Tools]]/ habilita a visual
   (global-set-key (org-research--key "n") 'org-noter-insert-note)
   (global-set-key (org-research--key "c") 'org-ref-insert-link)
   (global-set-key (org-research--key "r") 'org-roam)
+  (global-set-key (org-research--key "f") 'org-roam-find-file)
   
   
 #+end_src

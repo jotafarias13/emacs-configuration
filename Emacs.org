@@ -769,6 +769,16 @@ O pacote /[[https://www.gnu.org/software/auctex/][AUCTeX]]/ auxilia e configura 
   (setq evil-tex-toggle-override-m nil)
   (setq evil-tex-toggle-override-t t)
   
+  ;; Função personalizada para adicionar um novo item no itemize
+  (defun jlf/LaTeX-insert-item ()
+    (interactive)
+    (evil-open-below 1)
+    (insert "\\item ")
+    (indent-for-tab-command)
+    (evil-append 1))
+  
+  (add-hook 'LaTeX-mode-hook '(lambda () (define-key LaTeX-mode-map (kbd "C-<return>") 'jlf/LaTeX-insert-item)))
+  
 #+end_src
 
 ** LSP Mode 

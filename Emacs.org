@@ -1266,6 +1266,23 @@ O pacote /[[https://github.com/politza/pdf-tools][PDF-Tools]]/ habilita a visual
   
 #+end_src
 
+** Perspective
+
+#+begin_src emacs-lisp
+  
+  (use-package perspective
+    :custom
+    (persp-mode-prefix-key (kbd "C-c p"))
+    (persp-state-default-file "~/.emacs.d/persp-state-session")
+    (persp-modestring-short t)
+    :bind (("C-x b" . persp-counsel-switch-buffer))
+    :config
+    (persp-mode))
+  
+  (add-hook 'kill-emacs-hook #'persp-state-save)
+  
+#+end_src
+
 * Org Mode
  /[[https://orgmode.org/][Org Mode]]/ é um editor de documentos, planejador de projetos e tarefas e ambiente de programação muito útil e customizável, sendo de extrema importância para as tarefas e projetos do dia-a-dia.
 

@@ -743,25 +743,25 @@ O pacote /[[https://www.gnu.org/software/auctex/][AUCTeX]]/ auxilia e configura 
   ;; Coloca LaTeX-Mk disponível via C-c C-c
   ;; SyncTeX é configurado no arquivo "~/.latexmkrc"
   (eval-after-load "tex" (lambda ()
-    (push
-      '("LaTeX-Mk" "latexmk -pdf -pvc %s" TeX-run-TeX nil t
-        :help "Run LaTeX-Mk on file")
-      TeX-command-list)
-    (push
-      '("CleanAll" "latexmk -c" TeX-run-TeX nil t
-        :help "Files for deletion not found")
-      TeX-command-list)
-    (setq-default TeX-command-default "LaTeX-Mk")))
+			   (push
+			    '("LaTeX-Mk" "latexmk -pdf -pvc %s" TeX-run-TeX nil t
+			      :help "Run LaTeX-Mk on file")
+			    TeX-command-list)
+			   (push
+			    '("CleanAll" "latexmk -c" TeX-run-TeX nil t
+			      :help "Files for deletion not found")
+			    TeX-command-list)
+			   (setq-default TeX-command-default "LaTeX-Mk")))
   
   ;; Usa Skim como visualizador padrão, habilita PDF Sync
   ;; Displayline do Skim é usado para pesquisa .tex -> .pdf
   ;; Opção -b grifa a lina atual e -g abre o Skim no background
   (setq TeX-view-program-selection '((output-pdf "PDF Viewer")))
   (setq TeX-view-program-list
-        '(("PDF Viewer" "/Applications/Skim.app/Contents/SharedSupport/displayline -b -g %n %o %b")))
+	'(("PDF Viewer" "/Applications/Skim.app/Contents/SharedSupport/displayline -b -g %n %o %b")))
   
   ;; Inicializa o modo servidor no Emacs para possibilitar a comunicação com o Skim
-  (server-start)
+  ;; (server-start)
   
   ;; Habilita evil keybindings voltados para TeX
   (use-package evil-tex

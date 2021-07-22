@@ -535,90 +535,100 @@ O pacote /[[https://github.com/rnkn/olivetti][Olivetti]]/ introduz um ambiente d
 #+end_src
 
 ** Evil
-O pacote /[[https://github.com/emacs-evil/evil][evil]]/ configura um major mode que simula o modo de edição do Vim, facilitando a edição de texto de forma geral. O pacote /[[https://github.com/emacsmirror/undo-fu][Undo Fu]]/ melhora as funções de desfazer e refazer (undo-redo) para o /[[https://github.com/emacs-evil/evil][evil]]/, tornando-as práticas e simples. O pacote /[[https://github.com/emacs-evil/evil-collection][evil-collection]]/ aumenta a integração do /[[https://github.com/emacs-evil/evil][evil]]/  com outros modos do Emacs. O pacote /[[https://github.com/emacs-evil/evil-surround][evil-surround]]/ emula a ação surround do vim, facilitando a edição de texto. O pacote /[[https://github.com/emacsorphanage/evil-textobj-line][evil-textobj-line]]/ adiciona "linha" (com o comando 'l') como um text-obj para edição de texto, assim como são "w,W,b,B" etc. O pacote /[[https://github.com/linktohack/evil-commentary][evil-commentary]]/ adiciona o comando "gc" para comentar como uma ação de edição de texto, assim como são "d,c,y" etc. O pacote /[[https://github.com/edkolev/evil-goggles][evil-goggles]]/ destaca (highlight) a parte do texto onde um comando foi efetuado, facilitando a percepção do que foi/será alterado. O pacote /[[https://github.com/Dewdrops/evil-exchange/tree/ac50f21b29b6e3a111e10a9e88ae61c907ac5ee8][evil-exchange]]/ adiciona a ação de "troca" de texto com o comando "gz", evitando o ato de copiar um texto, deletar outro e colar o primeiro. O pacote /[[https://github.com/PythonNut/evil-easymotion][evil-easymotion]]/ facilita a movimentação dentro do buffer, criando alvos nos resultados da pesquisa para que se consiga chegar a um local específico do buffer de forma mais rápida e natural.
+O pacote /[[https://github.com/emacs-evil/evil][evil]]/ configura um major mode que simula o modo de edição do Vim, facilitando a edição de texto de forma geral. O pacote /[[https://github.com/apchamberlain/undo-tree.el][Undo Tree]]/ melhora as funções de desfazer e refazer (undo-redo) para o /[[https://github.com/emacs-evil/evil][evil]]/, tornando-as práticas e simples. O pacote /[[https://github.com/emacs-evil/evil-collection][evil-collection]]/ aumenta a integração do /[[https://github.com/emacs-evil/evil][evil]]/  com outros modos do Emacs. O pacote /[[https://github.com/emacs-evil/evil-surround][evil-surround]]/ emula a ação surround do vim, facilitando a edição de texto. O pacote /[[https://github.com/emacsorphanage/evil-textobj-line][evil-textobj-line]]/ adiciona "linha" (com o comando 'l') como um text-obj para edição de texto, assim como são "w,W,b,B" etc. O pacote /[[https://github.com/linktohack/evil-commentary][evil-commentary]]/ adiciona o comando "gc" para comentar como uma ação de edição de texto, assim como são "d,c,y" etc. O pacote /[[https://github.com/edkolev/evil-goggles][evil-goggles]]/ destaca (highlight) a parte do texto onde um comando foi efetuado, facilitando a percepção do que foi/será alterado. O pacote /[[https://github.com/Dewdrops/evil-exchange/tree/ac50f21b29b6e3a111e10a9e88ae61c907ac5ee8][evil-exchange]]/ adiciona a ação de "troca" de texto com o comando "gz", evitando o ato de copiar um texto, deletar outro e colar o primeiro. O pacote /[[https://github.com/PythonNut/evil-easymotion][evil-easymotion]]/ facilita a movimentação dentro do buffer, criando alvos nos resultados da pesquisa para que se consiga chegar a um local específico do buffer de forma mais rápida e natural.
 
 #+begin_src emacs-lisp
-
-;; Melhora as funções de desfazer e refazer do evil
-(use-package undo-fu
-  :init
-  (global-undo-tree-mode -1)
-  :config
-  (add-hook 'evil-mode-hook '(lambda () (define-key evil-normal-state-map (kbd "u") 'undo-fu-only-undo)))
-  (add-hook 'evil-mode-hook '(lambda () (define-key evil-normal-state-map (kbd "C-r") 'undo-fu-only-redo))))
-
-;; Configura o evil-mode para simular o Vim no Emacs
-(use-package evil
-  :init
-  (setq evil-want-integration t)
-  (setq evil-want-keybinding nil)
-  (setq evil-want-C-u-scroll t)
-  (setq evil-want-C-i-jump nil)
-  :config
-  (evil-mode 1)
-  (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-  (define-key evil-normal-state-map (kbd "m") (lambda () (interactive) (evil-open-below 1) (evil-normal-state)))
-  (define-key evil-normal-state-map (kbd "M") (lambda () (interactive) (evil-open-above 1) (evil-normal-state)))
-  (define-key evil-normal-state-map (kbd "g r") 'revert-buffer)
-  (define-key evil-motion-state-map (kbd "C-u") 'evil-scroll-up)
-
-  ;; Configura a navegação para funcionar quando visual-line-mode não está ativado
-  (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-  (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
-
-  (evil-set-initial-state 'messages-buffer-mode 'normal)
-  (evil-set-initial-state 'dashboard-mode 'normal))
-
-;; Aumenta a atuação dos keybindings do evil
-(use-package evil-collection
-  :after evil
-  :custom
-  (evil-collection-company-use-tng nil)   ;; evita o bug de completion de funções do clangd
-  :config
-  (evil-collection-init))
-
-;; Emula a ação surround do vim
-(use-package evil-surround
-  :config
+  
+  ;; (use-package undo-fu
+  ;;   :init
+  ;;   (global-undo-tree-mode -1)
+  ;;   :config
+  ;;   (add-hook 'evil-mode-hook '(lambda () (define-key evil-normal-state-map (kbd "u") 'undo-fu-only-undo)))
+  ;;   (add-hook 'evil-mode-hook '(lambda () (define-key evil-normal-state-map (kbd "C-r") 'undo-fu-only-redo))))
+  
+  
+  ;; Melhora as funções de desfazer e refazer do evil
+  (use-package undo-tree
+    :config
+    (setq undo-tree-visualizer-diff t)
+    (global-undo-tree-mode))
+  
+  ;; Configura o evil-mode para simular o Vim no Emacs
+  (use-package evil
+    :init
+    (setq evil-want-integration t)
+    (setq evil-want-keybinding nil)
+    (setq evil-want-C-u-scroll t)
+    (setq evil-want-C-i-jump nil)
+    (setq evil-want-Y-yank-to-eol t)
+    (setq evil-undo-system 'undo-tree)
+    :config
+    (evil-mode 1)
+    (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+    (define-key evil-normal-state-map (kbd "m") (lambda () (interactive) (evil-open-below 1) (evil-normal-state)))
+    (define-key evil-normal-state-map (kbd "M") (lambda () (interactive) (evil-open-above 1) (evil-normal-state)))
+    (define-key evil-normal-state-map (kbd "g r") 'revert-buffer)
+    (define-key evil-motion-state-map (kbd "C-u") 'evil-scroll-up)
+  
+    ;; Configura a navegação para funcionar quando visual-line-mode não está ativado
+    (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+    (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+    (evil-global-set-key 'motion "gj" 'evil-next-line)
+    (evil-global-set-key 'motion "gk" 'evil-previous-line)
+  
+    (evil-set-initial-state 'messages-buffer-mode 'normal)
+    (evil-set-initial-state 'dashboard-mode 'normal))
+  
+  ;; Aumenta a atuação dos keybindings do evil
+  (use-package evil-collection
+    :after evil
+    :custom
+    (evil-collection-company-use-tng nil)   ;; evita o bug de completion de funções do clangd
+    :config
+    (evil-collection-init))
+  
+  ;; Emula a ação surround do vim
+  (use-package evil-surround
+    :config
     (global-evil-surround-mode 1))
-
-;; Adiciona "linha" como um text-obj (w,W,b,B etc)
-(use-package evil-textobj-line)
-
-;; Adiciona o comandos "gc" para comentar como uma ação (d,c,y etc)
-(use-package evil-commentary
-  :config
-  (evil-commentary-mode))
-
-;; Destaca a parte do texto onde um comando foi efetuado
-(use-package evil-goggles
-  :config
-  (evil-goggles-mode)
-  (evil-goggles-use-diff-faces))
-
-(use-package evil-exchange)
-(setq evil-exchange-key (kbd "gz"))
-(setq evil-exchange-cancel-key (kbd "gZ"))
-(evil-exchange-install)
-
-(use-package evil-easymotion
-  :config
-  (evilem-default-keybindings "SPC"))
-
-(evilem-define (kbd "SPC f") (list 'evil-repeat-find-char
-				     'evil-repeat-find-char-reverse)
-	       :pre-hook (save-excursion
-			   (setq evil-this-type 'inclusive)
-			   (call-interactively #'evil-find-char))
-	       :bind ((evil-cross-lines t)))
-
-(evilem-define (kbd "SPC t") (list 'evil-repeat-find-char
-				   'evil-repeat-find-char-reverse)
-	       :pre-hook (save-excursion
-			   (setq evil-this-type 'inclusive)
-			   (call-interactively #'evil-find-char-to))
-	       :bind ((evil-cross-lines t)))
-
+  
+  ;; Adiciona "linha" como um text-obj (w,W,b,B etc)
+  (use-package evil-textobj-line)
+  
+  ;; Adiciona o comandos "gc" para comentar como uma ação (d,c,y etc)
+  (use-package evil-commentary
+    :config
+    (evil-commentary-mode))
+  
+  ;; Destaca a parte do texto onde um comando foi efetuado
+  (use-package evil-goggles
+    :config
+    (evil-goggles-mode)
+    (evil-goggles-use-diff-faces))
+  
+  (use-package evil-exchange)
+  (setq evil-exchange-key (kbd "gz"))
+  (setq evil-exchange-cancel-key (kbd "gZ"))
+  (evil-exchange-install)
+  
+  (use-package evil-easymotion
+    :config
+    (evilem-default-keybindings "SPC"))
+  
+  (evilem-define (kbd "SPC f") (list 'evil-repeat-find-char
+                                     'evil-repeat-find-char-reverse)
+                 :pre-hook (save-excursion
+                             (setq evil-this-type 'inclusive)
+                             (call-interactively #'evil-find-char))
+                 :bind ((evil-cross-lines t)))
+  
+  (evilem-define (kbd "SPC t") (list 'evil-repeat-find-char
+                                     'evil-repeat-find-char-reverse)
+                 :pre-hook (save-excursion
+                             (setq evil-this-type 'inclusive)
+                             (call-interactively #'evil-find-char-to))
+                 :bind ((evil-cross-lines t)))
+  
 #+end_src
 
 ** Diversos 

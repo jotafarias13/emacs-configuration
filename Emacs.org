@@ -33,49 +33,54 @@ Coloca como buffer de inicialização a org-agenda na visão dashboard (customiz
 Retira alguns elementos desnecessário do Emacs GUI e coloca elementos importantes de visualização de texto. O pacote /[[https://github.com/seagle0128/doom-modeline][doom-modeline]]/ habilita um design minimalista para a barra de modos do Emacs. O pacote /[[https://github.com/domtronn/all-the-icons.el][All The Icons]]/ habilita ícones para todos os tipos de arquivos e diretórios para melhor visualização. O comando para instalar as fontes (/all-the-icons-install-fonts/) adiciona cores para os ícones e só precisa ser executado uma vez. 
 
 #+begin_src emacs-lisp
-
-;; Remove de mensagem de boas-vindas
-(setq inhibit-startup-message t)
-
-;; Remove menus
-(tool-bar-mode -1)
-(menu-bar-mode -1)
-
-;; Remove barra de rolagem
-(scroll-bar-mode -1)
-
-;; Numerar linhas e colunas
-(column-number-mode)
-(global-display-line-numbers-mode t)
-
-;; Desabilita line-number para alguns modos
-(dolist (mode '(org-mode-hook
-                term-mode-hook
-                shell-mode-hook
-                treemacs-mode-hook
-                pdf-view-mode-hook
-                eshell-mode-hook))
-  (add-hook mode (lambda () (display-line-numbers-mode 0))))
-
-;; Visual line mode sempre ativo
-(global-visual-line-mode 1)
-
-;; Indica começo-fim de parênteses
-(add-hook 'after-init-hook (lambda () (show-paren-mode 1)))
-;; Altera cor do parêntese e do background quando der match em um parêntese
-(add-hook 'show-paren-mode-hook '(lambda () (set-face-attribute 'show-paren-match nil :foreground "Magenta" :background "#595959")))
-;; Obs: foi necessário fazer dessa forma por que o show-paren-mode-hook não estava funcionando como esperado.
-
-;; Barra de modos (inferior) minimalista
-(use-package doom-modeline
-  :init (doom-modeline-mode 1)
-  :custom ((doom-modeline-height 15)))
-
-;; Pacote All the icons
-(use-package all-the-icons)
-;; Obs: é preciso instalar as fontes do pacote (executar apenas uma vez)
-;; M-x all-the-icons-install-fonts
-
+  
+  ;; Remove de mensagem de boas-vindas
+  (setq inhibit-startup-message t)
+  
+  ;; Remove menus
+  (tool-bar-mode -1)
+  (menu-bar-mode -1)
+  
+  ;; Remove barra de rolagem
+  (scroll-bar-mode -1)
+  
+  ;; Numerar linhas e colunas
+  (column-number-mode)
+  (global-display-line-numbers-mode t)
+  
+  ;; Desabilita line-number para alguns modos
+  (dolist (mode '(org-mode-hook
+                  term-mode-hook
+                  shell-mode-hook
+                  treemacs-mode-hook
+                  pdf-view-mode-hook
+                  eshell-mode-hook))
+    (add-hook mode (lambda () (display-line-numbers-mode 0))))
+  
+  ;; Configura a numeração das linhas para serem relativas a linha atual
+  (add-hook 'display-line-numbers-mode-hook
+            '(lambda () (setq display-line-numbers 'relative)))
+  
+  
+  ;; Visual line mode sempre ativo
+  (global-visual-line-mode 1)
+  
+  ;; Indica começo-fim de parênteses
+  (add-hook 'after-init-hook (lambda () (show-paren-mode 1)))
+  ;; Altera cor do parêntese e do background quando der match em um parêntese
+  (add-hook 'show-paren-mode-hook '(lambda () (set-face-attribute 'show-paren-match nil :foreground "Magenta" :background "#595959")))
+  ;; Obs: foi necessário fazer dessa forma por que o show-paren-mode-hook não estava funcionando como esperado.
+  
+  ;; Barra de modos (inferior) minimalista
+  (use-package doom-modeline
+    :init (doom-modeline-mode 1)
+    :custom ((doom-modeline-height 15)))
+  
+  ;; Pacote All the icons
+  (use-package all-the-icons)
+  ;; Obs: é preciso instalar as fontes do pacote (executar apenas uma vez)
+  ;; M-x all-the-icons-install-fonts
+  
 #+end_src
 
 * Arquivos de Backup, Autosave e Custom

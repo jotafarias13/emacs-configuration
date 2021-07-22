@@ -1362,38 +1362,40 @@ Contém a configuração básica do org-mode juntamente com as configurações d
     ("C-c a" . org-agenda)
     ("C-c d" . (lambda () (interactive) (org-todo "DONE"))) 
     ("C-c w" . (lambda () (interactive) (org-todo "DONE") (org-refile))) 
+    :custom
+    (org-startup-folded 'content)
     :config
     (setq org-ellipsis " ▾")
     (setq org-hide-emphasis-markers t) 
-    
+  
     (setq org-agenda-start-with-log-mode t)
     (setq org-log-done 'time)
     (setq org-log-into-drawer t)
-    
+  
     (setq org-agenda-files
           '("~/Sync/Jota/Academico/Projetos/Emacs/Org/Tarefas.org"))
     ;; "~/Sync/Jota/Academico/Projetos/Emacs/Org/Saude.org"))
     ;; "~/Projects/Code/emacs-from-scratch/OrgFiles/Birthdays.org"))
-    
+  
     (require 'org-habit)
     (add-to-list 'org-modules 'org-habit)
     (setq org-habit-graph-column 60)
-    
+  
     (setq org-todo-keywords
           '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")))
     ;;     (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
-    
+  
     ;; (setq org-refile-targets
     ;;   '(("~/Sync/Jota/Academico/Projetos/Emacs/Org/Arquivado.org" :maxlevel . 1)
     ;;     ("~/Sync/Jota/Academico/Projetos/Emacs/Org/Tarefas.org" :maxlevel . 1)))
-    
+  
     (setq org-refile-targets
           '(("Arquivado.org" :maxlevel . 1)
             ("Tarefas.org" :maxlevel . 1)))
-    
+  
     ;; Salva os buffers de org depois de executar o refile
     (advice-add 'org-refile :after 'org-save-all-org-buffers)
-    
+  
     (setq org-tag-alist
           '((:startgroup)
             ;; Tags customizadas

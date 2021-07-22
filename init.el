@@ -36,6 +36,11 @@
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
+;; Configura a numeração das linhas para serem relativas a linha atual
+(add-hook 'display-line-numbers-mode-hook
+          '(lambda () (setq display-line-numbers 'relative)))
+
+
 ;; Visual line mode sempre ativo
 (global-visual-line-mode 1)
 
@@ -270,38 +275,108 @@
 (use-package company-box
   :hook (company-mode . company-box-mode))
 
-;; Adiciona o hook para pesquisar usando a função dired-isearch-filenames-regexp utilizando o "/"
-(eval-after-load "dired" '(progn
-  (define-key dired-mode-map (kbd "/") 'dired-isearch-filenames-regexp)
-))
+;; ;; Adiciona o hook para pesquisar usando a função dired-isearch-filenames-regexp utilizando o "/"
+;; (eval-after-load "dired" '(progn
+;;   (define-key dired-mode-map (kbd "/") 'dired-isearch-filenames-regexp)
+;; ))
 
-;; Adiciona o hook pra quando terminar a pesquisa entrar no arquivo e pesquisar novamente
-(add-hook 'isearch-mode-end-hook 
-	  (lambda ()
-	    (when (and (eq major-mode 'dired-mode)
-		       (not isearch-mode-end-hook-quit))
-	      (if (file-directory-p (dired-file-name-at-point)) (progn (dired-find-alternate-file) (dired-isearch-filenames-regexp))
-		(dired-find-file)
-	      ))))
+;; ;; Adiciona o hook pra quando terminar a pesquisa entrar no arquivo e pesquisar novamente
+;; (add-hook 'isearch-mode-end-hook 
+;; 	  (lambda ()
+;; 	    (when (and (eq major-mode 'dired-mode)
+;; 		       (not isearch-mode-end-hook-quit))
+;; 	      (if (file-directory-p (dired-file-name-at-point)) (progn (dired-find-alternate-file) (dired-isearch-filenames-regexp))
+;; 		(dired-find-file)
+;; 	      ))))
 
-;; Adiciona o hook para quando pesquisar levar o cursor para o início do buffer antes
-(add-hook 'isearch-mode-hook 
-	  (lambda ()
-	    (when (eq major-mode 'dired-mode)
-	      (beginning-of-buffer))))
+;; ;; Adiciona o hook para quando pesquisar levar o cursor para o início do buffer antes
+;; (add-hook 'isearch-mode-hook 
+;; 	  (lambda ()
+;; 	    (when (eq major-mode 'dired-mode)
+;; 	      (beginning-of-buffer))))
 
-;; Permite usar o comando dired-find-alternate-file que fecha o buffer atual em vez de criar outro, definindo o "<return>" como sendo a função que realiza isso
-(put 'dired-find-alternate-file 'disabled nil)
-(eval-after-load "dired"
-  (lambda ()
-    (define-key dired-mode-map (kbd "<return>") 
-      (lambda ()
-	(interactive)
-	(if (file-directory-p (dired-file-name-at-point)) (progn (dired-find-alternate-file)) (dired-find-file))))))
+;; ;; Permite usar o comando dired-find-alternate-file que fecha o buffer atual em vez de criar outro, definindo o "<return>" como sendo a função que realiza isso
+;; (put 'dired-find-alternate-file 'disabled nil)
+;; (eval-after-load "dired"
+;;   (lambda ()
+;;     (define-key dired-mode-map (kbd "<return>") 
+;;       (lambda ()
+;; 	(interactive)
+;; 	(if (file-directory-p (dired-file-name-at-point)) (progn (dired-find-alternate-file)) (dired-find-file))))))
 
-;; Navegação para próximo item e item anterior
-(define-key isearch-mode-map "\C-j" 'isearch-repeat-forward)
-(define-key isearch-mode-map "\C-k" 'isearch-repeat-backward)
+;; ;; Navegação para próximo item e item anterior
+;; (define-key isearch-mode-map "\C-j" 'isearch-repeat-forward)
+;; (define-key isearch-mode-map "\C-k" 'isearch-repeat-backward)
+
+
+
+;; Configura a exibição de itens do dired, a funcionalidade do dwim e alocação de itens deletados
+(use-package dired
+  :ensure nil
+  :bind (("C-x C-j" . dired-jump))
+  :custom
+  (dired-listing-switches "-agho --group-directories-first")
+
+  (dired-dwim-target t) ;; quando tem dois dired abertos, usa o segundo como path pra comandos do primeiro
+  (delete-by-moving-to-trash t)) ;; move os itens deletados para o lixo do computador
+
+;; Configura a manutenção de um único buffer do dired quando se abre arquivos ou diretórios
+(use-package dired-single
+  :after evil-collection
+  :config
+  (evil-collection-define-key 'normal 'dired-mode-map
+    "h" 'dired-single-up-directory
+    "l" 'dired-single-buffer))  ;; utiliza 'h' e 'l' para subir/descer na raiz de diretórios
+
+;; Configurações adicionais do dired-single (diretamente do repositório do pacote)
+(defun my-dired-init ()
+  "Remaps some dired functions to use dired-single functions.\nBunch of stuff to run for dired, either immediately or when it's
+       loaded."
+  (define-key dired-mode-map [remap dired-find-file]
+    'dired-single-buffer)
+  (define-key dired-mode-map [remap dired-mouse-find-file-other-window]
+    'dired-single-buffer-mouse)
+  (define-key dired-mode-map [remap dired-up-directory]
+    'dired-single-up-directory))
+
+;; if dired's already loaded, then the keymap will be bound
+(if (boundp 'dired-mode-map)
+    ;; we're good to go; just add our bindings
+    (my-dired-init)
+  ;; it's not loaded yet, so add our bindings to the load-hook
+  (add-hook 'dired-load-hook 'my-dired-init))
+
+
+;; Configura 'H' para esconder/exibir dotfiles nos itens do diretório
+(use-package dired-hide-dotfiles
+  :hook (dired-mode . dired-hide-dotfiles-mode)
+  :config
+  (evil-collection-define-key 'normal 'dired-mode-map
+    "H" 'dired-hide-dotfiles-mode))
+
+;; Configura o swiper para pesquisa no dired através do '/' 
+(defun guto/dired-swiper ()
+  "teste"
+  (interactive)
+  (swiper)
+  (if (file-directory-p (dired-file-name-at-point))
+      (progn
+        (dired-single-buffer)
+        (guto/dired-swiper))
+    (dired-single-buffer)))
+
+(with-eval-after-load "evil"
+  (evil-define-key 'normal dired-mode-map (kbd "/") 'guto/dired-swiper)
+  (evil-define-key 'normal dired-mode-map (kbd "SPC") 'dired-view-file))
+
+;; ls do Mac não suporta a flag --dired
+;; Instala o coreutils pelo homebrew
+;; Coloca o path pro executável na variável 'insert-directory-program'
+(when (string= system-type "darwin")
+  (setq dired-use-ls-dired t
+        insert-directory-program "/usr/local/bin/gls"))
+
+
 
 ;; Adiciona ícones para os elementos do dired
 (use-package all-the-icons-dired
@@ -309,9 +384,9 @@
   (dired-mode . all-the-icons-dired-mode)
   (all-the-icons-dired-mode . (lambda () (setq all-the-icons-dired-monochrome nil))))
 
-;; Para MacOS, impede o dired de passar a flag "--dired" para o comando "ls", evitando aparecimento de warnings
-(when (string= system-type "darwin")       
-  (setq dired-use-ls-dired nil))
+;; ;; Para MacOS, impede o dired de passar a flag "--dired" para o comando "ls", evitando aparecimento de warnings
+;; (when (string= system-type "darwin")       
+;;   (setq dired-use-ls-dired nil))
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode)
@@ -337,13 +412,19 @@
 (use-package olivetti
   :hook (org-mode . jlf/olivetti-mode-setup))
 
+;; (use-package undo-fu
+;;   :init
+;;   (global-undo-tree-mode -1)
+;;   :config
+;;   (add-hook 'evil-mode-hook '(lambda () (define-key evil-normal-state-map (kbd "u") 'undo-fu-only-undo)))
+;;   (add-hook 'evil-mode-hook '(lambda () (define-key evil-normal-state-map (kbd "C-r") 'undo-fu-only-redo))))
+
+
 ;; Melhora as funções de desfazer e refazer do evil
-(use-package undo-fu
-  :init
-  (global-undo-tree-mode -1)
+(use-package undo-tree
   :config
-  (add-hook 'evil-mode-hook '(lambda () (define-key evil-normal-state-map (kbd "u") 'undo-fu-only-undo)))
-  (add-hook 'evil-mode-hook '(lambda () (define-key evil-normal-state-map (kbd "C-r") 'undo-fu-only-redo))))
+  (setq undo-tree-visualizer-diff t)
+  (global-undo-tree-mode))
 
 ;; Configura o evil-mode para simular o Vim no Emacs
 (use-package evil
@@ -352,6 +433,8 @@
   (setq evil-want-keybinding nil)
   (setq evil-want-C-u-scroll t)
   (setq evil-want-C-i-jump nil)
+  (setq evil-want-Y-yank-to-eol t)
+  (setq evil-undo-system 'undo-tree)
   :config
   (evil-mode 1)
   (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
@@ -363,6 +446,8 @@
   ;; Configura a navegação para funcionar quando visual-line-mode não está ativado
   (evil-global-set-key 'motion "j" 'evil-next-visual-line)
   (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+  (evil-global-set-key 'motion "gj" 'evil-next-line)
+  (evil-global-set-key 'motion "gk" 'evil-previous-line)
 
   (evil-set-initial-state 'messages-buffer-mode 'normal)
   (evil-set-initial-state 'dashboard-mode 'normal))
@@ -378,7 +463,7 @@
 ;; Emula a ação surround do vim
 (use-package evil-surround
   :config
-    (global-evil-surround-mode 1))
+  (global-evil-surround-mode 1))
 
 ;; Adiciona "linha" como um text-obj (w,W,b,B etc)
 (use-package evil-textobj-line)
@@ -404,18 +489,18 @@
   (evilem-default-keybindings "SPC"))
 
 (evilem-define (kbd "SPC f") (list 'evil-repeat-find-char
-				     'evil-repeat-find-char-reverse)
-	       :pre-hook (save-excursion
-			   (setq evil-this-type 'inclusive)
-			   (call-interactively #'evil-find-char))
-	       :bind ((evil-cross-lines t)))
+                                   'evil-repeat-find-char-reverse)
+               :pre-hook (save-excursion
+                           (setq evil-this-type 'inclusive)
+                           (call-interactively #'evil-find-char))
+               :bind ((evil-cross-lines t)))
 
 (evilem-define (kbd "SPC t") (list 'evil-repeat-find-char
-				   'evil-repeat-find-char-reverse)
-	       :pre-hook (save-excursion
-			   (setq evil-this-type 'inclusive)
-			   (call-interactively #'evil-find-char-to))
-	       :bind ((evil-cross-lines t)))
+                                   'evil-repeat-find-char-reverse)
+               :pre-hook (save-excursion
+                           (setq evil-this-type 'inclusive)
+                           (call-interactively #'evil-find-char-to))
+               :bind ((evil-cross-lines t)))
 
 ;; Altera o padrão para separação de sentenças para ser apenas um espaço
 (setq sentence-end-double-space nil)
@@ -464,15 +549,15 @@
 ;; Coloca LaTeX-Mk disponível via C-c C-c
 ;; SyncTeX é configurado no arquivo "~/.latexmkrc"
 (eval-after-load "tex" (lambda ()
-  (push
-    '("LaTeX-Mk" "latexmk -pdf -pvc %s" TeX-run-TeX nil t
-      :help "Run LaTeX-Mk on file")
-    TeX-command-list)
-  (push
-    '("CleanAll" "latexmk -c" TeX-run-TeX nil t
-      :help "Files for deletion not found")
-    TeX-command-list)
-  (setq-default TeX-command-default "LaTeX-Mk")))
+			 (push
+			  '("LaTeX-Mk" "latexmk -pdf -pvc %s" TeX-run-TeX nil t
+			    :help "Run LaTeX-Mk on file")
+			  TeX-command-list)
+			 (push
+			  '("CleanAll" "latexmk -c" TeX-run-TeX nil t
+			    :help "Files for deletion not found")
+			  TeX-command-list)
+			 (setq-default TeX-command-default "LaTeX-Mk")))
 
 ;; Usa Skim como visualizador padrão, habilita PDF Sync
 ;; Displayline do Skim é usado para pesquisa .tex -> .pdf
@@ -482,13 +567,23 @@
       '(("PDF Viewer" "/Applications/Skim.app/Contents/SharedSupport/displayline -b -g %n %o %b")))
 
 ;; Inicializa o modo servidor no Emacs para possibilitar a comunicação com o Skim
-(server-start)
+;; (server-start)
 
 ;; Habilita evil keybindings voltados para TeX
 (use-package evil-tex
   :hook (LaTeX-mode . evil-tex-mode))
 (setq evil-tex-toggle-override-m nil)
 (setq evil-tex-toggle-override-t t)
+
+;; Função personalizada para adicionar um novo item no itemize
+(defun jlf/LaTeX-insert-item ()
+  (interactive)
+  (evil-open-below 1)
+  (insert "\\item ")
+  (indent-for-tab-command)
+  (evil-append 1))
+
+(add-hook 'LaTeX-mode-hook '(lambda () (define-key LaTeX-mode-map (kbd "C-<return>") 'jlf/LaTeX-insert-item)))
 
 ;; Instalação do clangd: brew install llvm
 ;; Instalação do compiledb: pip install compiledb
@@ -696,13 +791,19 @@
       :file-name "${slug}"
       :head "#+TITLE: ${title}\n#+AUTHOR: %(print user-full-name)\n#+EMAIL: %(print user-mail-address)\n#+URL: %(print user-url)\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+ROAM_TAGS: \n\n- *LINK TAGS* ::\n\n* %?"
       :unnarrowed t)))
+  (org-roam-capture-ref-templates
+   '(("r" "Roam Ref Protocol" plain (function org-roam--capture-get-point)
+      ""
+      :file-name "Refs/${slug}"
+      :head "#+TITLE: ${title}\n#+AUTHOR: %(print user-full-name)\n#+EMAIL: %(print user-mail-address)\n#+URL: %(print user-url)\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: \n\n- *LINK TAGS* ::\n\n* %?"
+      :unnarrowed t)))
   (org-roam-dailies-directory jlf/zettelkasten-dailies-directory)
   (org-roam-dailies-capture-templates
-        '(("d" "default" entry
-           #'org-roam-capture--get-point
-           "* %?"
-           :file-name "Dailies/%<%Y-%m-%d>"
-           :head "#+TITLE: %<%Y-%m-%d>\n\n")))
+   '(("d" "default" entry
+      #'org-roam-capture--get-point
+      "* %?"
+      :file-name "Dailies/%<%Y-%m-%d>"
+      :head "#+TITLE: %<%Y-%m-%d>\n\n")))
   :bind (:map org-roam-mode-map
               (("C-c n l" . org-roam)
                ("C-c n f" . org-roam-find-file)
@@ -714,9 +815,9 @@
 ;; Função para atualizar campos em um org buffer. Usada para atualizar o #+LAST_MODIFIED
 (defun jlf/org-update-field (REGEXP_FIELD NEW &optional ANYWHERE)
   "Update any field that starts at the beginning of a line in an org buffer.
-  REGEXP_FIELD is a string with regexp match to the desired field. Beware that, as it is a string, any time you use the escape character (\\) you need to insert two of them for the match to occur. For example, if you want to match the field #+LAST_MODIFIED: you need to pass #\\\\+LAST_MODIFIED: as a string to REGEXP_FIELD.
-  NEW is a string with the new value for the field.
-  If ANYWHERE is t, the match can occur anywhere inside the buffer. If it is nil or ommited, the match can only occur before the first heading."
+    REGEXP_FIELD is a string with regexp match to the desired field. Beware that, as it is a string, any time you use the escape character (\\) you need to insert two of them for the match to occur. For example, if you want to match the field #+LAST_MODIFIED: you need to pass #\\\\+LAST_MODIFIED: as a string to REGEXP_FIELD.
+    NEW is a string with the new value for the field.
+    If ANYWHERE is t, the match can occur anywhere inside the buffer. If it is nil or ommited, the match can only occur before the first heading."
   (save-excursion
     (goto-char (point-min))
     (let ((first-heading
@@ -742,6 +843,21 @@
 
 ;; org-roam-protocol
 (require 'org-roam-protocol)
+
+;; org-roam-server
+(use-package org-roam-server
+  :config
+  (setq org-roam-server-host "127.0.0.1"
+        org-roam-server-port 8080
+        org-roam-server-authenticate nil
+        org-roam-server-export-inline-images t
+        org-roam-server-serve-files nil
+        org-roam-server-served-file-extensions '("pdf" "mp4" "ogv")
+        org-roam-server-network-poll t
+        org-roam-server-network-arrows nil
+        org-roam-server-network-label-truncate t
+        org-roam-server-network-label-truncate-length 60
+        org-roam-server-network-label-wrap-length 20))
 
 (use-package org-noter
   :custom
@@ -870,6 +986,17 @@ With a prefix ARG, remove start location."
 (global-set-key (org-research--key "r") 'org-roam)
 (global-set-key (org-research--key "f") 'org-roam-find-file)
 
+(use-package perspective
+  :custom
+  (persp-mode-prefix-key (kbd "C-c p"))
+  (persp-state-default-file "~/.emacs.d/persp-state-session")
+  (persp-modestring-short t)
+  :bind (("C-x b" . persp-counsel-switch-buffer))
+  :config
+  (persp-mode))
+
+(add-hook 'kill-emacs-hook #'persp-state-save)
+
 ;; Congifuração das fontes e faces
 (defun jlf/org-font-setup ()
 
@@ -934,6 +1061,8 @@ With a prefix ARG, remove start location."
   ("C-c a" . org-agenda)
   ("C-c d" . (lambda () (interactive) (org-todo "DONE"))) 
   ("C-c w" . (lambda () (interactive) (org-todo "DONE") (org-refile))) 
+  :custom
+  (org-startup-folded 'content)
   :config
   (setq org-ellipsis " ▾")
   (setq org-hide-emphasis-markers t) 

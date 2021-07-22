@@ -1410,7 +1410,7 @@ Contém a configuração básica do org-mode juntamente com as configurações d
     ;; ("batch" . ?b)
     ;; ("note" . ?n)
     ;; ("idea" . ?i)))
-    
+  
     ;; Configure custom agenda views
     (setq org-agenda-custom-commands
           '(("d" "Dashboard"
@@ -1418,19 +1418,19 @@ Contém a configuração básica do org-mode juntamente com as configurações d
               (todo "TODO"
                     ((org-agenda-overriding-header "TODO Tasks")))
               (tags-todo "agenda/ACTIVE" ((org-agenda-overriding-header "Active Projects")))))
-            
+  
             ("n" "Next Tasks"
              ((todo "NEXT"
                     ((org-agenda-overriding-header "Next Tasks")))))
-            
+  
             ("W" "Work Tasks" tags-todo "+work-email")
-            
+  
             ;; Ações NEXT de baixo esforço (low-effort)
             ("e" tags-todo "+TODO=\"NEXT\"+Effort<15&+Effort>0"
              ((org-agenda-overriding-header "Low Effort Tasks")
               (org-agenda-max-todos 20)
               (org-agenda-files org-agenda-files)))
-            
+  
             ("w" "Workflow Status"
              ((todo "WAIT"
                     ((org-agenda-overriding-header "Waiting on External")
@@ -1458,12 +1458,12 @@ Contém a configuração básica do org-mode juntamente com as configurações d
               (todo "CANC"
                     ((org-agenda-overriding-header "Cancelled Projects")
                      (org-agenda-files org-agenda-files)))))))
-    
+  
     (setq org-capture-templates
           `(("t" "Tasks / Projects")
             ("tt" "Task" entry (file+olp "~/Projects/Code/emacs-from-scratch/OrgFiles/Tasks.org" "Inbox")
              "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
-            
+  
             ("j" "Journal Entries")
             ("jj" "Journal" entry
              (file+olp+datetree "~/Projects/Code/emacs-from-scratch/OrgFiles/Journal.org")
@@ -1476,23 +1476,24 @@ Contém a configuração básica do org-mode juntamente com as configurações d
              "* %<%I:%M %p> - %a :meetings:\n\n%?\n\n"
              :clock-in :clock-resume
              :empty-lines 1)
-            
+  
             ("w" "Workflows")
             ("we" "Checking Email" entry (file+olp+datetree "~/Projects/Code/emacs-from-scratch/OrgFiles/Journal.org")
              "* Checking Email :email:\n\n%?" :clock-in :clock-resume :empty-lines 1)
-            
+  
             ("m" "Metrics Capture")
             ("mw" "Weight" table-line (file+headline "~/Projects/Code/emacs-from-scratch/OrgFiles/Metrics.org" "Weight")
              "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)))
-    
+  
     (define-key global-map (kbd "C-c j")
       (lambda () (interactive) (org-capture nil "jj")))
-    
+  
     (jlf/org-font-setup))
   
 #+end_src
 
 ** Protocol
+
 #+begin_src emacs-lisp
   
   (use-package org-protocol

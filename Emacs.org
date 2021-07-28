@@ -631,6 +631,24 @@ O pacote /[[https://github.com/emacs-evil/evil][evil]]/ configura um major mode 
   
 #+end_src
 
+** Prescient
+O pacote /[[https://github.com/raxod502/prescient.el][prescient]]/ possibilita uma forma mais inteligente de ordenar as opções de completion, tendo aplicações para ivy e company.
+
+#+begin_src emacs-lisp
+  
+  (use-package prescient)
+  
+  (use-package ivy-prescient
+    :config (ivy-prescient-mode))
+  
+  (use-package company-prescient
+    :custom
+    (company-prescient-sort-length-enable nil)
+    :config
+    (company-prescient-mode))
+  
+#+end_src
+
 ** Diversos 
 Configuração diversas que não entraram em outras categorias.
 

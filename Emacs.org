@@ -1065,6 +1065,49 @@ O pacote /[[https://github.com/politza/pdf-tools][PDF-Tools]]/ habilita a visual
     :config
     (org-roam-setup))
   
+  
+  (with-eval-after-load "org-roam"
+  
+    (cl-defmethod org-roam-node-filetitle ((node org-roam-node))
+      "Return the file TITLE for the node."
+      (org-roam-get-keyword "TITLE" (org-roam-node-file node)))
+  
+    (cl-defmethod org-roam-node-filecitekey ((node org-roam-node))
+      "Return the file CITE_KEY for the node."
+      (org-roam-get-keyword "CITE_KEY" (org-roam-node-file node)))
+  
+    (cl-defmethod org-roam-node-directories ((node org-roam-node))
+      (if-let ((dirs (file-name-directory (file-relative-name (org-roam-node-file node) org-roam-directory))))
+          (format "(%s)" (string-join (f-split dirs) "/"))
+        ""))
+  
+    (cl-defmethod org-roam-node-backlinkscount ((node org-roam-node))
+      (let* ((count (caar (org-roam-db-query
+                           [:select (funcall count source)
+                                    :from links
+                                    :where (= dest $s1)
+                                    :and (= type "id")]
+                           (org-roam-node-id node)))))
+        (format "[%d]" count)))
+  
+    (cl-defmethod org-roam-node-hierarchy ((node org-roam-node))
+      "Return the hierarchy for the node."
+      (let ((title (org-roam-node-title node))
+            (olp (org-roam-node-olp node))
+            (level (org-roam-node-level node))
+            (filetitle (org-roam-node-filetitle node))
+            (filecitekey (org-roam-node-filecitekey node)))
+        (if filecitekey
+            (concat
+             (if (> level 0) (concat filecitekey " > "))
+             (if (> level 1) (concat (string-join olp " > ") " > "))
+             (if (= level 0) filecitekey title))
+          (concat
+           (if (> level 0) (concat filetitle " > "))
+           (if (> level 1) (concat (string-join olp " > ") " > "))
+           title)))))
+  
+  (setq org-roam-node-display-template "${directories:10} ${hierarchy:*} ${tags:25} ${backlinkscount:6}")
   ;; Função para atualizar campos em um org buffer. Usada para atualizar o #+LAST_MODIFIED
   (defun jlf/org-update-field (REGEXP_FIELD NEW &optional ANYWHERE)
     "Update any field that starts at the beginning of a line in an org buffer.

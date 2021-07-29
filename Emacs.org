@@ -1035,36 +1035,35 @@ O pacote /[[https://github.com/politza/pdf-tools][PDF-Tools]]/ habilita a visual
     "Directory of slip-box dailies files.")
   
   (use-package org-roam
-    :hook
-    (after-init . org-roam-mode)
+    :init
+    (setq org-roam-v2-ack t)
     :custom
-    (org-roam-directory (file-truename jlf/zettelkasten-directory))
+    (org-roam-directory (file-truename jlf/slipbox-directory))
     (org-roam-capture-templates
-     '(("d" "default" plain (function org-roam--capture-get-point)
-        ""
-        :file-name "${slug}"
-        :head "#+TITLE: ${title}\n#+AUTHOR: %(print user-full-name)\n#+EMAIL: %(print user-mail-address)\n#+URL: %(print user-url)\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+ROAM_TAGS: \n\n- *LINK TAGS* ::\n\n* %?"
+     '(("n" "Note File" plain "%?"
+        :if-new (file+head "${slug}.org"
+                           "#+TITLE: ${title}\n#+AUTHOR: %(print user-full-name)\n#+EMAIL: %(print user-mail-address)\n#+URL: %(print user-url)\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+FILETAGS:\n\n* ")
         :unnarrowed t)))
     (org-roam-capture-ref-templates
-     '(("r" "Roam Ref Protocol" plain (function org-roam--capture-get-point)
-        ""
-        :file-name "Refs/${slug}"
-        :head "#+TITLE: ${title}\n#+AUTHOR: %(print user-full-name)\n#+EMAIL: %(print user-mail-address)\n#+URL: %(print user-url)\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: \n\n- *LINK TAGS* ::\n\n* %?"
+     '(("r" "Roam Ref Protocol" plain "%?"
+        :if-new (file+head "Refs/${slug}.org"
+                           "#+TITLE: ${title}\n#+AUTHOR: %(print user-full-name)\n#+EMAIL: %(print user-mail-address)\n#+URL: %(print user-url)\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+FILETAGS:\n\n* ")
         :unnarrowed t)))
-    (org-roam-dailies-directory jlf/zettelkasten-dailies-directory)
+    (org-roam-dailies-directory jlf/slipbox-dailies-directory)
     (org-roam-dailies-capture-templates
-     '(("d" "default" entry
-        #'org-roam-capture--get-point
+     '(("d" "Dailies" entry
         "* %?"
-        :file-name "Dailies/%<%Y-%m-%d>"
-        :head "#+TITLE: %<%Y-%m-%d>\n\n")))
-    :bind (:map org-roam-mode-map
-                (("C-c n l" . org-roam)
-                 ("C-c n f" . org-roam-find-file)
-                 ("C-c n g" . org-roam-graph))
-                :map org-mode-map
-                (("C-c n i" . org-roam-insert))
-                (("C-c n I" . org-roam-insert-immediate))))
+        :if-new (file+head "Dailies/%<%Y-%m-%d>.org"
+                           "#+TITLE: %<%Y-%m-%d>\n\n"))))
+    :bind (("C-c n l" . org-roam-buffer-toggle)
+           ("C-c n f" . org-roam-node-find)
+           ("C-c n g" . org-roam-graph)
+           ("C-c n i" . org-roam-node-insert)
+           ("C-c n c" . org-roam-capture)
+           ;; Dailies
+           ("C-c n j" . org-roam-dailies-capture-today))
+    :config
+    (org-roam-setup))
   
   ;; Função para atualizar campos em um org buffer. Usada para atualizar o #+LAST_MODIFIED
   (defun jlf/org-update-field (REGEXP_FIELD NEW &optional ANYWHERE)

@@ -1291,21 +1291,25 @@ If ANYWHERE is t, the match can occur anywhere inside the buffer. If it is nil o
   
   (use-package org-roam-bibtex
     :after org-roam
-    :hook (org-roam-mode . org-roam-bibtex-mode)
     :custom
     (orb-preformat-keywords
      '("=key=" "file" "title" "=type=" "author-or-editor" "year" "journal" "doi" "url" "keywords" "abstract"))
-    (orb-templates
-     '(("a" "article" plain (function org-roam-capture--get-point)
-        ""
-        :file-name "Refs/${=key=}"
-        :head "#+TITLE: ${title}\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: \n\n- *LINK TAGS* ::\n\n* Info\n:PROPERTIES:\n:ID: ${=key=}\n:DOCUMENT_PATH: %(file-relative-name (orb-process-file-field \"${=key=}\") (print jlf/zettelkasten-refs-directory))\n:TYPE: %(capitalize \"${=type=}\")\n:AUTHOR: ${author-or-editor}\n:YEAR: ${year}\n:JOURNAL: ${journal}\n:DOI: %(if (string-equal \"${doi}\" \"\") \"---\" \"${doi}\")\n:URL: %(if (string-equal \"${url}\" \"\") \"---\" \"${url}\")\n:KEYWORDS: %(if (string-equal \"${keywords}\" \"\") \"---\" \"${keywords}\")\n%(if (string-equal \"${abstract}\" \"\") \":ABSTRACT: ---\\n\"):END:\n%(unless (string-equal \"${abstract}\" \"\") \":ABSTRACT:\\n${abstract}\\n:END:\\n\")\n* %?Notes\n:PROPERTIES:\n:NOTER_DOCUMENT: %(file-relative-name (orb-process-file-field \"${=key=}\") (print jlf/zettelkasten-refs-directory))\n:END:\n"
-        :unnarrowed t)
-       ("b" "book" plain (function org-roam-capture--get-point)
-        ""
-        :file-name "Refs/${=key=}"
-        :head "#+TITLE: ${title}\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: \n\n- *LINK TAGS* ::\n\n* Info\n:PROPERTIES:\n:ID: ${=key=}\n:DOCUMENT_PATH: %(file-relative-name (orb-process-file-field \"${=key=}\") (print jlf/zettelkasten-refs-directory))\n:TYPE: %(capitalize \"${=type=}\")\n:AUTHOR: ${author-or-editor}\n:YEAR: ${year}\n:END:\n\n* %?Notes\n:PROPERTIES:\n:NOTER_DOCUMENT: %(file-relative-name (orb-process-file-field \"${=key=}\") (print jlf/zettelkasten-refs-directory))\n:END:\n"
-        :unnarrowed t))))
+    :config
+    (add-to-list 'org-roam-capture-templates
+                 '("b" "Bibliography Reference"))
+    (add-to-list 'org-roam-capture-templates
+                 '("ba" "Article" plain
+                   "%?"
+                   :if-new (file+head "Refs/${=key=}.org"
+                                      "#+TITLE: ${title}\n#+CITE_KEY: ${=key=}\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+FILETAGS:\n\n* Info\n:PROPERTIES:\n:DOCUMENT_PATH: %(file-relative-name (orb-process-file-field \"${=key=}\") (print jlf/slipbox-refs-directory))\n:TYPE: %(capitalize \"${=type=}\")\n:AUTHOR: ${author-or-editor}\n:YEAR: ${year}\n:JOURNAL: ${journal}\n:DOI: %(if (string-equal \"${doi}\" \"\") \"---\" \"${doi}\")\n:URL: %(if (string-equal \"${url}\" \"\") \"---\" \"${url}\")\n:KEYWORDS: %(if (string-equal \"${keywords}\" \"\") \"---\" \"${keywords}\")\n%(if (string-equal \"${abstract}\" \"\") \":ABSTRACT: ---\\n\"):END:\n%(unless (string-equal \"${abstract}\" \"\") \":ABSTRACT:\\n${abstract}\\n:END:\\n\")\n* Notes\n:PROPERTIES:\n:NOTER_DOCUMENT: %(file-relative-name (orb-process-file-field \"${=key=}\") (print jlf/slipbox-refs-directory))\n:END:\n")
+                   :unnarrowed t))
+    (add-to-list 'org-roam-capture-templates
+                 '("bb" "Book" plain
+                   "%?"
+                   :if-new (file+head "Refs/${=key=}.org"
+                                      "#+TITLE: ${title}\n#+CITE_KEY: ${=key=}\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+FILETAGS:\n\n* Info\n:PROPERTIES:\n:DOCUMENT_PATH: %(file-relative-name (orb-process-file-field \"${=key=}\") (print jlf/slipbox-refs-directory))\n:TYPE: %(capitalize \"${=type=}\")\n:AUTHOR: ${author-or-editor}\n:YEAR: ${year}\n:END:\n\n* Notes\n:PROPERTIES:\n:NOTER_DOCUMENT: %(file-relative-name (orb-process-file-field \"${=key=}\") (print jlf/slipbox-refs-directory))\n:END:\n")
+                   :unnarrowed t)))
+  
   
   (org-roam-bibtex-mode)
   

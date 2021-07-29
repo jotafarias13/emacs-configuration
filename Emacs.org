@@ -1108,6 +1108,14 @@ O pacote /[[https://github.com/politza/pdf-tools][PDF-Tools]]/ habilita a visual
            title)))))
   
   (setq org-roam-node-display-template "${directories:10} ${hierarchy:*} ${tags:25} ${backlinkscount:6}")
+  
+  (defun jlf/org-roam-node-exclude-add ()
+    "Add ROAM_EXCLUDE property to node with value t."
+    (org-entry-put (point) "ROAM_EXCLUDE" "t"))
+  
+  (advice-add 'org-noter-insert-note :after 'jlf/org-roam-node-exclude-add)
+  
+  
   ;; Função para atualizar campos em um org buffer. Usada para atualizar o #+LAST_MODIFIED
   (defun jlf/org-update-field (REGEXP_FIELD NEW &optional ANYWHERE)
     "Update any field that starts at the beginning of a line in an org buffer.

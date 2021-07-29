@@ -639,6 +639,7 @@ O pacote /[[https://github.com/raxod502/prescient.el][prescient]]/ possibilita u
   (use-package prescient)
   
   (use-package ivy-prescient
+    :after counsel
     :config (ivy-prescient-mode))
   
   (use-package company-prescient

@@ -883,7 +883,7 @@ A ferramenta /MyWorkSpace/ é uma função de minha autoria que me auxilia na ab
 (defun jlf/my-workspace ()
   "Ferrameta para facilitar abertura de arquivos e diretórios dos projetos nos quais trabalho."
   (interactive)
-    (let* ((my-workspace-list '("Agenda" "Artigo" "Dissertação C++" "Dissertação TeX" "Emacs" "Zettelkasten"))
+    (let* ((my-workspace-list '("Agenda" "Artigo" "Dissertação C++" "Dissertação TeX" "Emacs" "Slip-Box"))
            (my-workspace (completing-read "WorkSpace: " my-workspace-list)))
       (pcase my-workspace
         ("Agenda"
@@ -923,9 +923,9 @@ A ferramenta /MyWorkSpace/ é uma função de minha autoria que me auxilia na ab
 		(interactive "fEmacs: ")
 		(find-file file-name nil))))
 	  ))
-        ("Zettelkasten"
+        ("Slip-Box"
               (progn
-	  (let ((default-directory jlf/zettelkasten-directory))
+	  (let ((default-directory jlf/slipbox-directory))
 	    (call-interactively
 	      (lambda (file-name)
 		(interactive "fRoam: ")
@@ -1022,17 +1022,17 @@ O pacote /[[https://github.com/politza/pdf-tools][PDF-Tools]]/ habilita a visual
 
 #+begin_src emacs-lisp
   
-  ;; Variável do diretório root dos arquivos referentes ao Zettelkasten
-  (defvar jlf/zettelkasten-directory "~/Sync/Jota/Academico/Projetos/Zettelkasten/"
-    "Directory of Zettelkasten related files.")
+  ;; Variável do diretório root dos arquivos do slip-box
+  (defvar jlf/slipbox-directory "~/Sync/Jota/Academico/Projetos/Slip-Box/"
+    "Directory of slip-box files.")
   
-  ;; Variável do diretório dos arquivos de referência do Zettelkasten
-  (defvar jlf/zettelkasten-refs-directory "~/Sync/Jota/Academico/Projetos/Zettelkasten/Refs/"
-    "Directory of Zettelkasten ref files.")
+  ;; Variável do diretório dos arquivos de referência slip-box
+  (defvar jlf/slipbox-refs-directory "~/Sync/Jota/Academico/Projetos/Slip-Box/Refs/"
+    "Directory of slip-box ref files.")
   
-  ;; Variável do diretório dos dailies do Zettelkasten
-  (defvar jlf/zettelkasten-dailies-directory "~/Sync/Jota/Academico/Projetos/Zettelkasten/Dailies/"
-    "Directory of Zettelkasten dailies files.")
+  ;; Variável do diretório dos dailies do slip-box (fleeting notes do zettelkasten)
+  (defvar jlf/slipbox-dailies-directory "~/Sync/Jota/Academico/Projetos/Slip-Box/Dailies/"
+    "Directory of slip-box dailies files.")
   
   (use-package org-roam
     :hook
@@ -1121,7 +1121,7 @@ O pacote /[[https://github.com/politza/pdf-tools][PDF-Tools]]/ habilita a visual
   
   (use-package org-noter
     :custom
-    (org-noter-notes-search-path (list jlf/zettelkasten-refs-directory))
+    (org-noter-notes-search-path (list jlf/slipbox-refs-directory))
     (org-noter-doc-split-fraction '(0.7 . 0.3))
     ;; (org-noter-insert-note-no-questions t)
     ;; (org-noter-hide-other nil)
@@ -1221,10 +1221,10 @@ O pacote /[[https://github.com/politza/pdf-tools][PDF-Tools]]/ habilita a visual
     :init
     (setq org-ref-completion-library 'org-ref-ivy-cite)
     :custom
-    (org-ref-default-bibliography (list (concat jlf/zettelkasten-refs-directory "bibliography.bib")))
-    (org-ref-pdf-directory jlf/zettelkasten-refs-directory)
+    (org-ref-default-bibliography (list (concat jlf/slipbox-refs-directory "bibliography.bib")))
+    (org-ref-pdf-directory jlf/slipbox-refs-directory)
     (org-ref-note-title-format "* TODO %y - %t\n :PROPERTIES:\n  :Custom_ID: %k\n  :NOTER_DOCUMENT: %F\n :ROAM_KEY: cite:%k\n  :AUTHOR: %9a\n  :JOURNAL: %j\n  :YEAR: %y\n  :VOLUME: %v\n  :PAGES: %p\n  :DOI: %D\n  :URL: %U\n :END:\n\n")
-    (org-ref-notes-directory jlf/zettelkasten-refs-directory)
+    (org-ref-notes-directory jlf/slipbox-refs-directory)
     (org-ref-notes-function 'orb-edit-notes)
     :config
     ;; Adicionei essas funções pra deixar o org-ref na cara do ivy-bibtex

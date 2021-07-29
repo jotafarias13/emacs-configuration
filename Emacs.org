@@ -1330,13 +1330,18 @@ If ANYWHERE is t, the match can occur anywhere inside the buffer. If it is nil o
   
   (global-set-key (org-research--key "b") 'ivy-bibtex)
   (global-set-key (org-research--key "t") 'org-noter)
-  (global-set-key (org-research--key "l") 'org-roam-insert)
-  (global-set-key (org-research--key "L") 'org-roam-insert-immediate)
+  (global-set-key (org-research--key "l") 'org-roam-node-insert)
   (global-set-key (org-research--key "n") 'org-noter-insert-note)
   (global-set-key (org-research--key "c") 'org-ref-insert-link)
-  (global-set-key (org-research--key "r") 'org-roam)
-  (global-set-key (org-research--key "f") 'org-roam-find-file)
-  
+  (global-set-key (org-research--key "r") 'org-roam-buffer-display-dedicated)
+  (global-set-key (org-research--key "R") 'org-roam-buffer-toggle)
+  (global-set-key (org-research--key "f") 'org-roam-node-find)
+  (global-set-key (org-research--key "g") 'org-roam-graph)
+  (global-set-key (org-research--key "d") 'org-roam-dailies-capture-today)
+  (global-set-key (org-research--key "a a") 'org-roam-alias-add)
+  (global-set-key (org-research--key "a r") 'org-roam-ref-add)
+  (global-set-key (org-research--key "a t") 'org-roam-tag-add)
+  (global-set-key (org-research--key "a e") 'jlf/org-roam-node-exclude-add)
   
 #+end_src
 

@@ -1291,6 +1291,7 @@ If ANYWHERE is t, the match can occur anywhere inside the buffer. If it is nil o
   
   (use-package org-roam-bibtex
     :after org-roam
+    :load-path "~/Sync/Jota/Academico/Projetos/Emacs/org-roam-bibtex-branch-v2/org-roam-bibtex/"
     :custom
     (orb-preformat-keywords
      '("=key=" "file" "title" "=type=" "author-or-editor" "year" "journal" "doi" "url" "keywords" "abstract"))

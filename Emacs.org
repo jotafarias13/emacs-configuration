@@ -1256,8 +1256,8 @@ If ANYWHERE is t, the match can occur anywhere inside the buffer. If it is nil o
   
   (use-package ivy-bibtex
     :custom
-    (bibtex-completion-bibliography (list (concat jlf/zettelkasten-refs-directory "bibliography.bib")))
-    (bibtex-completion-library-path (list jlf/zettelkasten-refs-directory))
+    (bibtex-completion-bibliography (list (concat jlf/slipbox-refs-directory "bibliography.bib")))
+    (bibtex-completion-library-path (list jlf/slipbox-refs-directory))
     (bibtex-completion-find-note-functions '(orb-find-note-file)))
   
 #+end_src

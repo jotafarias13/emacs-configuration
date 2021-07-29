@@ -502,6 +502,18 @@
                            (call-interactively #'evil-find-char-to))
                :bind ((evil-cross-lines t)))
 
+(use-package prescient)
+
+(use-package ivy-prescient
+  :after counsel
+  :config (ivy-prescient-mode))
+
+(use-package company-prescient
+  :custom
+  (company-prescient-sort-length-enable nil)
+  :config
+  (company-prescient-mode))
+
 ;; Altera o padrão para separação de sentenças para ser apenas um espaço
 (setq sentence-end-double-space nil)
 
@@ -645,7 +657,7 @@
 (defun jlf/my-workspace ()
   "Ferrameta para facilitar abertura de arquivos e diretórios dos projetos nos quais trabalho."
   (interactive)
-    (let* ((my-workspace-list '("Agenda" "Artigo" "Dissertação C++" "Dissertação TeX" "Emacs" "Zettelkasten"))
+    (let* ((my-workspace-list '("Agenda" "Artigo" "Dissertação C++" "Dissertação TeX" "Emacs" "Slip-Box"))
            (my-workspace (completing-read "WorkSpace: " my-workspace-list)))
       (pcase my-workspace
         ("Agenda"
@@ -685,9 +697,9 @@
 		(interactive "fEmacs: ")
 		(find-file file-name nil))))
 	  ))
-        ("Zettelkasten"
+        ("Slip-Box"
               (progn
-	  (let ((default-directory jlf/zettelkasten-directory))
+	  (let ((default-directory jlf/slipbox-directory))
 	    (call-interactively
 	      (lambda (file-name)
 		(interactive "fRoam: ")
@@ -768,100 +780,150 @@
   (add-hook 'pdf-view-mode-hook 'pdf-view-restore-mode)
   (setq pdf-view-restore-filename "~/.emacs.d/.pdf-view-restore"))
 
-;; Variável do diretório root dos arquivos referentes ao Zettelkasten
-(defvar jlf/zettelkasten-directory "~/Sync/Jota/Academico/Projetos/Zettelkasten/"
-  "Directory of Zettelkasten related files.")
-
-;; Variável do diretório dos arquivos de referência do Zettelkasten
-(defvar jlf/zettelkasten-refs-directory "~/Sync/Jota/Academico/Projetos/Zettelkasten/Refs/"
-  "Directory of Zettelkasten ref files.")
-
-;; Variável do diretório dos dailies do Zettelkasten
-(defvar jlf/zettelkasten-dailies-directory "~/Sync/Jota/Academico/Projetos/Zettelkasten/Dailies/"
-  "Directory of Zettelkasten dailies files.")
-
-(use-package org-roam
-  :hook
-  (after-init . org-roam-mode)
-  :custom
-  (org-roam-directory (file-truename jlf/zettelkasten-directory))
-  (org-roam-capture-templates
-   '(("d" "default" plain (function org-roam--capture-get-point)
-      ""
-      :file-name "${slug}"
-      :head "#+TITLE: ${title}\n#+AUTHOR: %(print user-full-name)\n#+EMAIL: %(print user-mail-address)\n#+URL: %(print user-url)\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+ROAM_TAGS: \n\n- *LINK TAGS* ::\n\n* %?"
-      :unnarrowed t)))
-  (org-roam-capture-ref-templates
-   '(("r" "Roam Ref Protocol" plain (function org-roam--capture-get-point)
-      ""
-      :file-name "Refs/${slug}"
-      :head "#+TITLE: ${title}\n#+AUTHOR: %(print user-full-name)\n#+EMAIL: %(print user-mail-address)\n#+URL: %(print user-url)\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: \n\n- *LINK TAGS* ::\n\n* %?"
-      :unnarrowed t)))
-  (org-roam-dailies-directory jlf/zettelkasten-dailies-directory)
-  (org-roam-dailies-capture-templates
-   '(("d" "default" entry
-      #'org-roam-capture--get-point
-      "* %?"
-      :file-name "Dailies/%<%Y-%m-%d>"
-      :head "#+TITLE: %<%Y-%m-%d>\n\n")))
-  :bind (:map org-roam-mode-map
-              (("C-c n l" . org-roam)
-               ("C-c n f" . org-roam-find-file)
-               ("C-c n g" . org-roam-graph))
-              :map org-mode-map
-              (("C-c n i" . org-roam-insert))
-              (("C-c n I" . org-roam-insert-immediate))))
-
-;; Função para atualizar campos em um org buffer. Usada para atualizar o #+LAST_MODIFIED
-(defun jlf/org-update-field (REGEXP_FIELD NEW &optional ANYWHERE)
-  "Update any field that starts at the beginning of a line in an org buffer.
-    REGEXP_FIELD is a string with regexp match to the desired field. Beware that, as it is a string, any time you use the escape character (\\) you need to insert two of them for the match to occur. For example, if you want to match the field #+LAST_MODIFIED: you need to pass #\\\\+LAST_MODIFIED: as a string to REGEXP_FIELD.
-    NEW is a string with the new value for the field.
-    If ANYWHERE is t, the match can occur anywhere inside the buffer. If it is nil or ommited, the match can only occur before the first heading."
-  (save-excursion
-    (goto-char (point-min))
-    (let ((first-heading
-           (save-excursion
-             (re-search-forward org-outline-regexp-bol nil t))))
-      (if (re-search-forward (concat "^" REGEXP_FIELD) (if ANYWHERE nil first-heading) t)
-          (progn
-            (if (looking-at-p " ")
-                (forward-char)
-              (insert " "))
-            (delete-region (point) (line-end-position))
-            (insert NEW))
-        nil))))
-
-;; Função para atualizar o campo #+LAST_MODIFIED em org buffers
-(defun jlf/org-update-last-modified ()
-  "Update #+LAST_MODIFIED field in org buffers."
-  (when (derived-mode-p 'org-mode)
-    (jlf/org-update-field "#\\+LAST_MODIFIED:" (format-time-string "[%d-%m-%Y %a %H:%M:%S]") nil)))
-
-;; Hook para atualizar 
-(add-hook 'before-save-hook 'jlf/org-update-last-modified)
-
-;; org-roam-protocol
-(require 'org-roam-protocol)
-
-;; org-roam-server
-(use-package org-roam-server
-  :config
-  (setq org-roam-server-host "127.0.0.1"
-        org-roam-server-port 8080
-        org-roam-server-authenticate nil
-        org-roam-server-export-inline-images t
-        org-roam-server-serve-files nil
-        org-roam-server-served-file-extensions '("pdf" "mp4" "ogv")
-        org-roam-server-network-poll t
-        org-roam-server-network-arrows nil
-        org-roam-server-network-label-truncate t
-        org-roam-server-network-label-truncate-length 60
-        org-roam-server-network-label-wrap-length 20))
+;; Variável do diretório root dos arquivos do slip-box
+  (defvar jlf/slipbox-directory "~/Sync/Jota/Academico/Projetos/Slip-Box/"
+    "Directory of slip-box files.")
+  
+  ;; Variável do diretório dos arquivos de referência slip-box
+  (defvar jlf/slipbox-refs-directory "~/Sync/Jota/Academico/Projetos/Slip-Box/Refs/"
+    "Directory of slip-box ref files.")
+  
+  ;; Variável do diretório dos dailies do slip-box (fleeting notes do zettelkasten)
+  (defvar jlf/slipbox-dailies-directory "~/Sync/Jota/Academico/Projetos/Slip-Box/Dailies/"
+    "Directory of slip-box dailies files.")
+  
+  (use-package org-roam
+    :init
+    (setq org-roam-v2-ack t)
+    :custom
+    (org-roam-directory (file-truename jlf/slipbox-directory))
+    (org-roam-capture-templates
+     '(("n" "Note File" plain "%?"
+        :if-new (file+head "${slug}.org"
+                           "#+TITLE: ${title}\n#+AUTHOR: %(print user-full-name)\n#+EMAIL: %(print user-mail-address)\n#+URL: %(print user-url)\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+FILETAGS:\n\n* ")
+        :unnarrowed t)))
+    (org-roam-capture-ref-templates
+     '(("r" "Roam Ref Protocol" plain "%?"
+        :if-new (file+head "Refs/${slug}.org"
+                           "#+TITLE: ${title}\n#+AUTHOR: %(print user-full-name)\n#+EMAIL: %(print user-mail-address)\n#+URL: %(print user-url)\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+FILETAGS:\n\n* ")
+        :unnarrowed t)))
+    (org-roam-dailies-directory jlf/slipbox-dailies-directory)
+    (org-roam-dailies-capture-templates
+     '(("d" "Dailies" entry
+        "* %?"
+        :if-new (file+head "Dailies/%<%Y-%m-%d>.org"
+                           "#+TITLE: %<%Y-%m-%d>\n\n"))))
+    :bind (("C-c n l" . org-roam-buffer-toggle)
+           ("C-c n f" . org-roam-node-find)
+           ("C-c n g" . org-roam-graph)
+           ("C-c n i" . org-roam-node-insert)
+           ("C-c n c" . org-roam-capture)
+           ;; Dailies
+           ("C-c n j" . org-roam-dailies-capture-today))
+    :config
+    (org-roam-setup))
+  
+  
+  (with-eval-after-load "org-roam"
+  
+    (cl-defmethod org-roam-node-filetitle ((node org-roam-node))
+      "Return the file TITLE for the node."
+      (org-roam-get-keyword "TITLE" (org-roam-node-file node)))
+  
+    (cl-defmethod org-roam-node-filecitekey ((node org-roam-node))
+      "Return the file CITE_KEY for the node."
+      (org-roam-get-keyword "CITE_KEY" (org-roam-node-file node)))
+  
+    (cl-defmethod org-roam-node-directories ((node org-roam-node))
+      (if-let ((dirs (file-name-directory (file-relative-name (org-roam-node-file node) org-roam-directory))))
+          (format "(%s)" (string-join (f-split dirs) "/"))
+        ""))
+  
+    (cl-defmethod org-roam-node-backlinkscount ((node org-roam-node))
+      (let* ((count (caar (org-roam-db-query
+                           [:select (funcall count source)
+                                    :from links
+                                    :where (= dest $s1)
+                                    :and (= type "id")]
+                           (org-roam-node-id node)))))
+        (format "[%d]" count)))
+  
+    (cl-defmethod org-roam-node-hierarchy ((node org-roam-node))
+      "Return the hierarchy for the node."
+      (let ((title (org-roam-node-title node))
+            (olp (org-roam-node-olp node))
+            (level (org-roam-node-level node))
+            (filetitle (org-roam-node-filetitle node))
+            (filecitekey (org-roam-node-filecitekey node)))
+        (if filecitekey
+            (concat
+             (if (> level 0) (concat filecitekey " > "))
+             (if (> level 1) (concat (string-join olp " > ") " > "))
+             (if (= level 0) filecitekey title))
+          (concat
+           (if (> level 0) (concat filetitle " > "))
+           (if (> level 1) (concat (string-join olp " > ") " > "))
+           title)))))
+  
+  (setq org-roam-node-display-template "${directories:10} ${hierarchy:*} ${tags:25} ${backlinkscount:6}")
+  
+  (defun jlf/org-roam-node-exclude-add ()
+    "Add ROAM_EXCLUDE property to node with value t."
+    (org-entry-put (point) "ROAM_EXCLUDE" "t"))
+  
+  (advice-add 'org-noter-insert-note :after 'jlf/org-roam-node-exclude-add)
+  
+  
+  ;; Função para atualizar campos em um org buffer. Usada para atualizar o #+LAST_MODIFIED
+  (defun jlf/org-update-field (REGEXP_FIELD NEW &optional ANYWHERE)
+    "Update any field that starts at the beginning of a line in an org buffer. 
+REGEXP_FIELD is a string with regexp match to the desired field. Beware that, as it is a string, any time you use the escape character (\\) you need to insert two of them for the match to occur. For example, if you want to match the field #+LAST_MODIFIED: you need to pass #\\\\+LAST_MODIFIED: as a string to REGEXP_FIELD. 
+NEW is a string with the new value for the field. 
+If ANYWHERE is t, the match can occur anywhere inside the buffer. If it is nil or ommited, the match can only occur before the first heading."
+    (save-excursion
+      (goto-char (point-min))
+      (let ((first-heading
+             (save-excursion
+               (re-search-forward org-outline-regexp-bol nil t))))
+        (if (re-search-forward (concat "^" REGEXP_FIELD) (if ANYWHERE nil first-heading) t)
+            (progn
+              (if (looking-at-p " ")
+                  (forward-char)
+                (insert " "))
+              (delete-region (point) (line-end-position))
+              (insert NEW))
+          nil))))
+  
+  ;; Função para atualizar o campo #+LAST_MODIFIED em org buffers
+  (defun jlf/org-update-last-modified ()
+    "Update #+LAST_MODIFIED field in org buffers."
+    (when (derived-mode-p 'org-mode)
+      (jlf/org-update-field "#\\+LAST_MODIFIED:" (format-time-string "[%d-%m-%Y %a %H:%M:%S]") nil)))
+  
+  ;; Hook para atualizar 
+  (add-hook 'before-save-hook 'jlf/org-update-last-modified)
+  
+  ;; org-roam-protocol
+  (require 'org-roam-protocol)
+  
+  ;; org-roam-server
+  ;; (use-package org-roam-server
+  ;;   :config
+  ;;   (setq org-roam-server-host "127.0.0.1"
+  ;;         org-roam-server-port 8080
+  ;;         org-roam-server-authenticate nil
+  ;;         org-roam-server-export-inline-images t
+  ;;         org-roam-server-serve-files nil
+  ;;         org-roam-server-served-file-extensions '("pdf" "mp4" "ogv")
+  ;;         org-roam-server-network-poll t
+  ;;         org-roam-server-network-arrows nil
+  ;;         org-roam-server-network-label-truncate t
+  ;;         org-roam-server-network-label-truncate-length 60
+  ;;         org-roam-server-network-label-wrap-length 20))
 
 (use-package org-noter
   :custom
-  (org-noter-notes-search-path (list jlf/zettelkasten-refs-directory))
+  (org-noter-notes-search-path (list jlf/slipbox-refs-directory))
   (org-noter-doc-split-fraction '(0.7 . 0.3))
   ;; (org-noter-insert-note-no-questions t)
   ;; (org-noter-hide-other nil)
@@ -928,8 +990,8 @@ With a prefix ARG, remove start location."
 
 (use-package ivy-bibtex
   :custom
-  (bibtex-completion-bibliography (list (concat jlf/zettelkasten-refs-directory "bibliography.bib")))
-  (bibtex-completion-library-path (list jlf/zettelkasten-refs-directory))
+  (bibtex-completion-bibliography (list (concat jlf/slipbox-refs-directory "bibliography.bib")))
+  (bibtex-completion-library-path (list jlf/slipbox-refs-directory))
   (bibtex-completion-find-note-functions '(orb-find-note-file)))
 
 (use-package org-ref
@@ -937,10 +999,10 @@ With a prefix ARG, remove start location."
   :init
   (setq org-ref-completion-library 'org-ref-ivy-cite)
   :custom
-  (org-ref-default-bibliography (list (concat jlf/zettelkasten-refs-directory "bibliography.bib")))
-  (org-ref-pdf-directory jlf/zettelkasten-refs-directory)
+  (org-ref-default-bibliography (list (concat jlf/slipbox-refs-directory "bibliography.bib")))
+  (org-ref-pdf-directory jlf/slipbox-refs-directory)
   (org-ref-note-title-format "* TODO %y - %t\n :PROPERTIES:\n  :Custom_ID: %k\n  :NOTER_DOCUMENT: %F\n :ROAM_KEY: cite:%k\n  :AUTHOR: %9a\n  :JOURNAL: %j\n  :YEAR: %y\n  :VOLUME: %v\n  :PAGES: %p\n  :DOI: %D\n  :URL: %U\n :END:\n\n")
-  (org-ref-notes-directory jlf/zettelkasten-refs-directory)
+  (org-ref-notes-directory jlf/slipbox-refs-directory)
   (org-ref-notes-function 'orb-edit-notes)
   :config
   ;; Adicionei essas funções pra deixar o org-ref na cara do ivy-bibtex
@@ -951,21 +1013,26 @@ With a prefix ARG, remove start location."
 
 (use-package org-roam-bibtex
   :after org-roam
-  :hook (org-roam-mode . org-roam-bibtex-mode)
+  :load-path "~/Sync/Jota/Academico/Projetos/Emacs/org-roam-bibtex-branch-v2/org-roam-bibtex/"
   :custom
   (orb-preformat-keywords
    '("=key=" "file" "title" "=type=" "author-or-editor" "year" "journal" "doi" "url" "keywords" "abstract"))
-  (orb-templates
-   '(("a" "article" plain (function org-roam-capture--get-point)
-      ""
-      :file-name "Refs/${=key=}"
-      :head "#+TITLE: ${title}\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: \n\n- *LINK TAGS* ::\n\n* Info\n:PROPERTIES:\n:ID: ${=key=}\n:DOCUMENT_PATH: %(file-relative-name (orb-process-file-field \"${=key=}\") (print jlf/zettelkasten-refs-directory))\n:TYPE: %(capitalize \"${=type=}\")\n:AUTHOR: ${author-or-editor}\n:YEAR: ${year}\n:JOURNAL: ${journal}\n:DOI: %(if (string-equal \"${doi}\" \"\") \"---\" \"${doi}\")\n:URL: %(if (string-equal \"${url}\" \"\") \"---\" \"${url}\")\n:KEYWORDS: %(if (string-equal \"${keywords}\" \"\") \"---\" \"${keywords}\")\n%(if (string-equal \"${abstract}\" \"\") \":ABSTRACT: ---\\n\"):END:\n%(unless (string-equal \"${abstract}\" \"\") \":ABSTRACT:\\n${abstract}\\n:END:\\n\")\n* %?Notes\n:PROPERTIES:\n:NOTER_DOCUMENT: %(file-relative-name (orb-process-file-field \"${=key=}\") (print jlf/zettelkasten-refs-directory))\n:END:\n"
-      :unnarrowed t)
-     ("b" "book" plain (function org-roam-capture--get-point)
-      ""
-      :file-name "Refs/${=key=}"
-      :head "#+TITLE: ${title}\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+ROAM_KEY: ${ref}\n#+ROAM_TAGS: \n\n- *LINK TAGS* ::\n\n* Info\n:PROPERTIES:\n:ID: ${=key=}\n:DOCUMENT_PATH: %(file-relative-name (orb-process-file-field \"${=key=}\") (print jlf/zettelkasten-refs-directory))\n:TYPE: %(capitalize \"${=type=}\")\n:AUTHOR: ${author-or-editor}\n:YEAR: ${year}\n:END:\n\n* %?Notes\n:PROPERTIES:\n:NOTER_DOCUMENT: %(file-relative-name (orb-process-file-field \"${=key=}\") (print jlf/zettelkasten-refs-directory))\n:END:\n"
-      :unnarrowed t))))
+  :config
+  (add-to-list 'org-roam-capture-templates
+               '("b" "Bibliography Reference"))
+  (add-to-list 'org-roam-capture-templates
+               '("ba" "Article" plain
+                 "%?"
+                 :if-new (file+head "Refs/${=key=}.org"
+                                    "#+TITLE: ${title}\n#+CITE_KEY: ${=key=}\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+FILETAGS:\n\n* Info\n:PROPERTIES:\n:DOCUMENT_PATH: %(file-relative-name (orb-process-file-field \"${=key=}\") (print jlf/slipbox-refs-directory))\n:TYPE: %(capitalize \"${=type=}\")\n:AUTHOR: ${author-or-editor}\n:YEAR: ${year}\n:JOURNAL: ${journal}\n:DOI: %(if (string-equal \"${doi}\" \"\") \"---\" \"${doi}\")\n:URL: %(if (string-equal \"${url}\" \"\") \"---\" \"${url}\")\n:KEYWORDS: %(if (string-equal \"${keywords}\" \"\") \"---\" \"${keywords}\")\n%(if (string-equal \"${abstract}\" \"\") \":ABSTRACT: ---\\n\"):END:\n%(unless (string-equal \"${abstract}\" \"\") \":ABSTRACT:\\n${abstract}\\n:END:\\n\")\n* Notes\n:PROPERTIES:\n:NOTER_DOCUMENT: %(file-relative-name (orb-process-file-field \"${=key=}\") (print jlf/slipbox-refs-directory))\n:END:\n")
+                 :unnarrowed t))
+  (add-to-list 'org-roam-capture-templates
+               '("bb" "Book" plain
+                 "%?"
+                 :if-new (file+head "Refs/${=key=}.org"
+                                    "#+TITLE: ${title}\n#+CITE_KEY: ${=key=}\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+FILETAGS:\n\n* Info\n:PROPERTIES:\n:DOCUMENT_PATH: %(file-relative-name (orb-process-file-field \"${=key=}\") (print jlf/slipbox-refs-directory))\n:TYPE: %(capitalize \"${=type=}\")\n:AUTHOR: ${author-or-editor}\n:YEAR: ${year}\n:END:\n\n* Notes\n:PROPERTIES:\n:NOTER_DOCUMENT: %(file-relative-name (orb-process-file-field \"${=key=}\") (print jlf/slipbox-refs-directory))\n:END:\n")
+                 :unnarrowed t)))
+
 
 (org-roam-bibtex-mode)
 
@@ -979,12 +1046,18 @@ With a prefix ARG, remove start location."
 
 (global-set-key (org-research--key "b") 'ivy-bibtex)
 (global-set-key (org-research--key "t") 'org-noter)
-(global-set-key (org-research--key "l") 'org-roam-insert)
-(global-set-key (org-research--key "L") 'org-roam-insert-immediate)
+(global-set-key (org-research--key "l") 'org-roam-node-insert)
 (global-set-key (org-research--key "n") 'org-noter-insert-note)
 (global-set-key (org-research--key "c") 'org-ref-insert-link)
-(global-set-key (org-research--key "r") 'org-roam)
-(global-set-key (org-research--key "f") 'org-roam-find-file)
+(global-set-key (org-research--key "r") 'org-roam-buffer-display-dedicated)
+(global-set-key (org-research--key "R") 'org-roam-buffer-toggle)
+(global-set-key (org-research--key "f") 'org-roam-node-find)
+(global-set-key (org-research--key "g") 'org-roam-graph)
+(global-set-key (org-research--key "d") 'org-roam-dailies-capture-today)
+(global-set-key (org-research--key "a a") 'org-roam-alias-add)
+(global-set-key (org-research--key "a r") 'org-roam-ref-add)
+(global-set-key (org-research--key "a t") 'org-roam-tag-add)
+(global-set-key (org-research--key "a e") 'jlf/org-roam-node-exclude-add)
 
 (use-package perspective
   :custom

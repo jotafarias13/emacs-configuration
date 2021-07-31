@@ -501,14 +501,6 @@ O pacote /[[https://github.com/emacs-evil/evil][evil]]/ configura um major mode 
 
 #+begin_src emacs-lisp
   
-  ;; (use-package undo-fu
-  ;;   :init
-  ;;   (global-undo-tree-mode -1)
-  ;;   :config
-  ;;   (add-hook 'evil-mode-hook '(lambda () (define-key evil-normal-state-map (kbd "u") 'undo-fu-only-undo)))
-  ;;   (add-hook 'evil-mode-hook '(lambda () (define-key evil-normal-state-map (kbd "C-r") 'undo-fu-only-redo))))
-  
-  
   ;; Melhora as funções de desfazer e refazer do evil
   (use-package undo-tree
     :config

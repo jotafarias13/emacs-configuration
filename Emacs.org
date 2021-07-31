@@ -375,41 +375,6 @@ Adiciona algumas configurações do dired para facilitar sua utilização e a na
 
 #+begin_src emacs-lisp
   
-  ;; ;; Adiciona o hook para pesquisar usando a função dired-isearch-filenames-regexp utilizando o "/"
-  ;; (eval-after-load "dired" '(progn
-  ;;   (define-key dired-mode-map (kbd "/") 'dired-isearch-filenames-regexp)
-  ;; ))
-  
-  ;; ;; Adiciona o hook pra quando terminar a pesquisa entrar no arquivo e pesquisar novamente
-  ;; (add-hook 'isearch-mode-end-hook 
-  ;; 	  (lambda ()
-  ;; 	    (when (and (eq major-mode 'dired-mode)
-  ;; 		       (not isearch-mode-end-hook-quit))
-  ;; 	      (if (file-directory-p (dired-file-name-at-point)) (progn (dired-find-alternate-file) (dired-isearch-filenames-regexp))
-  ;; 		(dired-find-file)
-  ;; 	      ))))
-  
-  ;; ;; Adiciona o hook para quando pesquisar levar o cursor para o início do buffer antes
-  ;; (add-hook 'isearch-mode-hook 
-  ;; 	  (lambda ()
-  ;; 	    (when (eq major-mode 'dired-mode)
-  ;; 	      (beginning-of-buffer))))
-  
-  ;; ;; Permite usar o comando dired-find-alternate-file que fecha o buffer atual em vez de criar outro, definindo o "<return>" como sendo a função que realiza isso
-  ;; (put 'dired-find-alternate-file 'disabled nil)
-  ;; (eval-after-load "dired"
-  ;;   (lambda ()
-  ;;     (define-key dired-mode-map (kbd "<return>") 
-  ;;       (lambda ()
-  ;; 	(interactive)
-  ;; 	(if (file-directory-p (dired-file-name-at-point)) (progn (dired-find-alternate-file)) (dired-find-file))))))
-  
-  ;; ;; Navegação para próximo item e item anterior
-  ;; (define-key isearch-mode-map "\C-j" 'isearch-repeat-forward)
-  ;; (define-key isearch-mode-map "\C-k" 'isearch-repeat-backward)
-  
-  
-  
   ;; Configura a exibição de itens do dired, a funcionalidade do dwim e alocação de itens deletados
   (use-package dired
     :ensure nil
@@ -483,10 +448,6 @@ Adiciona algumas configurações do dired para facilitar sua utilização e a na
     :hook 
     (dired-mode . all-the-icons-dired-mode)
     (all-the-icons-dired-mode . (lambda () (setq all-the-icons-dired-monochrome nil))))
-  
-  ;; ;; Para MacOS, impede o dired de passar a flag "--dired" para o comando "ls", evitando aparecimento de warnings
-  ;; (when (string= system-type "darwin")       
-  ;;   (setq dired-use-ls-dired nil))
   
 #+end_src
 

@@ -261,7 +261,8 @@ Configura o tipo de tela, a fonte e seu tamanho, assim como o tema /[[https://gi
     (let ((screen-type (nth sscreen--current-screen-type-index sscreen-screen-types)))
       (sscreen--change-screen-type screen-type)))
   
-  (sscreen--change-screen-type "Default")
+  ;; Inicializar o emacs com o screen type "Default"
+  (add-hook 'after-init-hook (lambda () (sscreen--change-screen-type "Default")))
   
   ;; Keybinding para chamar a função
   (global-set-key (kbd "M-+") 'sscreen-toggle-screen-type)

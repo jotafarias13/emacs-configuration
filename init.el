@@ -197,7 +197,8 @@
   (let ((screen-type (nth sscreen--current-screen-type-index sscreen-screen-types)))
     (sscreen--change-screen-type screen-type)))
 
-(sscreen--change-screen-type "Default")
+;; Inicializar o emacs com o screen type "Default"
+(add-hook 'after-init-hook (lambda () (sscreen--change-screen-type "Default")))
 
 ;; Keybinding para chamar a função
 (global-set-key (kbd "M-+") 'sscreen-toggle-screen-type)
@@ -275,41 +276,6 @@
 (use-package company-box
   :hook (company-mode . company-box-mode))
 
-;; ;; Adiciona o hook para pesquisar usando a função dired-isearch-filenames-regexp utilizando o "/"
-;; (eval-after-load "dired" '(progn
-;;   (define-key dired-mode-map (kbd "/") 'dired-isearch-filenames-regexp)
-;; ))
-
-;; ;; Adiciona o hook pra quando terminar a pesquisa entrar no arquivo e pesquisar novamente
-;; (add-hook 'isearch-mode-end-hook 
-;; 	  (lambda ()
-;; 	    (when (and (eq major-mode 'dired-mode)
-;; 		       (not isearch-mode-end-hook-quit))
-;; 	      (if (file-directory-p (dired-file-name-at-point)) (progn (dired-find-alternate-file) (dired-isearch-filenames-regexp))
-;; 		(dired-find-file)
-;; 	      ))))
-
-;; ;; Adiciona o hook para quando pesquisar levar o cursor para o início do buffer antes
-;; (add-hook 'isearch-mode-hook 
-;; 	  (lambda ()
-;; 	    (when (eq major-mode 'dired-mode)
-;; 	      (beginning-of-buffer))))
-
-;; ;; Permite usar o comando dired-find-alternate-file que fecha o buffer atual em vez de criar outro, definindo o "<return>" como sendo a função que realiza isso
-;; (put 'dired-find-alternate-file 'disabled nil)
-;; (eval-after-load "dired"
-;;   (lambda ()
-;;     (define-key dired-mode-map (kbd "<return>") 
-;;       (lambda ()
-;; 	(interactive)
-;; 	(if (file-directory-p (dired-file-name-at-point)) (progn (dired-find-alternate-file)) (dired-find-file))))))
-
-;; ;; Navegação para próximo item e item anterior
-;; (define-key isearch-mode-map "\C-j" 'isearch-repeat-forward)
-;; (define-key isearch-mode-map "\C-k" 'isearch-repeat-backward)
-
-
-
 ;; Configura a exibição de itens do dired, a funcionalidade do dwim e alocação de itens deletados
 (use-package dired
   :ensure nil
@@ -384,10 +350,6 @@
   (dired-mode . all-the-icons-dired-mode)
   (all-the-icons-dired-mode . (lambda () (setq all-the-icons-dired-monochrome nil))))
 
-;; ;; Para MacOS, impede o dired de passar a flag "--dired" para o comando "ls", evitando aparecimento de warnings
-;; (when (string= system-type "darwin")       
-;;   (setq dired-use-ls-dired nil))
-
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode)
   :config
@@ -411,14 +373,6 @@
 
 (use-package olivetti
   :hook (org-mode . jlf/olivetti-mode-setup))
-
-;; (use-package undo-fu
-;;   :init
-;;   (global-undo-tree-mode -1)
-;;   :config
-;;   (add-hook 'evil-mode-hook '(lambda () (define-key evil-normal-state-map (kbd "u") 'undo-fu-only-undo)))
-;;   (add-hook 'evil-mode-hook '(lambda () (define-key evil-normal-state-map (kbd "C-r") 'undo-fu-only-redo))))
-
 
 ;; Melhora as funções de desfazer e refazer do evil
 (use-package undo-tree

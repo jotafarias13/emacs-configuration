@@ -861,7 +861,7 @@ A ferramenta /MyWorkSpace/ é uma função de minha autoria que me auxilia na ab
     "Ferrameta para facilitar abertura de arquivos e diretórios dos projetos nos quais trabalho."
     (interactive)
     (let* ((my-workspace-list (mapcar 'car jlf/my-workspace-alist))
-           (my-workspace (completing-read "WorkSpace: " my-workspace-list)))
+           (my-workspace (completing-read "WorkSpace: " (sort my-workspace-list (lambda (A B) (string-lessp A B))))))
       (if (assoc my-workspace jlf/my-workspace-alist)
           (funcall (cdr (assoc my-workspace jlf/my-workspace-alist)))
         (message "Invalid Argument!"))))

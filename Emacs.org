@@ -1406,6 +1406,7 @@ Contém a configuração básica do org-mode juntamente com as configurações d
     ("C-c w" . (lambda () (interactive) (org-todo "DONE") (org-refile))) 
     :custom
     (org-startup-folded 'content)
+    (org-directory "~/Sync/Jota/Academico/Projetos/Org/")
     :config
     (setq org-ellipsis " ▾")
     (setq org-hide-emphasis-markers t) 

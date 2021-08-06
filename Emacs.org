@@ -833,65 +833,36 @@ Após baixar o /[[https://github.com/astoff/digestif][Digestif]]/, é preciso ad
 A ferramenta /MyWorkSpace/ é uma função de minha autoria que me auxilia na abertura de arquivos e diretórios dos projetos nos quais trabalho. Ela foi criada por que os pacotes tradicionais e famosos que servem esse propósito são muito rebuscados e minha necessidade é suprida pelas poucas funcionalidades desta ferramenta.
 
 #+begin_src emacs-lisp
-
-(defun jlf/my-workspace ()
-  "Ferrameta para facilitar abertura de arquivos e diretórios dos projetos nos quais trabalho."
-  (interactive)
-    (let* ((my-workspace-list '("Agenda" "Artigo" "Dissertação C++" "Dissertação TeX" "Emacs" "Slip-Box"))
+  
+  (defvar jlf/my-workspace-alist (list)
+    "List of entries in workspace.")
+  
+  (add-to-list 'jlf/my-workspace-alist '("Artigo" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Artigos/2021/EJPC/"))) t)
+  (add-to-list 'jlf/my-workspace-alist '("Dissertação C++" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Projetos/C++/pancreasArtificial/"))) t)
+  (add-to-list 'jlf/my-workspace-alist '("Dissertação TeX" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Pós-Graduação/UFRN/Mestrado/Dissertação/Defesa/"))) t)
+  (add-to-list 'jlf/my-workspace-alist '("Emacs" . (lambda () (jlf/my-workspace-find-file "~/.emacs.d/"))) t)
+  (add-to-list 'jlf/my-workspace-alist '("Slip-Box" . (lambda () (jlf/my-workspace-find-file jlf/slipbox-directory))) t)
+  (add-to-list 'jlf/my-workspace-alist '("Agenda" . (lambda () (org-agenda nil "d") (delete-other-windows))) t)
+  (add-to-list 'jlf/my-workspace-alist '("Org" . (lambda () (jlf/my-workspace-find-file org-directory))) t)
+  
+  (defun jlf/my-workspace-find-file (FILE)
+    (let ((default-directory FILE))
+      (call-interactively
+       (lambda (file-name)
+         (interactive "fOpen File: ")
+         (find-file file-name nil)))))
+  
+  (defun jlf/my-workspace ()
+    "Ferrameta para facilitar abertura de arquivos e diretórios dos projetos nos quais trabalho."
+    (interactive)
+    (let* ((my-workspace-list (mapcar 'car jlf/my-workspace-alist))
            (my-workspace (completing-read "WorkSpace: " my-workspace-list)))
-      (pcase my-workspace
-        ("Agenda"
-              (progn
-	  (org-agenda nil "d")
-	  (delete-other-windows)
-	  ))
-        ("Artigo"
-              (progn
-	  (let ((default-directory "~/Sync/Jota/Academico/Artigos/2021/EJPC/"))
-	    (call-interactively
-	      (lambda (file-name)
-		(interactive "fArtigo: ")
-		(find-file file-name nil))))
-	  ))
-        ("Dissertação C++"
-              (progn
-	  (let ((default-directory "~/Sync/Jota/Academico/Projetos/C++/pancreasArtificial/"))
-	    (call-interactively
-	      (lambda (file-name)
-		(interactive "fDissertação C++: ")
-		(find-file file-name nil))))
-	  ))
-        ("Dissertação TeX"
-              (progn
-	  (let ((default-directory "~/Sync/Jota/Academico/Pós-Graduação/UFRN/Mestrado/Dissertação/Defesa/"))
-	    (call-interactively
-	      (lambda (file-name)
-		(interactive "fDissertação TeX: ")
-		(find-file file-name nil))))
-	  ))
-        ("Emacs"
-              (progn
-	  (let ((default-directory "~/.emacs.d/"))
-	    (call-interactively
-	      (lambda (file-name)
-		(interactive "fEmacs: ")
-		(find-file file-name nil))))
-	  ))
-        ("Slip-Box"
-              (progn
-	  (let ((default-directory jlf/slipbox-directory))
-	    (call-interactively
-	      (lambda (file-name)
-		(interactive "fRoam: ")
-		(find-file file-name nil))))
-	  ))
-        (_
-          (progn
-	    (message "Argumento Inválido!")
-	    )))))
-
-(global-set-key (kbd "C-+") 'jlf/my-workspace) ;; Keybinding para ferramenta MyWorkSpace
-
+      (if (assoc my-workspace jlf/my-workspace-alist)
+          (funcall (cdr (assoc my-workspace jlf/my-workspace-alist)))
+        (message "Invalid Argument!"))))
+  
+  (global-set-key (kbd "C-+") 'jlf/my-workspace) ;; Keybinding para ferramenta MyWorkSpace
+  
 #+end_src
 
 ** PDF-Tools

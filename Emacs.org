@@ -590,10 +590,15 @@ O pacote /[[https://github.com/raxod502/prescient.el][prescient]]/ possibilita u
 
 #+begin_src emacs-lisp
   
-  (use-package prescient)
+  (use-package prescient
+    :custom
+    (prescient-sort-full-matches-first t))
   
   (use-package ivy-prescient
     :after counsel
+    :custom
+    (ivy-prescient-sort-commands '(:not swiper swiper-isearch ivy-switch-buffer ivy-completing-read))
+    (ivy-prescient-retain-classic-highlighting t)
     :config (ivy-prescient-mode))
   
   (use-package company-prescient

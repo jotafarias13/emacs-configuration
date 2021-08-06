@@ -1415,7 +1415,8 @@ Contém a configuração básica do org-mode juntamente com as configurações d
     (setq org-log-into-drawer t)
   
     (setq org-agenda-files
-          '("~/Sync/Jota/Academico/Projetos/Emacs/Org/Tarefas.org"))
+          (list (format "%sTarefas.org" org-directory)))
+          ;; '("~/Sync/Jota/Academico/Projetos/Emacs/Org/Tarefas.org"))
     ;; "~/Sync/Jota/Academico/Projetos/Emacs/Org/Saude.org"))
     ;; "~/Projects/Code/emacs-from-scratch/OrgFiles/Birthdays.org"))
   

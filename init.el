@@ -608,61 +608,32 @@
 (cl-defmethod project-root ((project (head latex-module)))
    (cdr project))
 
+(defvar jlf/my-workspace-alist (list)
+  "List of entries in workspace.")
+
+(add-to-list 'jlf/my-workspace-alist '("Artigo" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Artigos/2021/EJPC/"))) t)
+(add-to-list 'jlf/my-workspace-alist '("Dissertação C++" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Projetos/C++/pancreasArtificial/"))) t)
+(add-to-list 'jlf/my-workspace-alist '("Dissertação TeX" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Pós-Graduação/UFRN/Mestrado/Dissertação/Defesa/"))) t)
+(add-to-list 'jlf/my-workspace-alist '("Emacs" . (lambda () (jlf/my-workspace-find-file "~/.emacs.d/"))) t)
+(add-to-list 'jlf/my-workspace-alist '("Slip-Box" . (lambda () (jlf/my-workspace-find-file jlf/slipbox-directory))) t)
+(add-to-list 'jlf/my-workspace-alist '("Agenda" . (lambda () (org-agenda nil "d") (delete-other-windows))) t)
+(add-to-list 'jlf/my-workspace-alist '("Org" . (lambda () (jlf/my-workspace-find-file org-directory))) t)
+
+(defun jlf/my-workspace-find-file (FILE)
+  (let ((default-directory FILE))
+    (call-interactively
+     (lambda (file-name)
+       (interactive "fOpen File: ")
+       (find-file file-name nil)))))
+
 (defun jlf/my-workspace ()
   "Ferrameta para facilitar abertura de arquivos e diretórios dos projetos nos quais trabalho."
   (interactive)
-    (let* ((my-workspace-list '("Agenda" "Artigo" "Dissertação C++" "Dissertação TeX" "Emacs" "Slip-Box"))
-           (my-workspace (completing-read "WorkSpace: " my-workspace-list)))
-      (pcase my-workspace
-        ("Agenda"
-              (progn
-	  (org-agenda nil "d")
-	  (delete-other-windows)
-	  ))
-        ("Artigo"
-              (progn
-	  (let ((default-directory "~/Sync/Jota/Academico/Artigos/2021/EJPC/"))
-	    (call-interactively
-	      (lambda (file-name)
-		(interactive "fArtigo: ")
-		(find-file file-name nil))))
-	  ))
-        ("Dissertação C++"
-              (progn
-	  (let ((default-directory "~/Sync/Jota/Academico/Projetos/C++/pancreasArtificial/"))
-	    (call-interactively
-	      (lambda (file-name)
-		(interactive "fDissertação C++: ")
-		(find-file file-name nil))))
-	  ))
-        ("Dissertação TeX"
-              (progn
-	  (let ((default-directory "~/Sync/Jota/Academico/Pós-Graduação/UFRN/Mestrado/Dissertação/Defesa/"))
-	    (call-interactively
-	      (lambda (file-name)
-		(interactive "fDissertação TeX: ")
-		(find-file file-name nil))))
-	  ))
-        ("Emacs"
-              (progn
-	  (let ((default-directory "~/.emacs.d/"))
-	    (call-interactively
-	      (lambda (file-name)
-		(interactive "fEmacs: ")
-		(find-file file-name nil))))
-	  ))
-        ("Slip-Box"
-              (progn
-	  (let ((default-directory jlf/slipbox-directory))
-	    (call-interactively
-	      (lambda (file-name)
-		(interactive "fRoam: ")
-		(find-file file-name nil))))
-	  ))
-        (_
-          (progn
-	    (message "Argumento Inválido!")
-	    )))))
+  (let* ((my-workspace-list (mapcar 'car jlf/my-workspace-alist))
+         (my-workspace (completing-read "WorkSpace: " my-workspace-list)))
+    (if (assoc my-workspace jlf/my-workspace-alist)
+        (funcall (cdr (assoc my-workspace jlf/my-workspace-alist)))
+      (message "Invalid Argument!"))))
 
 (global-set-key (kbd "C-+") 'jlf/my-workspace) ;; Keybinding para ferramenta MyWorkSpace
 
@@ -1090,6 +1061,7 @@ With a prefix ARG, remove start location."
   ("C-c w" . (lambda () (interactive) (org-todo "DONE") (org-refile))) 
   :custom
   (org-startup-folded 'content)
+  (org-directory "~/Sync/Jota/Academico/Projetos/Org/")
   :config
   (setq org-ellipsis " ▾")
   (setq org-hide-emphasis-markers t) 
@@ -1099,7 +1071,8 @@ With a prefix ARG, remove start location."
   (setq org-log-into-drawer t)
 
   (setq org-agenda-files
-        '("~/Sync/Jota/Academico/Projetos/Emacs/Org/Tarefas.org"))
+        (list (format "%sTarefas.org" org-directory)))
+        ;; '("~/Sync/Jota/Academico/Projetos/Emacs/Org/Tarefas.org"))
   ;; "~/Sync/Jota/Academico/Projetos/Emacs/Org/Saude.org"))
   ;; "~/Projects/Code/emacs-from-scratch/OrgFiles/Birthdays.org"))
 

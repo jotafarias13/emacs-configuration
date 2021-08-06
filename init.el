@@ -456,10 +456,15 @@
                            (call-interactively #'evil-find-char-to))
                :bind ((evil-cross-lines t)))
 
-(use-package prescient)
+(use-package prescient
+  :custom
+  (prescient-sort-full-matches-first t))
 
 (use-package ivy-prescient
   :after counsel
+  :custom
+  (ivy-prescient-sort-commands '(:not swiper swiper-isearch ivy-switch-buffer ivy-completing-read))
+  (ivy-prescient-retain-classic-highlighting t)
   :config (ivy-prescient-mode))
 
 (use-package company-prescient
@@ -630,7 +635,7 @@
   "Ferrameta para facilitar abertura de arquivos e diretórios dos projetos nos quais trabalho."
   (interactive)
   (let* ((my-workspace-list (mapcar 'car jlf/my-workspace-alist))
-         (my-workspace (completing-read "WorkSpace: " my-workspace-list)))
+         (my-workspace (completing-read "WorkSpace: " (sort my-workspace-list (lambda (A B) (string-lessp A B))))))
     (if (assoc my-workspace jlf/my-workspace-alist)
         (funcall (cdr (assoc my-workspace jlf/my-workspace-alist)))
       (message "Invalid Argument!"))))
@@ -1203,33 +1208,37 @@ With a prefix ARG, remove start location."
                  :empty-lines 1
                  :immediate-finish t) t)
   (add-to-list 'org-capture-templates
-               '("pr" "Read List" entry
-                 (file "~/Sync/Jota/Academico/Projetos/Org/Protocol/read_list.org")
-                 "* TODO %(if (string-empty-p \"\%:description\") \"\%^{Title: }\" \"\%:description\")\n:LINK: %:link\n:ACCESS: [%<%d-%m-%Y %a %H:%M:%S>]\n%^{Description: }"
+               '("pr" "Read List" plain
+                 (file+function "~/Sync/Jota/Academico/Projetos/Org/Protocol/read_list.org" jlf/org-protocol--capture-template-headline-target)
+                 "** TODO %(if (string-empty-p \"\%:description\") \"\%^{Title: }\" \"\%:description\")\n:LINK: %:link\n:ACCESS: [%<%d-%m-%Y %a %H:%M:%S>]\n%^{Description: }"
                  :empty-lines 1
                  :immediate-finish t) t))
 
-;; Função que retorna uma lista com todos os headings level 1 de um org-buffer
-(defun jlf/org--return-level-1-headings ()
+;; Função que retorna uma lista com todos os headings level N de um org-buffer
+(defun jlf/org--return-level-n-headings (N)
   (org-element-map (org-element-parse-buffer) 'headline
     (lambda (item)
-      (when (= (org-element-property :level item) 1) (org-element-property :raw-value item)))))
+      (when (= (org-element-property :level item) N) (org-element-property :raw-value item)))))
 
-;; Função que retorna o buffer-point para inserção de um novo favorito
+;; Função que retorna o buffer-point para inserção de um novo heading
 (defun jlf/org-protocol--capture-template-headline-target ()
-  (let* ((options (jlf/org--return-level-1-headings))
-         (heading (completing-read "Bookmark Section: " (add-to-list 'options "* ADD NEW SECTION *"))))
+  (let* ((options (jlf/org--return-level-n-headings 1))
+         (heading (completing-read "Section: " (add-to-list 'options "* ADD NEW SECTION *"))))
     (if (string-equal heading "* ADD NEW SECTION *")
-        (progn
-          (call-interactively
-           (lambda (new-bookmark-section)
-             (interactive "sNew Bookmark Section: ")
-             (goto-char (point-min))
-             (re-search-forward "^* Others")
-             (beginning-of-line)
-             (newline)
-             (previous-line)
-             (insert (concat "* " new-bookmark-section "\n")))))
+        (call-interactively
+         (lambda (new-section)
+           (interactive "sNew Section: ")
+           (goto-char (point-min))
+           (if (re-search-forward "^* Others" nil t)
+               (progn
+                 (beginning-of-line)
+                 (newline)
+                 (previous-line))
+             (progn
+               (goto-char (point-max))
+               (evil-open-below 2)
+               (evil-normal-state)))
+           (insert (concat "* " new-section "\n"))))
       (progn
         (goto-char (point-min))
         (re-search-forward (concat "^* " heading))

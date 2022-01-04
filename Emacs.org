@@ -378,7 +378,9 @@ Adiciona algumas configurações do dired para facilitar sua utilização e a na
   ;; Configura a exibição de itens do dired, a funcionalidade do dwim e alocação de itens deletados
   (use-package dired
     :ensure nil
-    :bind (("C-x C-j" . dired-jump))
+    :bind (
+           ("C-x C-j" . dired-jump)
+           ("C-=" . dired-create-empty-file))
     :custom
     (dired-listing-switches "-agho --group-directories-first")
   

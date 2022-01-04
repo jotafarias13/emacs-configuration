@@ -1366,6 +1366,9 @@ Contém a configuração básica do org-mode juntamente com as configurações d
 
 #+begin_src emacs-lisp
   
+  (defvar jlf/org-directory "~/Sync/Jota/Academico/Projetos/Org/"
+    "My Org directory.")
+  
   (defun jlf/org-mode-setup ()
     (org-indent-mode)
     (variable-pitch-mode 1)
@@ -1382,133 +1385,306 @@ Contém a configuração básica do org-mode juntamente com as configurações d
     ("C-c w" . (lambda () (interactive) (org-todo "DONE") (org-refile))) 
     :custom
     (org-startup-folded 'content)
-    (org-directory "~/Sync/Jota/Academico/Projetos/Org/")
+    (org-directory jlf/org-directory)
+    (org-format-latex-options '(
+                                :foreground default
+                                :background default
+                                :scale 1.7
+                                :html-foreground "Black"
+                                :html-background "Transparent"
+                                :html-scale 1.7
+                                :matchers ("begin" "$1" "$" "$$" "\\(" "\\[")))
     :config
     (setq org-ellipsis " ▾")
     (setq org-hide-emphasis-markers t) 
   
+    ;; (setq org-agenda-start-with-log-mode t)
+    ;; (setq org-log-done 'time)
+    ;; (setq org-log-into-drawer t)
+  
+    ;; (setq org-agenda-files
+    ;;       (list (format "%sTarefas.org" org-directory)))
+    ;;       ;; '("~/Sync/Jota/Academico/Projetos/Emacs/Org/Tarefas.org"))
+    ;; ;; "~/Sync/Jota/Academico/Projetos/Emacs/Org/Saude.org"))
+    ;; ;; "~/Projects/Code/emacs-from-scratch/OrgFiles/Birthdays.org"))
+  
+    ;; (require 'org-habit)
+    ;; (add-to-list 'org-modules 'org-habit)
+    ;; (setq org-habit-graph-column 60)
+  
+    ;; (setq org-todo-keywords
+    ;;       '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")))
+    ;; ;;     (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
+  
+    ;; ;; (setq org-refile-targets
+    ;; ;;   '(("~/Sync/Jota/Academico/Projetos/Emacs/Org/Arquivado.org" :maxlevel . 1)
+    ;; ;;     ("~/Sync/Jota/Academico/Projetos/Emacs/Org/Tarefas.org" :maxlevel . 1)))
+  
+    ;; (setq org-refile-targets
+    ;;       '(("Arquivado.org" :maxlevel . 1)
+    ;;         ("Tarefas.org" :maxlevel . 1)))
+  
+    ;; ;; Salva os buffers de org depois de executar o refile
+    ;; (advice-add 'org-refile :after 'org-save-all-org-buffers)
+  
+    ;; (setq org-tag-alist
+    ;;       '((:startgroup)
+    ;;         ;; Tags customizadas
+    ;;         (:endgroup)
+    ;;         ("Saúde" . ?S)
+    ;;         ("Consulta" . ?c)
+    ;;         ("Exame" . ?e)
+    ;;         ("Trabalho" . ?T)
+    ;;         ("Mestrado" . ?m)
+    ;;         ("Doutorado" . ?d)
+    ;;         ("Lazer" . ?L)
+    ;;         ("Emacs" . ?E)))
+    ;; ;; ("batch" . ?b)
+    ;; ;; ("note" . ?n)
+    ;; ;; ("idea" . ?i)))
+  
+    ;; ;; Configure custom agenda views
+    ;; (setq org-agenda-custom-commands
+    ;;       '(("d" "Dashboard"
+    ;;          ((agenda "" ((org-deadline-warning-days 7)))
+    ;;           (todo "TODO"
+    ;;                 ((org-agenda-overriding-header "TODO Tasks")))
+    ;;           (tags-todo "agenda/ACTIVE" ((org-agenda-overriding-header "Active Projects")))))
+  
+    ;;         ("n" "Next Tasks"
+    ;;          ((todo "NEXT"
+    ;;                 ((org-agenda-overriding-header "Next Tasks")))))
+  
+    ;;         ("W" "Work Tasks" tags-todo "+work-email")
+  
+    ;;         ;; Ações NEXT de baixo esforço (low-effort)
+    ;;         ("e" tags-todo "+TODO=\"NEXT\"+Effort<15&+Effort>0"
+    ;;          ((org-agenda-overriding-header "Low Effort Tasks")
+    ;;           (org-agenda-max-todos 20)
+    ;;           (org-agenda-files org-agenda-files)))
+  
+    ;;         ("w" "Workflow Status"
+    ;;          ((todo "WAIT"
+    ;;                 ((org-agenda-overriding-header "Waiting on External")
+    ;;                  (org-agenda-files org-agenda-files)))
+    ;;           (todo "REVIEW"
+    ;;                 ((org-agenda-overriding-header "In Review")
+    ;;                  (org-agenda-files org-agenda-files)))
+    ;;           (todo "PLAN"
+    ;;                 ((org-agenda-overriding-header "In Planning")
+    ;;                  (org-agenda-todo-list-sublevels nil)
+    ;;                  (org-agenda-files org-agenda-files)))
+    ;;           (todo "BACKLOG"
+    ;;                 ((org-agenda-overriding-header "Project Backlog")
+    ;;                  (org-agenda-todo-list-sublevels nil)
+    ;;                  (org-agenda-files org-agenda-files)))
+    ;;           (todo "READY"
+    ;;                 ((org-agenda-overriding-header "Ready for Work")
+    ;;                  (org-agenda-files org-agenda-files)))
+    ;;           (todo "ACTIVE"
+    ;;                 ((org-agenda-overriding-header "Active Projects")
+    ;;                  (org-agenda-files org-agenda-files)))
+    ;;           (todo "COMPLETED"
+    ;;                 ((org-agenda-overriding-header "Completed Projects")
+    ;;                  (org-agenda-files org-agenda-files)))
+    ;;           (todo "CANC"
+    ;;                 ((org-agenda-overriding-header "Cancelled Projects")
+    ;;                  (org-agenda-files org-agenda-files)))))))
+  
+    ;; (setq org-capture-templates
+    ;;       `(("t" "Tasks / Projects")
+    ;;         ("tt" "Task" entry (file+olp "~/Projects/Code/emacs-from-scratch/OrgFiles/Tasks.org" "Inbox")
+    ;;          "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
+  
+    ;;         ("j" "Journal Entries")
+    ;;         ("jj" "Journal" entry
+    ;;          (file+olp+datetree "~/Projects/Code/emacs-from-scratch/OrgFiles/Journal.org")
+    ;;          "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
+    ;;          ;; ,(dw/read-file-as-string "~/Notes/Templates/Daily.org")
+    ;;          :clock-in :clock-resume
+    ;;          :empty-lines 1)
+    ;;         ("jm" "Meeting" entry
+    ;;          (file+olp+datetree "~/Projects/Code/emacs-from-scratch/OrgFiles/Journal.org")
+    ;;          "* %<%I:%M %p> - %a :meetings:\n\n%?\n\n"
+    ;;          :clock-in :clock-resume
+    ;;          :empty-lines 1)
+  
+    ;;         ("w" "Workflows")
+    ;;         ("we" "Checking Email" entry (file+olp+datetree "~/Projects/Code/emacs-from-scratch/OrgFiles/Journal.org")
+    ;;          "* Checking Email :email:\n\n%?" :clock-in :clock-resume :empty-lines 1)
+  
+    ;;         ("m" "Metrics Capture")
+    ;;         ("mw" "Weight" table-line (file+headline "~/Projects/Code/emacs-from-scratch/OrgFiles/Metrics.org" "Weight")
+    ;;          "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)))
+  
+    ;; (define-key global-map (kbd "C-c j")
+    ;;   (lambda () (interactive) (org-capture nil "jj")))
+  
+    (jlf/org-font-setup))
+  
+  
+  
+  
+  
+  
+  
+  (with-eval-after-load 'org  
+    ;; Códigos finais
+  
+    ;; Variáveis
+    (defvar jlf/org-directory "~/Sync/Jota/Academico/Projetos/Org/"
+      "My Org directory.")
+  
+    (defvar jlf/org-agenda-directory (concat jlf/org-directory "Agenda/")
+      "My Org Agenda directory.")
+  
+    (defvar jlf/org-calendar-directory (concat jlf/org-directory "Calendar/")
+      "My Org Calendar directory.")
+  
+  
+    ;; Templates
+    (add-to-list 'org-capture-templates
+                 `("i" "Inbox" entry (file ,(concat jlf/org-agenda-directory "inbox.org"))
+                   "* TODO %^{Description: }"
+                   :immediate-finish t) t)
+  
+    (add-to-list 'org-capture-templates
+                 `("pi" "Inbox" entry (file ,(concat jlf/org-agenda-directory "inbox.org"))
+                   "* TODO [[%:link][%:description]]\n%^{Description: }"
+                   :immediate-finish t) t)
+  
+  
+    ;; Org-log
     (setq org-agenda-start-with-log-mode t)
     (setq org-log-done 'time)
     (setq org-log-into-drawer t)
   
-    (setq org-agenda-files
-          (list (format "%sTarefas.org" org-directory)))
-          ;; '("~/Sync/Jota/Academico/Projetos/Emacs/Org/Tarefas.org"))
-    ;; "~/Sync/Jota/Academico/Projetos/Emacs/Org/Saude.org"))
-    ;; "~/Projects/Code/emacs-from-scratch/OrgFiles/Birthdays.org"))
+    ;; Org agenda view
+    (setq org-agenda-block-separator "\n")
+    (setq org-agenda-remove-tags t)
   
-    (require 'org-habit)
-    (add-to-list 'org-modules 'org-habit)
-    (setq org-habit-graph-column 60)
+    ;; Agenda Custom
+    (setq jlf/org-agenda-main-view
+          `(" " "Agenda"
+            ((agenda ""
+                     ((org-agenda-span 'day)
+                      (org-deadline-warning-days 60)))
+             (todo "TODO"
+                   ((org-agenda-overriding-header "To Refile")
+                    (org-agenda-files '(,(concat jlf/org-agenda-directory "inbox.org")))))
+             (todo "NEXT"
+                   ((org-agenda-overriding-header "In Progress")
+                    (org-agenda-files '(,(concat jlf/org-agenda-directory "projects.org")
+                                        ,(concat jlf/org-agenda-directory "tasks.org")
+                                        ,(concat jlf/org-agenda-directory "reading.org")))))
+             (todo "TODO"
+                   ((org-agenda-overriding-header "Projects")
+                    (org-agenda-files '(,(concat jlf/org-agenda-directory "projects.org")))))
+             (todo "TODO"
+                   ((org-agenda-overriding-header "Tasks")
+                    (org-agenda-files '(,(concat jlf/org-agenda-directory "tasks.org")))
+                    (org-agenda-skip-function '(org-agenda-skip-entry-if 'timestamp)))))))
   
-    (setq org-todo-keywords
-          '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")))
-    ;;     (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
+    (setq jlf/org-agenda-week-view
+          `("d" "Week"
+            ((agenda ""
+                     ((org-agenda-span 'week)
+                      (org-deadline-warning-days 60))))))
   
-    ;; (setq org-refile-targets
-    ;;   '(("~/Sync/Jota/Academico/Projetos/Emacs/Org/Arquivado.org" :maxlevel . 1)
-    ;;     ("~/Sync/Jota/Academico/Projetos/Emacs/Org/Tarefas.org" :maxlevel . 1)))
+    (setq jlf/org-agenda-reading-view
+          `("r" "Reading"
+            ((todo "NEXT"
+                   ((org-agenda-overriding-header "Next")
+                    (org-agenda-files '(,(concat jlf/org-agenda-directory "reading.org")))))
+             (todo "TODO"
+                   ((org-agenda-overriding-header "All")
+                    (org-agenda-files '(,(concat jlf/org-agenda-directory "reading.org"))))))))
+  
+    (setq org-agenda-custom-commands nil)
+    (add-to-list 'org-agenda-custom-commands `,jlf/org-agenda-main-view)
+    (add-to-list 'org-agenda-custom-commands `,jlf/org-agenda-week-view)
+    (add-to-list 'org-agenda-custom-commands `,jlf/org-agenda-reading-view)
+  
+    (defun jlf/org-agenda-main ()
+      "Open org-agenda in main view."
+      (interactive)
+      (org-agenda nil " ")
+      (delete-other-windows))
+  
+    (global-set-key (kbd "C-M-_") 'jlf/org-agenda-main)
+  
+    ;; Agenda Files
+    (require 'find-lisp)
+    (setq org-agenda-files (find-lisp-find-files jlf/org-agenda-directory "\.org$"))
+  
+    ;; Agenda Refiles
+    (setq org-refile-use-outline-path 'file
+          org-outline-path-complete-in-steps nil)
+    (setq org-refile-allow-creating-parent-nodes 'confirm)
   
     (setq org-refile-targets
-          '(("Arquivado.org" :maxlevel . 1)
-            ("Tarefas.org" :maxlevel . 1)))
+          '(("projects.org" :maxlevel . 2)
+            ("tasks.org" :level . 2)
+            ("reading.org" :level . 1)))
   
     ;; Salva os buffers de org depois de executar o refile
     (advice-add 'org-refile :after 'org-save-all-org-buffers)
+    (advice-add 'org-agenda-refile :after 'org-save-all-org-buffers)
   
+    ;; Agenda Tags
     (setq org-tag-alist
-          '((:startgroup)
-            ;; Tags customizadas
-            (:endgroup)
-            ("Saúde" . ?S)
-            ("Consulta" . ?c)
-            ("Exame" . ?e)
-            ("Trabalho" . ?T)
-            ("Mestrado" . ?m)
-            ("Lazer" . ?L)
-            ("Emacs" . ?E)))
-    ;; ("batch" . ?b)
-    ;; ("note" . ?n)
-    ;; ("idea" . ?i)))
+          '(("emacs" . ?e)
+            ("lazer" . ?l)
+            ("leitura" . ?L)
+            ("saúde" . ?s)
+            (:newline)
+            ("doutorado" . ?d)
+            ("financeiro" . ?f)
+            ("biblioteca" . ?b)
+            ("escrita" . ?E)))
   
-    ;; Configure custom agenda views
-    (setq org-agenda-custom-commands
-          '(("d" "Dashboard"
-             ((agenda "" ((org-deadline-warning-days 7)))
-              (todo "TODO"
-                    ((org-agenda-overriding-header "TODO Tasks")))
-              (tags-todo "agenda/ACTIVE" ((org-agenda-overriding-header "Active Projects")))))
+    ;; Agenda TODO keywords
+    (setq org-todo-keywords
+          '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
+            (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)")))
   
-            ("n" "Next Tasks"
-             ((todo "NEXT"
-                    ((org-agenda-overriding-header "Next Tasks")))))
+    ;; Função para inbox capture
+    (defun jlf/org-capture-inbox ()
+      "Capture inbox item."
+      (interactive)
+      (org-capture nil "i"))
   
-            ("W" "Work Tasks" tags-todo "+work-email")
+    (global-set-key (kbd "C-c i") 'jlf/org-capture-inbox)
+    ;; (define-key org-agenda-mode-map "c" 'jlf/org-capture-inbox)
   
-            ;; Ações NEXT de baixo esforço (low-effort)
-            ("e" tags-todo "+TODO=\"NEXT\"+Effort<15&+Effort>0"
-             ((org-agenda-overriding-header "Low Effort Tasks")
-              (org-agenda-max-todos 20)
-              (org-agenda-files org-agenda-files)))
+    ;; Função para processar TODO
+    (defun jlf/org-agenda-process-inbox-item ()
+      "Process single inbox item in org-agenda.
+            First, set a priority. Then, set the effort. Next, choose between
+            add a timestamp, a schedule, a deadline or no timestamp. Finally,
+            refile the item."
+      (interactive)
+      (org-agenda-priority)
+      (org-agenda-set-effort)
+      (let ((time (completing-read "Time: " '("Timestamp" "Schedule" "Deadline" "No Timestamp"))))
+        (pcase time
+          ("Timestamp"
+           (call-interactively 'org-time-stamp))
+          ("Schedule"
+           (call-interactively 'org-agenda-schedule))
+          ("Deadline"
+           (call-interactively 'org-agenda-deadline))
+          ("No Timestamp"
+           ())
+          (_
+           (message "Invalid input. Using 'No Timestamp' option."))))
+      (org-agenda-refile))
   
-            ("w" "Workflow Status"
-             ((todo "WAIT"
-                    ((org-agenda-overriding-header "Waiting on External")
-                     (org-agenda-files org-agenda-files)))
-              (todo "REVIEW"
-                    ((org-agenda-overriding-header "In Review")
-                     (org-agenda-files org-agenda-files)))
-              (todo "PLAN"
-                    ((org-agenda-overriding-header "In Planning")
-                     (org-agenda-todo-list-sublevels nil)
-                     (org-agenda-files org-agenda-files)))
-              (todo "BACKLOG"
-                    ((org-agenda-overriding-header "Project Backlog")
-                     (org-agenda-todo-list-sublevels nil)
-                     (org-agenda-files org-agenda-files)))
-              (todo "READY"
-                    ((org-agenda-overriding-header "Ready for Work")
-                     (org-agenda-files org-agenda-files)))
-              (todo "ACTIVE"
-                    ((org-agenda-overriding-header "Active Projects")
-                     (org-agenda-files org-agenda-files)))
-              (todo "COMPLETED"
-                    ((org-agenda-overriding-header "Completed Projects")
-                     (org-agenda-files org-agenda-files)))
-              (todo "CANC"
-                    ((org-agenda-overriding-header "Cancelled Projects")
-                     (org-agenda-files org-agenda-files)))))))
+    ;; (define-key org-agenda-mode-map "P" 'jlf/org-agenda-process-inbox-item)
+    )
   
-    (setq org-capture-templates
-          `(("t" "Tasks / Projects")
-            ("tt" "Task" entry (file+olp "~/Projects/Code/emacs-from-scratch/OrgFiles/Tasks.org" "Inbox")
-             "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
   
-            ("j" "Journal Entries")
-            ("jj" "Journal" entry
-             (file+olp+datetree "~/Projects/Code/emacs-from-scratch/OrgFiles/Journal.org")
-             "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
-             ;; ,(dw/read-file-as-string "~/Notes/Templates/Daily.org")
-             :clock-in :clock-resume
-             :empty-lines 1)
-            ("jm" "Meeting" entry
-             (file+olp+datetree "~/Projects/Code/emacs-from-scratch/OrgFiles/Journal.org")
-             "* %<%I:%M %p> - %a :meetings:\n\n%?\n\n"
-             :clock-in :clock-resume
-             :empty-lines 1)
   
-            ("w" "Workflows")
-            ("we" "Checking Email" entry (file+olp+datetree "~/Projects/Code/emacs-from-scratch/OrgFiles/Journal.org")
-             "* Checking Email :email:\n\n%?" :clock-in :clock-resume :empty-lines 1)
-  
-            ("m" "Metrics Capture")
-            ("mw" "Weight" table-line (file+headline "~/Projects/Code/emacs-from-scratch/OrgFiles/Metrics.org" "Weight")
-             "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)))
-  
-    (define-key global-map (kbd "C-c j")
-      (lambda () (interactive) (org-capture nil "jj")))
-  
-    (jlf/org-font-setup))
   
 #+end_src
 

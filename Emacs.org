@@ -13,7 +13,7 @@ Coloca como buffer de inicialização a org-agenda na visão dashboard (customiz
 #+begin_src emacs-lisp
   
   ;; Buffer de inicialização
-  (add-hook 'after-init-hook (lambda () (org-agenda nil "d") (delete-other-windows)))
+  (add-hook 'after-init-hook 'jlf/org-agenda-main)
   
   ;; Diretório de inicialização
   (setq default-directory "~/.emacs.d/")

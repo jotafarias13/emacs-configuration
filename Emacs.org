@@ -849,6 +849,9 @@ A ferramenta /MyWorkSpace/ é uma função de minha autoria que me auxilia na ab
   (add-to-list 'jlf/my-workspace-alist '("Slip-Box" . (lambda () (jlf/my-workspace-find-file jlf/slipbox-directory))) t)
   (add-to-list 'jlf/my-workspace-alist '("Agenda" . (lambda () (org-agenda nil "d") (delete-other-windows))) t)
   (add-to-list 'jlf/my-workspace-alist '("Org" . (lambda () (jlf/my-workspace-find-file org-directory))) t)
+  (add-to-list 'jlf/my-workspace-alist '("Doutorado" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Pós-Graduação/UFRN/Doutorado/"))) t)
+  (add-to-list 'jlf/my-workspace-alist '("Ledger" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Financeiro/Ledger/"))) t)
+  (add-to-list 'jlf/my-workspace-alist '("Lattes" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Projetos/Lattes/"))) t)
   
   (defun jlf/my-workspace-find-file (FILE)
     (let ((default-directory FILE))

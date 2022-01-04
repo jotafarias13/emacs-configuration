@@ -132,40 +132,40 @@ Configura o pacote /[[https://github.com/jwiegley/use-package][use-package]]/ co
 O pacote /[[https://github.com/rranelli/auto-package-update.el][auto-package-update]]/ gerencia a atualização automática de pacotes e configura a frequência em que devem ser atualizados.
 
 #+begin_src emacs-lisp
-
-;; Gerencia atualização automática dos pacotes
-(use-package auto-package-update
-  :custom
-  (auto-package-update-interval 7)
-  (auto-package-update-prompt-before-update t)
-  (auto-package-update-hide-results t)
-  :config
-  (auto-package-update-maybe)
-  (auto-package-update-at-time "10:00"))
-
+  
+  ;; Gerencia atualização automática dos pacotes
+  ;; (use-package auto-package-update
+  ;;   :custom
+  ;;   (auto-package-update-interval 30)
+  ;;   (auto-package-update-prompt-before-update t)
+  ;;   (auto-package-update-hide-results t)
+  ;;   :config
+  ;;   (auto-package-update-maybe)
+  ;;   (auto-package-update-at-time "10:00"))
+  
 #+end_src
 
 * Keybindings
 Configura alguns keybindings para facilitar a abertura de diretórios e arquivos muito utilizados entre outros.
 
 #+begin_src emacs-lisp
-
-;; Atalhos personalizados para manipular janelas, selecionar texto e usar colar do clipboard
-(global-set-key (kbd "M-<up>") 'enlarge-window) ;; aumentar a janela verticalmente com M-<up>
-(global-set-key (kbd "M-<down>") 'shrink-window) ;; diminuir a janela verticalmente com M-<down>
-(global-set-key (kbd "M-<right>") 'enlarge-window-horizontally) ;; aumentar a janela horizontalmente com M-<right>
-(global-set-key (kbd "M-<left>") 'shrink-window-horizontally) ;; diminuir a janela horizontalmente com M-<left>
-(global-set-key (kbd "C-=") 'set-mark-command) ;; selecionar texto com C-=
-(global-set-key (kbd "C-M-y") 'clipboard-yank) ;; colar do clipboard
-
-;; Atalhos para dired, para abrir o init.el e para abrir o eshell 
-(global-set-key (kbd "C-M-0") (lambda () (interactive) (find-file "~/.emacs.d/Emacs.org" nil)))
-(global-set-key (kbd "C-M-1") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Pós-Graduação/UFRN/Mestrado/Dissertação/Defesa/")))
-(global-set-key (kbd "C-M-2") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Projetos/C++/")))
-(global-set-key (kbd "C-M-3") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Projetos/Emacs/Org/")))
-(global-set-key (kbd "C-M-4") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/")))
-(global-set-key (kbd "C-M-s") (lambda () (interactive) (eshell nil)))
-
+  
+  ;; Atalhos personalizados para manipular janelas, selecionar texto e usar colar do clipboard
+  (global-set-key (kbd "M-<up>") 'enlarge-window) ;; aumentar a janela verticalmente com M-<up>
+  (global-set-key (kbd "M-<down>") 'shrink-window) ;; diminuir a janela verticalmente com M-<down>
+  (global-set-key (kbd "M-<right>") 'enlarge-window-horizontally) ;; aumentar a janela horizontalmente com M-<right>
+  (global-set-key (kbd "M-<left>") 'shrink-window-horizontally) ;; diminuir a janela horizontalmente com M-<left>
+  ;; (global-set-key (kbd "C-=") 'set-mark-command) ;; selecionar texto com C-=
+  (global-set-key (kbd "C-M-y") 'clipboard-yank) ;; colar do clipboard
+  
+  ;; Atalhos para dired, para abrir o init.el e para abrir o eshell 
+  (global-set-key (kbd "C-M-0") (lambda () (interactive) (find-file "~/.emacs.d/Emacs.org" nil)))
+  (global-set-key (kbd "C-M-1") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Pós-Graduação/UFRN/Mestrado/Dissertação/Defesa/")))
+  (global-set-key (kbd "C-M-2") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Projetos/C++/")))
+  (global-set-key (kbd "C-M-3") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Projetos/Org/")))
+  (global-set-key (kbd "C-M-4") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/")))
+  (global-set-key (kbd "C-M-s") (lambda () (interactive) (eshell nil)))
+  
 #+end_src
 
 * Configurações Gerais

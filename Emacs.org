@@ -1698,7 +1698,7 @@ Responsável por executar ou exportar blocos de código em org-mode. Configurado
 
 ;; Exporta automaticamente o arquivo de saída associado aos blocos de código (tangle) toda vez que o arquivo .org for salvo
 (defun jlf/org-babel-tangle-config ()
-(when (string-equal (buffer-file-name) "/Users/Jota/.emacs.d/Emacs.org")
+(when (string-equal (buffer-file-name) "~/.emacs.d/Emacs.org")
 ;; (when (string-equal (file-name-directory (buffer-file-name))
 ;;                     (expand-file-name user-emacs-directory))
     (let ((org-confirm-babel-evaluate nil))

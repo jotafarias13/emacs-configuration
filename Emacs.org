@@ -814,14 +814,14 @@ Após instalar o /[[https://clangd.llvm.org/][clangd]]/, é preciso adicionar el
 O pacote python-mode configura programação em Python3 no Emacs. É preciso instalar algum lsp de python e colocá-lo no $PATH. Nesse caso, foi instalado o /[[https://github.com/python-lsp/python-lsp-server][pylsp]]/.
 
 #+begin_src emacs-lisp
-  
+
   ;; pip3 install 'python-lsp-server[all]'
-  (use-package python-mode
-    :ensure t
-    :hook (python-mode . lsp-deferred)
-    :custom
-    ;; NOTE: Set these if Python 3 is called "python3" on your system!
-    (python-shell-interpreter "python3"))
+  ;; (use-package python-mode
+  ;;   :ensure t
+  ;;   :hook (python-mode . lsp-deferred)
+  ;;   :custom
+  ;;   ;; NOTE: Set these if Python 3 is called "python3" on your system!
+  ;;   (python-shell-interpreter "python3"))
 
 #+end_src
 

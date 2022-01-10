@@ -11,22 +11,49 @@ Esse é o arquivo com as configurações de inicialização do Emacs, escrito em
 Coloca como buffer de inicialização a org-agenda na visão dashboard (customizada). Além disso, coloca como diretório padrão de início o diretório "~/.emacs.d/", determina o tamanho da janela inicial e informa os dados do usuário.
 
 #+begin_src emacs-lisp
-  
+
   ;; Buffer de inicialização
   ;; (add-hook 'after-init-hook 'jlf/org-agenda-main)
 
   ;; Diretório de inicialização
   (setq default-directory "~/.emacs.d/")
-  
+
   ;; Tamanho da janela de inicialização
   (add-to-list 'initial-frame-alist '(height . 1.0))
   (add-to-list 'initial-frame-alist '(width . 1.0))
-  
+
   ;; Dados de usuário
   (setq user-full-name "João Lucas Correia Barbosa de Farias")
   (setq user-mail-address "fariasjota09@gmail.com")
   (defvar user-url "https://github.com/jotafarias13")
-  
+
+#+end_src
+
+* Gerenciador de Pacotes
+Configura o pacote /[[https://github.com/jwiegley/use-package][use-package]]/ como gerenciador padrão de pacotes para melhor instalação e configuração.
+
+#+begin_src emacs-lisp
+
+;; Inicialização do gerenciador de pacotes padrão
+(require 'package)
+
+;; Repositórios 
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                         ("org" . "https://orgmode.org/elpa/")
+                         ("elpa" . "https://elpa.gnu.org/packages/")))
+
+;; Inicialização de pacotes
+(package-initialize)
+
+;; Instalação do use-package
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
+;; Coloca ":ensure t" em todos os pacotes
+(require 'use-package)
+(setq use-package-always-ensure t)
+
 #+end_src
 
 * Interface de Usuário (UI)
@@ -98,33 +125,6 @@ Gerencia os arquivos de backup e autosave para que fiquem localizados em diretó
 ;; Envia comandos custom para outro arquivo
 (setq custom-file "~/.emacs.d/custom.el")
 (load custom-file)
-
-#+end_src
-
-* Gerenciador de Pacotes
-Configura o pacote /[[https://github.com/jwiegley/use-package][use-package]]/ como gerenciador padrão de pacotes para melhor instalação e configuração.
-
-#+begin_src emacs-lisp
-
-;; Inicialização do gerenciador de pacotes padrão
-(require 'package)
-
-;; Repositórios 
-(setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                         ("org" . "https://orgmode.org/elpa/")
-                         ("elpa" . "https://elpa.gnu.org/packages/")))
-
-;; Inicialização de pacotes
-(package-initialize)
-
-;; Instalação do use-package
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-
-;; Coloca ":ensure t" em todos os pacotes
-(require 'use-package)
-(setq use-package-always-ensure t)
 
 #+end_src
 

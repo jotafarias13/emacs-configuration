@@ -1,5 +1,5 @@
 ;; Buffer de inicialização
-(add-hook 'after-init-hook 'jlf/org-agenda-main)
+;; (add-hook 'after-init-hook 'jlf/org-agenda-main)
 
 ;; Diretório de inicialização
 (setq default-directory "~/.emacs.d/")
@@ -12,6 +12,26 @@
 (setq user-full-name "João Lucas Correia Barbosa de Farias")
 (setq user-mail-address "fariasjota09@gmail.com")
 (defvar user-url "https://github.com/jotafarias13")
+
+;; Inicialização do gerenciador de pacotes padrão
+(require 'package)
+
+;; Repositórios 
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                         ("org" . "https://orgmode.org/elpa/")
+                         ("elpa" . "https://elpa.gnu.org/packages/")))
+
+;; Inicialização de pacotes
+(package-initialize)
+
+;; Instalação do use-package
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
+;; Coloca ":ensure t" em todos os pacotes
+(require 'use-package)
+(setq use-package-always-ensure t)
 
 ;; Remove de mensagem de boas-vindas
 (setq inhibit-startup-message t)
@@ -70,26 +90,6 @@
 ;; Envia comandos custom para outro arquivo
 (setq custom-file "~/.emacs.d/custom.el")
 (load custom-file)
-
-;; Inicialização do gerenciador de pacotes padrão
-(require 'package)
-
-;; Repositórios 
-(setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                         ("org" . "https://orgmode.org/elpa/")
-                         ("elpa" . "https://elpa.gnu.org/packages/")))
-
-;; Inicialização de pacotes
-(package-initialize)
-
-;; Instalação do use-package
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-
-;; Coloca ":ensure t" em todos os pacotes
-(require 'use-package)
-(setq use-package-always-ensure t)
 
 ;; Gerencia atualização automática dos pacotes
 ;; (use-package auto-package-update
@@ -241,12 +241,6 @@
   :after ivy
   :init (all-the-icons-ivy-rich-mode 1))
 
-;; Adiciona informações sobre cada comando no ivy
-(use-package ivy-rich
-  :after ivy
-  :init
-  (ivy-rich-mode 1))
-
 ;; Substitui comandos para funcionar melhor com ivy
 (use-package counsel
   :bind (:map counsel-mode-map
@@ -254,6 +248,12 @@
   ([remap dired] . counsel-dired))
   :config
   (counsel-mode 1))
+
+;; Adiciona informações sobre cada comando no ivy
+(use-package ivy-rich
+  :after ivy
+  :init
+  (ivy-rich-mode 1))
 
 ;; Ferramenta de pesquisa que substitui isearch e tem integração com ivy
 (use-package swiper)
@@ -559,9 +559,6 @@
 
 (add-hook 'LaTeX-mode-hook '(lambda () (define-key LaTeX-mode-map (kbd "C-<return>") 'jlf/LaTeX-insert-item)))
 
-;; Instalação do clangd: brew install llvm
-;; Instalação do compiledb: pip install compiledb
-
 ;; Breadcrumb no topo do buffer (caminho do arquivo)
 (defun jlf/lsp-mode-setup ()
   (setq lsp-headerline-breadcrumb-segments '(project path-up-to-project file symbols))
@@ -599,12 +596,12 @@
         (other . "gnu")))
 
 ;; pip3 install 'python-lsp-server[all]'
-(use-package python-mode
-  :ensure t
-  :hook (python-mode . lsp-deferred)
-  :custom
-  ;; NOTE: Set these if Python 3 is called "python3" on your system!
-  (python-shell-interpreter "python3"))
+;; (use-package python-mode
+;;   :ensure t
+;;   :hook (python-mode . lsp-deferred)
+;;   :custom
+;;   ;; NOTE: Set these if Python 3 is called "python3" on your system!
+;;   (python-shell-interpreter "python3"))
 
 ;; Funciona como um cliente LSP para Emacs, utilizado para escrever em LaTeX
 (use-package eglot
@@ -1003,16 +1000,16 @@ With a prefix ARG, remove start location."
 (global-set-key (org-research--key "a t") 'org-roam-tag-add)
 (global-set-key (org-research--key "a e") 'jlf/org-roam-node-exclude-add)
 
-(use-package perspective
-  :custom
-  (persp-mode-prefix-key (kbd "C-c p"))
-  (persp-state-default-file "~/.emacs.d/persp-state-session")
-  (persp-modestring-short t)
-  :bind (("C-x b" . persp-counsel-switch-buffer))
-  :config
-  (persp-mode))
+;; (use-package perspective
+;;   :custom
+;;   (persp-mode-prefix-key (kbd "C-c p"))
+;;   (persp-state-default-file "~/.emacs.d/persp-state-session")
+;;   (persp-modestring-short t)
+;;   :bind (("C-x b" . persp-counsel-switch-buffer))
+;;   :config
+;;   (persp-mode))
 
-(add-hook 'kill-emacs-hook #'persp-state-save)
+;; (add-hook 'kill-emacs-hook #'persp-state-save)
 
 ;; Congifuração das fontes e faces
 (defun jlf/org-font-setup ()
@@ -1095,135 +1092,7 @@ With a prefix ARG, remove start location."
   :config
   (setq org-ellipsis " ▾")
   (setq org-hide-emphasis-markers t) 
-
-  ;; (setq org-agenda-start-with-log-mode t)
-  ;; (setq org-log-done 'time)
-  ;; (setq org-log-into-drawer t)
-
-  ;; (setq org-agenda-files
-  ;;       (list (format "%sTarefas.org" org-directory)))
-  ;;       ;; '("~/Sync/Jota/Academico/Projetos/Emacs/Org/Tarefas.org"))
-  ;; ;; "~/Sync/Jota/Academico/Projetos/Emacs/Org/Saude.org"))
-  ;; ;; "~/Projects/Code/emacs-from-scratch/OrgFiles/Birthdays.org"))
-
-  ;; (require 'org-habit)
-  ;; (add-to-list 'org-modules 'org-habit)
-  ;; (setq org-habit-graph-column 60)
-
-  ;; (setq org-todo-keywords
-  ;;       '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")))
-  ;; ;;     (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
-
-  ;; ;; (setq org-refile-targets
-  ;; ;;   '(("~/Sync/Jota/Academico/Projetos/Emacs/Org/Arquivado.org" :maxlevel . 1)
-  ;; ;;     ("~/Sync/Jota/Academico/Projetos/Emacs/Org/Tarefas.org" :maxlevel . 1)))
-
-  ;; (setq org-refile-targets
-  ;;       '(("Arquivado.org" :maxlevel . 1)
-  ;;         ("Tarefas.org" :maxlevel . 1)))
-
-  ;; ;; Salva os buffers de org depois de executar o refile
-  ;; (advice-add 'org-refile :after 'org-save-all-org-buffers)
-
-  ;; (setq org-tag-alist
-  ;;       '((:startgroup)
-  ;;         ;; Tags customizadas
-  ;;         (:endgroup)
-  ;;         ("Saúde" . ?S)
-  ;;         ("Consulta" . ?c)
-  ;;         ("Exame" . ?e)
-  ;;         ("Trabalho" . ?T)
-  ;;         ("Mestrado" . ?m)
-  ;;         ("Doutorado" . ?d)
-  ;;         ("Lazer" . ?L)
-  ;;         ("Emacs" . ?E)))
-  ;; ;; ("batch" . ?b)
-  ;; ;; ("note" . ?n)
-  ;; ;; ("idea" . ?i)))
-
-  ;; ;; Configure custom agenda views
-  ;; (setq org-agenda-custom-commands
-  ;;       '(("d" "Dashboard"
-  ;;          ((agenda "" ((org-deadline-warning-days 7)))
-  ;;           (todo "TODO"
-  ;;                 ((org-agenda-overriding-header "TODO Tasks")))
-  ;;           (tags-todo "agenda/ACTIVE" ((org-agenda-overriding-header "Active Projects")))))
-
-  ;;         ("n" "Next Tasks"
-  ;;          ((todo "NEXT"
-  ;;                 ((org-agenda-overriding-header "Next Tasks")))))
-
-  ;;         ("W" "Work Tasks" tags-todo "+work-email")
-
-  ;;         ;; Ações NEXT de baixo esforço (low-effort)
-  ;;         ("e" tags-todo "+TODO=\"NEXT\"+Effort<15&+Effort>0"
-  ;;          ((org-agenda-overriding-header "Low Effort Tasks")
-  ;;           (org-agenda-max-todos 20)
-  ;;           (org-agenda-files org-agenda-files)))
-
-  ;;         ("w" "Workflow Status"
-  ;;          ((todo "WAIT"
-  ;;                 ((org-agenda-overriding-header "Waiting on External")
-  ;;                  (org-agenda-files org-agenda-files)))
-  ;;           (todo "REVIEW"
-  ;;                 ((org-agenda-overriding-header "In Review")
-  ;;                  (org-agenda-files org-agenda-files)))
-  ;;           (todo "PLAN"
-  ;;                 ((org-agenda-overriding-header "In Planning")
-  ;;                  (org-agenda-todo-list-sublevels nil)
-  ;;                  (org-agenda-files org-agenda-files)))
-  ;;           (todo "BACKLOG"
-  ;;                 ((org-agenda-overriding-header "Project Backlog")
-  ;;                  (org-agenda-todo-list-sublevels nil)
-  ;;                  (org-agenda-files org-agenda-files)))
-  ;;           (todo "READY"
-  ;;                 ((org-agenda-overriding-header "Ready for Work")
-  ;;                  (org-agenda-files org-agenda-files)))
-  ;;           (todo "ACTIVE"
-  ;;                 ((org-agenda-overriding-header "Active Projects")
-  ;;                  (org-agenda-files org-agenda-files)))
-  ;;           (todo "COMPLETED"
-  ;;                 ((org-agenda-overriding-header "Completed Projects")
-  ;;                  (org-agenda-files org-agenda-files)))
-  ;;           (todo "CANC"
-  ;;                 ((org-agenda-overriding-header "Cancelled Projects")
-  ;;                  (org-agenda-files org-agenda-files)))))))
-
-  ;; (setq org-capture-templates
-  ;;       `(("t" "Tasks / Projects")
-  ;;         ("tt" "Task" entry (file+olp "~/Projects/Code/emacs-from-scratch/OrgFiles/Tasks.org" "Inbox")
-  ;;          "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
-
-  ;;         ("j" "Journal Entries")
-  ;;         ("jj" "Journal" entry
-  ;;          (file+olp+datetree "~/Projects/Code/emacs-from-scratch/OrgFiles/Journal.org")
-  ;;          "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
-  ;;          ;; ,(dw/read-file-as-string "~/Notes/Templates/Daily.org")
-  ;;          :clock-in :clock-resume
-  ;;          :empty-lines 1)
-  ;;         ("jm" "Meeting" entry
-  ;;          (file+olp+datetree "~/Projects/Code/emacs-from-scratch/OrgFiles/Journal.org")
-  ;;          "* %<%I:%M %p> - %a :meetings:\n\n%?\n\n"
-  ;;          :clock-in :clock-resume
-  ;;          :empty-lines 1)
-
-  ;;         ("w" "Workflows")
-  ;;         ("we" "Checking Email" entry (file+olp+datetree "~/Projects/Code/emacs-from-scratch/OrgFiles/Journal.org")
-  ;;          "* Checking Email :email:\n\n%?" :clock-in :clock-resume :empty-lines 1)
-
-  ;;         ("m" "Metrics Capture")
-  ;;         ("mw" "Weight" table-line (file+headline "~/Projects/Code/emacs-from-scratch/OrgFiles/Metrics.org" "Weight")
-  ;;          "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)))
-
-  ;; (define-key global-map (kbd "C-c j")
-  ;;   (lambda () (interactive) (org-capture nil "jj")))
-
   (jlf/org-font-setup))
-
-
-
-
-
 
 
 (with-eval-after-load 'org  
@@ -1468,7 +1337,7 @@ With a prefix ARG, remove start location."
 
 ;; Exporta automaticamente o arquivo de saída associado aos blocos de código (tangle) toda vez que o arquivo .org for salvo
 (defun jlf/org-babel-tangle-config ()
-(when (string-equal (buffer-file-name) "/Users/Jota/.emacs.d/Emacs.org")
+(when (string-equal (buffer-file-name) "~/.emacs.d/Emacs.org")
 ;; (when (string-equal (file-name-directory (buffer-file-name))
 ;;                     (expand-file-name user-emacs-directory))
     (let ((org-confirm-babel-evaluate nil))

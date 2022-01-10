@@ -326,12 +326,6 @@ O pacote /[[https://github.com/abo-abo/swiper][ivy]]/ adiciona estrutura de auto
     :after ivy
     :init (all-the-icons-ivy-rich-mode 1))
   
-  ;; Adiciona informações sobre cada comando no ivy
-  (use-package ivy-rich
-    :after ivy
-    :init
-    (ivy-rich-mode 1))
-  
   ;; Substitui comandos para funcionar melhor com ivy
   (use-package counsel
     :bind (:map counsel-mode-map
@@ -339,6 +333,12 @@ O pacote /[[https://github.com/abo-abo/swiper][ivy]]/ adiciona estrutura de auto
     ([remap dired] . counsel-dired))
     :config
     (counsel-mode 1))
+  
+  ;; Adiciona informações sobre cada comando no ivy
+  (use-package ivy-rich
+    :after ivy
+    :init
+    (ivy-rich-mode 1))
   
   ;; Ferramenta de pesquisa que substitui isearch e tem integração com ivy
   (use-package swiper)

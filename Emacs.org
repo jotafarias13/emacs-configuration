@@ -1078,6 +1078,7 @@ O pacote /[[https://github.com/org-roam/org-roam][org-roam]]/ possibilita a cria
   
   (defun jlf/org-roam-node-exclude-add ()
     "Add ROAM_EXCLUDE property to node with value t."
+    (interactive)
     (org-entry-put (point) "ROAM_EXCLUDE" "t"))
   
   (advice-add 'org-noter-insert-note :after 'jlf/org-roam-node-exclude-add)

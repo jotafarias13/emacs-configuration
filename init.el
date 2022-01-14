@@ -810,6 +810,7 @@
   
   (defun jlf/org-roam-node-exclude-add ()
     "Add ROAM_EXCLUDE property to node with value t."
+    (interactive)
     (org-entry-put (point) "ROAM_EXCLUDE" "t"))
   
   (advice-add 'org-noter-insert-note :after 'jlf/org-roam-node-exclude-add)
@@ -861,6 +862,16 @@ If ANYWHERE is t, the match can occur anywhere inside the buffer. If it is nil o
   ;;         org-roam-server-network-label-truncate t
   ;;         org-roam-server-network-label-truncate-length 60
   ;;         org-roam-server-network-label-wrap-length 20))
+
+(use-package org-roam-ui
+  :after org-roam
+  :config
+  (setq org-roam-ui-sync-theme t
+        org-roam-ui-follow t
+        org-roam-ui-update-on-save t
+        org-roam-ui-open-on-start t))
+
+;; M-x org-roam-ui-mode
 
 (use-package org-noter
   :custom

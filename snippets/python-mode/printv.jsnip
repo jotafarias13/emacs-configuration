@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: printv
+# key: printv
+# --
+print($1)

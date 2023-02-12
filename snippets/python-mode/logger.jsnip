@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: lof
+# key: lof
+# --
+logger.info("$1")

@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: fopenr
+# key: fopenr
+# --
+FILE* ${1:p} = fopen(${2:const char * filename}, "r");
+
+if ($1 == NULL) {
+    printf("Erro: não foi possível abrir para leitura o arquivo %s!", $2);
+}

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: log
+# key: lod
+# --
+logger.info("$1...")
+$0
+logger.info("Done!")

@@ -86,7 +86,7 @@ Retira alguns elementos desnecessário do Emacs GUI e coloca elementos important
   
   ;; Configura a numeração das linhas para serem relativas a linha atual
   (add-hook 'display-line-numbers-mode-hook
-            '(lambda () (setq display-line-numbers 'relative)))
+            #'(lambda () (setq display-line-numbers 'relative)))
   
   
   ;; Visual line mode sempre ativo
@@ -95,7 +95,7 @@ Retira alguns elementos desnecessário do Emacs GUI e coloca elementos important
   ;; Indica começo-fim de parênteses
   (add-hook 'after-init-hook (lambda () (show-paren-mode 1)))
   ;; Altera cor do parêntese e do background quando der match em um parêntese
-  (add-hook 'show-paren-mode-hook '(lambda () (set-face-attribute 'show-paren-match nil :foreground "Magenta" :background "#595959")))
+  (add-hook 'show-paren-mode-hook #'(lambda () (set-face-attribute 'show-paren-match nil :foreground "Magenta" :background "#595959")))
   ;; Obs: foi necessário fazer dessa forma por que o show-paren-mode-hook não estava funcionando como esperado.
   
   ;; Barra de modos (inferior) minimalista
@@ -197,7 +197,7 @@ Configura o tipo de tela, a fonte e seu tamanho, assim como o tema /[[https://gi
   ;; É necessário baixar as fontes Fira Code e Inconsolata
   ;; As funções criadas com namespace 'sscreen' (switch-screen) possibilitam trocar os tamanhos das fontes para diferentes tipos de telas (sem alterar frame size ou modeline size)
   
-  (defvar sscreen--current-screen-type-index 0
+  (defvar sscreen--current-screen-type-index 1
     "Index of the current screen type according to sscreen--screen-types.")
   
   (defvar sscreen-screen-types '("Default" "Monitor")
@@ -262,7 +262,7 @@ Configura o tipo de tela, a fonte e seu tamanho, assim como o tema /[[https://gi
       (sscreen--change-screen-type screen-type)))
   
   ;; Inicializar o emacs com o screen type "Default"
-  (add-hook 'after-init-hook (lambda () (sscreen--change-screen-type "Default")))
+  (add-hook 'after-init-hook (lambda () (sscreen--change-screen-type "Monitor")))
   
   ;; Keybinding para chamar a função
   (global-set-key (kbd "M-+") 'sscreen-toggle-screen-type)
@@ -350,23 +350,37 @@ O pacote /[[https://company-mode.github.io/][company]]/ substitui a ferramenta p
 
 #+begin_src emacs-lisp
 
-;; Autocompletion in-buffer
-(use-package company
-  :config
-  (add-hook 'after-init-hook 'global-company-mode)
-  (add-hook 'company-mode-hook '(lambda () (define-key company-active-map (kbd "<tab>") nil)))
-  (add-hook 'company-mode-hook '(lambda () (define-key company-active-map (kbd "TAB") nil)))
-  (add-hook 'company-mode-hook '(lambda () (define-key company-active-map (kbd "C-<return>") 'company-abort)))
-  (add-hook 'company-mode-hook '(lambda () (define-key company-active-map (kbd "<return>") 'company-complete-selection)))
-  (add-hook 'company-mode-hook '(lambda () (define-key company-active-map (kbd "C-j") 'company-select-next)))
-  (add-hook 'company-mode-hook '(lambda () (define-key company-active-map (kbd "C-k") 'company-select-previous)))
-  :custom
-  (company-minimum-prefix-length 1)
-  (company-idle-delay 0.2))
+  ;; Autocompletion in-buffer
+  (use-package company
+    :config
+    (add-hook 'after-init-hook 'global-company-mode)
+    (add-hook 'company-mode-hook #'(lambda () (define-key company-active-map (kbd "<tab>") nil)))
+    (add-hook 'company-mode-hook #'(lambda () (define-key company-active-map (kbd "TAB") nil)))
+    (add-hook 'company-mode-hook #'(lambda () (define-key company-active-map (kbd "C-<return>") 'company-abort)))
+    (add-hook 'company-mode-hook #'(lambda () (define-key company-active-map (kbd "<return>") 'company-complete-selection)))
+    (add-hook 'company-mode-hook #'(lambda () (define-key company-active-map (kbd "C-j") 'company-select-next)))
+    (add-hook 'company-mode-hook #'(lambda () (define-key company-active-map (kbd "C-k") 'company-select-previous)))
+    :custom
+    (company-minimum-prefix-length 1)
+    (company-idle-delay 0.2))
 
-;; Melhora aparência do menu de autocompletion
-(use-package company-box
-  :hook (company-mode . company-box-mode))
+  ;; Melhora aparência do menu de autocompletion
+  ;; (use-package company-box
+  ;;   :hook (company-mode . company-box-mode))
+
+  ;; Integração com LSP de python (pylsp)
+  ;; Atualmente não funciona
+  ;; (use-package company-jedi
+  ;;   :init
+  ;;   (setq jedi:complete-on-dot t)
+  ;;   (setq jedi:get-in-function-call-delay 100)
+  ;;   (setq jedi:get-in-function-call-timeout 200))
+
+  ;; (defun my/python-mode-hook ()
+  ;;   (add-to-list 'company-backends 'company-jedi)
+  ;;   (jedi-mode))
+
+  ;; (add-hook 'python-mode-hook 'my/python-mode-hook)
 
 #+end_src
 
@@ -617,11 +631,18 @@ Configuração diversas que não entraram em outras categorias.
 
 #+begin_src emacs-lisp
 
-;; Altera o padrão para separação de sentenças para ser apenas um espaço
-(setq sentence-end-double-space nil)
+  ;; Altera o padrão para separação de sentenças para ser apenas um espaço
+  (setq sentence-end-double-space nil)
 
-;; Diminui prompts yes/no para agilizar escolha
-(fset 'yes-or-no-p 'y-or-n-p)
+  ;; Diminui prompts yes/no para agilizar escolha
+  (fset 'yes-or-no-p 'y-or-n-p)
+
+  (setq recentf-mode 1)
+  (global-set-key (kbd "C-M-b") 'recentf-open-files) ;; abrir buffer com arquivos recentes
+
+  ;; Mostra histórico de opções no minibuffer usando M-p
+  (setq history-length 25)
+  (setq savehist-mode 1)
 
 #+end_src
 
@@ -758,13 +779,14 @@ O pacote /[[https://www.gnu.org/software/auctex/][AUCTeX]]/ auxilia e configura 
     (indent-for-tab-command)
     (evil-append 1))
   
-  (add-hook 'LaTeX-mode-hook '(lambda () (define-key LaTeX-mode-map (kbd "C-<return>") 'jlf/LaTeX-insert-item)))
+  (add-hook 'LaTeX-mode-hook #'(lambda () (define-key LaTeX-mode-map (kbd "C-<return>") 'jlf/LaTeX-insert-item)))
   
 #+end_src
 
 ** LSP Mode 
 O pacote /[[https://emacs-lsp.github.io/lsp-mode/][lsp-mode]]/ serve como um cliente de Language Server Protocol para Emacs. Necessita de um servidor para fazer comunicação com o Emacs e simular ferramentas de uma IDE. Configurado para funcionar com o /[[https://clangd.llvm.org/][clangd]]/ para programação em C++. O pacote /[[https://github.com/emacs-lsp/lsp-ui][lsp-ui]]/ acrescenta informações sobre a parte do código sobre o qual o cursor está em cima, mostrando-as no minibuffer ou em um menu. O pacote /[[https://github.com/emacs-lsp/lsp-ivy][lsp-ivy]]/ faz a integração do /[[https://github.com/abo-abo/swiper][ivy]]/ no /[[https://emacs-lsp.github.io/lsp-mode/][lsp-mode]]/. Como o /[[https://emacs-lsp.github.io/lsp-mode/][lsp-mode]]/ é usado para programação em C/C++, a configuração do estilo de formatação do buffer é feita abaixo, modificando a variável /c-default-style/.
 
+*** C++
 Após instalar o /[[https://clangd.llvm.org/][clangd]]/, é preciso adicionar ele ao $PATH do terminal. Depois, criar o arquivo compile_commands.json no project root directory. Para isso, instala o /[[https://github.com/nickdiego/compiledb][compiledb]]/ e o utiliza para gerar o .json através de um Makefile com o comando "compiledb -n make".
 
 #+begin_src shell :tangle no
@@ -787,56 +809,132 @@ Após instalar o /[[https://clangd.llvm.org/][clangd]]/, é preciso adicionar el
 
 #+begin_src emacs-lisp
 
-  ;; Breadcrumb no topo do buffer (caminho do arquivo)
-  (defun jlf/lsp-mode-setup ()
-    (setq lsp-headerline-breadcrumb-segments '(project path-up-to-project file symbols))
-    (lsp-headerline-breadcrumb-mode))
+    ;; Breadcrumb no topo do buffer (caminho do arquivo)
+    (defun jlf/lsp-mode-setup ()
+      (setq lsp-headerline-breadcrumb-segments '(project path-up-to-project file symbols))
+      (lsp-headerline-breadcrumb-mode))
 
-  ;; Adiciona funcionalidades de IDE para o Emacs
-  (use-package lsp-mode
-    :commands (lsp lsp-deferred)
-    :hook (lsp-mode . jlf/lsp-mode-setup)
-    :init
-    (setq lsp-keymap-prefix "C-c l") 
-    (setq lsp-diagnostics-provider :none)
-    :hook (c++-mode . lsp)
-    :config
-    (lsp-enable-which-key-integration t))
+    ;; Adiciona funcionalidades de IDE para o Emacs
+    (use-package lsp-mode
+      :commands (lsp lsp-deferred)
+      :hook (lsp-mode . jlf/lsp-mode-setup)
+      :init
+      (setq lsp-keymap-prefix "C-c l") 
+      (setq lsp-diagnostics-provider :none)
+      :hook
+      (c++-mode . lsp)
+      (c-mode . lsp)
+      :config
+      (lsp-enable-which-key-integration t))
 
-  ;; Feature do clangd que possibilita a escolha do overload de uma função no company-box
-  (setq lsp-clients-clangd-args '("--completion-style=detailed" "--header-insertion=never"))
+    ;; Feature do clangd que possibilita a escolha do overload de uma função no company-box
+    (setq lsp-clients-clangd-args '("--completion-style=detailed" "--header-insertion=never"))
 
-  ;; Pacote para adicionar explicação do código à medida que o cursor navega pelo buffer 
-  (use-package lsp-ui
-    :hook (lsp-mode . lsp-ui-mode)
-    :custom
-    (lsp-ui-doc-position 'bottom))
+    ;; Pacote para adicionar explicação do código à medida que o cursor navega pelo buffer 
+    (use-package lsp-ui
+      :hook (lsp-mode . lsp-ui-mode)
+      :custom
+      (lsp-ui-doc-position 'bottom))
 
-  ;; Realiza integração do ivy no lsp-mode
-  (use-package lsp-ivy)
+    ;; Realiza integração do ivy no lsp-mode
+    (use-package lsp-ivy)
 
-  ;; Configura o estilo de formatação de buffer para linguagens em C e similares
-  ;; (setq c-default-style '(c++-mode  . “cc-mode”))
-  (setq c-default-style
-        '((java-mode . "java")
-          (awk-mode . "awk")
-          (c++-mode . "cc-mode")
-          (other . "gnu")))
+    ;; Configura o estilo de formatação de buffer para linguagens em C e similares
+    ;; (setq c-default-style '(c++-mode  . “cc-mode”))
+    (setq c-default-style
+          '((java-mode . "java")
+            (awk-mode . "awk")
+            (c++-mode . "cc-mode")
+            (other . "gnu")))
 
 #+end_src
 
 *** Python
 O pacote python-mode configura programação em Python3 no Emacs. É preciso instalar algum lsp de python e colocá-lo no $PATH. Nesse caso, foi instalado o /[[https://github.com/python-lsp/python-lsp-server][pylsp]]/.
 
+#+begin_src shell
+
+  pip3 install 'python-lsp-server[all]'
+
+#+end_src
+
 #+begin_src emacs-lisp
 
-  ;; pip3 install 'python-lsp-server[all]'
   ;; (use-package python-mode
-  ;;   :ensure t
-  ;;   :hook (python-mode . lsp-deferred)
+  ;;   :hook
+  ;;   (python-mode . lsp-deferred)
+  ;;   (python-mode . electric-pair-mode)
   ;;   :custom
-  ;;   ;; NOTE: Set these if Python 3 is called "python3" on your system!
-  ;;   (python-shell-interpreter "python3"))
+  ;;   (python-shell-interpreter "python3")
+  ;;   :init
+  ;;   (setq lsp-pylsp-plugins-jedi-completion-fuzzy t))
+
+  (use-package elpy
+    :init
+    (elpy-enable)
+    (setq python-shell-interpreter "python3")
+    (highlight-indentation-mode)
+    (setq elpy-rpc-python-command "python3")
+    (setq elpy-shell-darwin-use-pty t))
+
+#+end_src
+
+Para utilizar ambientes virtual (virtual environments) em python, é necessário instalar o [[https://virtualenv.pypa.io/en/latest/installation.html][virtualenv]]. O pacote /[[https://github.com/jorgenschaefer/pyvenv][pyvenv]]/ possibilita utilizar o virtual environment dentro do Emacs.
+
+#+begin_src shell
+
+  pip3 install virtualenv
+
+#+end_src
+
+#+begin_src emacs-lisp
+
+  ;; (use-package pyvenv
+  ;;   :config
+  ;;   (pyvenv-mode 1))
+
+#+end_src
+
+Para padronizar códigos, é necessário utilizar um checador. O pacote /[[https://www.flycheck.org/][flycheck]]/ checa o código de acordo com alguns possíveis checkers. Preferencialmente, utilzar /[[https://flake8.pycqa.org/][flake8]]/ seguido de /[[https://docs.pylint.org/][pylint]]/.
+
+#+begin_src emacs-lisp
+
+  (use-package flycheck)
+    ;; :hook (python-mode . flycheck-mode))
+
+#+end_src
+
+Para facilitar o término de workflow, as funções abaixo fecham o buffer de processo de Python (e, assim, terminando o processo) e desativam quaisquer ambientes virtuais abertos.
+
+#+begin_src emacs-lisp
+
+  (defun return-t() t)
+
+  (defun jlf/end-python-work()
+    "Kills python process and deactivates any virtual environments."
+    (interactive)
+    (let ((kill-buffer-query-functions (list 'return-t)))
+      (kill-buffer "*Python*"))
+    (pyvenv-deactivate))
+
+  (add-hook 'python-mode-hook 'hs-minor-mode)
+  (add-hook 'python-mode-hook 'electric-pair-mode)
+  (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c k") 'jlf/end-python-work)))
+  (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c C-a") 'pyvenv-activate)))
+
+#+end_src
+
+Para autoformatação de código, black e isort são usados. O pacote blacken usa black para reformatar o código sem alterar a ordem e o pacote python-isort usa o isort para ajeitar a ordem dos imports. É necessário ter ambos instalados no computador ou ambiente virtual.
+
+#+begin_src emacs-lisp
+
+  (use-package blacken
+    :hook (python-mode . blacken-mode)
+    :init (setq blacken-line-length 79))
+
+  (use-package python-isort
+    :after python
+    :hook (python-mode . python-isort-on-save-mode))
 
 #+end_src
 
@@ -871,11 +969,11 @@ Após baixar o /[[https://github.com/astoff/digestif][Digestif]]/, é preciso ad
 A ferramenta /MyWorkSpace/ é uma função de minha autoria que me auxilia na abertura de arquivos e diretórios dos projetos nos quais trabalho. Ela foi criada por que os pacotes tradicionais e famosos que servem esse propósito são muito rebuscados e minha necessidade é suprida pelas poucas funcionalidades desta ferramenta.
 
 #+begin_src emacs-lisp
-  
+
   (defvar jlf/my-workspace-alist (list)
     "List of entries in workspace.")
-  
-  (add-to-list 'jlf/my-workspace-alist '("Artigo" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Artigos/2021/EJPC/"))) t)
+
+  (add-to-list 'jlf/my-workspace-alist '("Artigo" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Artigos/2022/JHE"))) t)
   (add-to-list 'jlf/my-workspace-alist '("Dissertação C++" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Projetos/C++/pancreasArtificial/"))) t)
   (add-to-list 'jlf/my-workspace-alist '("Dissertação TeX" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Pós-Graduação/UFRN/Mestrado/Dissertação/Defesa/"))) t)
   (add-to-list 'jlf/my-workspace-alist '("Emacs" . (lambda () (jlf/my-workspace-find-file "~/.emacs.d/"))) t)
@@ -883,16 +981,21 @@ A ferramenta /MyWorkSpace/ é uma função de minha autoria que me auxilia na ab
   (add-to-list 'jlf/my-workspace-alist '("Agenda" . (lambda () (org-agenda nil "d") (delete-other-windows))) t)
   (add-to-list 'jlf/my-workspace-alist '("Org" . (lambda () (jlf/my-workspace-find-file org-directory))) t)
   (add-to-list 'jlf/my-workspace-alist '("Doutorado" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Pós-Graduação/UFRN/Doutorado/"))) t)
-  (add-to-list 'jlf/my-workspace-alist '("Ledger" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Financeiro/Ledger/"))) t)
+  ;; (add-to-list 'jlf/my-workspace-alist '("Ledger" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Financeiro/Ledger/"))) t)
+  (add-to-list 'jlf/my-workspace-alist '("Ledger" . (lambda () (find-file "~/Sync/Jota/Financeiro/Ledger/ledger.dat"))) t)
   (add-to-list 'jlf/my-workspace-alist '("Lattes" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Projetos/Lattes/"))) t)
-  
+  (add-to-list 'jlf/my-workspace-alist '("Ensino" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Ensino/Substituto UFRN/2022-2/"))) t)
+  (add-to-list 'jlf/my-workspace-alist '("Python" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Projetos/Python/"))) t)
+  (add-to-list 'jlf/my-workspace-alist '("O-data" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/O-data/"))) t)
+  (add-to-list 'jlf/my-workspace-alist '("Hubbi" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/O-data/Hubbi/scripts/hubbi/"))) t)
+
   (defun jlf/my-workspace-find-file (FILE)
     (let ((default-directory FILE))
       (call-interactively
        (lambda (file-name)
          (interactive "fOpen File: ")
          (find-file file-name nil)))))
-  
+
   (defun jlf/my-workspace ()
     "Ferrameta para facilitar abertura de arquivos e diretórios dos projetos nos quais trabalho."
     (interactive)
@@ -901,9 +1004,9 @@ A ferramenta /MyWorkSpace/ é uma função de minha autoria que me auxilia na ab
       (if (assoc my-workspace jlf/my-workspace-alist)
           (funcall (cdr (assoc my-workspace jlf/my-workspace-alist)))
         (message "Invalid Argument!"))))
-  
+
   (global-set-key (kbd "C-+") 'jlf/my-workspace) ;; Keybinding para ferramenta MyWorkSpace
-  
+
 #+end_src
 
 ** PDF-Tools
@@ -988,19 +1091,19 @@ O pacote /[[https://github.com/politza/pdf-tools][PDF-Tools]]/ habilita a visual
 O pacote /[[https://github.com/org-roam/org-roam][org-roam]]/ possibilita a criação de /backlinks/ entre notas (seja um arquivo ou um heading). Dessa forma, é possível visualizar em quais outros nodes um node específico foi citado, facilitando a percepção de conexões entre temas, peça fundamental para a utilização do método Zettelkasten.
 
 #+begin_src emacs-lisp
-  
-  ;; Variável do diretório root dos arquivos do slip-box
+
+  ;; VARIÁVEL do diretório root dos arquivos do slip-box
   (defvar jlf/slipbox-directory "~/Sync/Jota/Academico/Projetos/Slip-Box/"
     "Directory of slip-box files.")
-  
+
   ;; Variável do diretório dos arquivos de referência slip-box
   (defvar jlf/slipbox-refs-directory "~/Sync/Jota/Academico/Projetos/Slip-Box/Refs/"
     "Directory of slip-box ref files.")
-  
+
   ;; Variável do diretório dos dailies do slip-box (fleeting notes do zettelkasten)
   (defvar jlf/slipbox-dailies-directory "~/Sync/Jota/Academico/Projetos/Slip-Box/Dailies/"
     "Directory of slip-box dailies files.")
-  
+
   (use-package org-roam
     :init
     (setq org-roam-v2-ack t)
@@ -1031,23 +1134,23 @@ O pacote /[[https://github.com/org-roam/org-roam][org-roam]]/ possibilita a cria
            ("C-c n j" . org-roam-dailies-capture-today))
     :config
     (org-roam-setup))
-  
-  
+
+
   (with-eval-after-load "org-roam"
-  
+
     (cl-defmethod org-roam-node-filetitle ((node org-roam-node))
       "Return the file TITLE for the node."
       (org-roam-get-keyword "TITLE" (org-roam-node-file node)))
-  
+
     (cl-defmethod org-roam-node-filecitekey ((node org-roam-node))
       "Return the file CITE_KEY for the node."
       (org-roam-get-keyword "CITE_KEY" (org-roam-node-file node)))
-  
+
     (cl-defmethod org-roam-node-directories ((node org-roam-node))
       (if-let ((dirs (file-name-directory (file-relative-name (org-roam-node-file node) org-roam-directory))))
           (format "(%s)" (string-join (f-split dirs) "/"))
         ""))
-  
+
     (cl-defmethod org-roam-node-backlinkscount ((node org-roam-node))
       (let* ((count (caar (org-roam-db-query
                            [:select (funcall count source)
@@ -1056,7 +1159,7 @@ O pacote /[[https://github.com/org-roam/org-roam][org-roam]]/ possibilita a cria
                                     :and (= type "id")]
                            (org-roam-node-id node)))))
         (format "[%d]" count)))
-  
+
     (cl-defmethod org-roam-node-hierarchy ((node org-roam-node))
       "Return the hierarchy for the node."
       (let ((title (org-roam-node-title node))
@@ -1073,23 +1176,22 @@ O pacote /[[https://github.com/org-roam/org-roam][org-roam]]/ possibilita a cria
            (if (> level 0) (concat filetitle " > "))
            (if (> level 1) (concat (string-join olp " > ") " > "))
            title)))))
-  
+
   (setq org-roam-node-display-template "${directories:10} ${hierarchy:*} ${tags:25} ${backlinkscount:6}")
-  
+
   (defun jlf/org-roam-node-exclude-add ()
     "Add ROAM_EXCLUDE property to node with value t."
     (interactive)
     (org-entry-put (point) "ROAM_EXCLUDE" "t"))
-  
+
   (advice-add 'org-noter-insert-note :after 'jlf/org-roam-node-exclude-add)
-  
-  
+
   ;; Função para atualizar campos em um org buffer. Usada para atualizar o #+LAST_MODIFIED
   (defun jlf/org-update-field (REGEXP_FIELD NEW &optional ANYWHERE)
     "Update any field that starts at the beginning of a line in an org buffer. 
-REGEXP_FIELD is a string with regexp match to the desired field. Beware that, as it is a string, any time you use the escape character (\\) you need to insert two of them for the match to occur. For example, if you want to match the field #+LAST_MODIFIED: you need to pass #\\\\+LAST_MODIFIED: as a string to REGEXP_FIELD. 
-NEW is a string with the new value for the field. 
-If ANYWHERE is t, the match can occur anywhere inside the buffer. If it is nil or ommited, the match can only occur before the first heading."
+      REGEXP_FIELD is a string with regexp match to the desired field. Beware that, as it is a string, any time you use the escape character (\\) you need to insert two of them for the match to occur. For example, if you want to match the field #+LAST_MODIFIED: you need to pass #\\\\+LAST_MODIFIED: as a string to REGEXP_FIELD. 
+      NEW is a string with the new value for the field. 
+      If ANYWHERE is t, the match can occur anywhere inside the buffer. If it is nil or ommited, the match can only occur before the first heading."
     (save-excursion
       (goto-char (point-min))
       (let ((first-heading
@@ -1103,19 +1205,19 @@ If ANYWHERE is t, the match can occur anywhere inside the buffer. If it is nil o
               (delete-region (point) (line-end-position))
               (insert NEW))
           nil))))
-  
+
   ;; Função para atualizar o campo #+LAST_MODIFIED em org buffers
   (defun jlf/org-update-last-modified ()
     "Update #+LAST_MODIFIED field in org buffers."
     (when (derived-mode-p 'org-mode)
       (jlf/org-update-field "#\\+LAST_MODIFIED:" (format-time-string "[%d-%m-%Y %a %H:%M:%S]") nil)))
-  
+
   ;; Hook para atualizar 
   (add-hook 'before-save-hook 'jlf/org-update-last-modified)
-  
+
   ;; org-roam-protocol
   (require 'org-roam-protocol)
-  
+
   ;; org-roam-server
   ;; (use-package org-roam-server
   ;;   :config
@@ -1130,7 +1232,7 @@ If ANYWHERE is t, the match can occur anywhere inside the buffer. If it is nil o
   ;;         org-roam-server-network-label-truncate t
   ;;         org-roam-server-network-label-truncate-length 60
   ;;         org-roam-server-network-label-wrap-length 20))
-  
+
 #+end_src
 
 *** org-roam-ui
@@ -1280,7 +1382,7 @@ O pacote /[[https://github.com/jkitchin/org-ref][org-ref]]/ cria a utilidade de 
 O pacote /[[https://github.com/org-roam/org-roam-bibtex][org-roam-bibtex]]/ integra os pacotes org-roam, ivy-bibtex e org-ref, permitindo a utilização das funcionalidades do org-roam para referências bibliográficas.
 
 #+begin_src emacs-lisp
-  
+
   (use-package org-roam-bibtex
     :after org-roam
     :load-path "~/Sync/Jota/Academico/Projetos/Emacs/org-roam-bibtex-branch-v2/org-roam-bibtex/"
@@ -1302,10 +1404,23 @@ O pacote /[[https://github.com/org-roam/org-roam-bibtex][org-roam-bibtex]]/ inte
                    :if-new (file+head "Refs/${=key=}.org"
                                       "#+TITLE: ${title}\n#+CITE_KEY: ${=key=}\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+FILETAGS:\n\n* Info\n:PROPERTIES:\n:DOCUMENT_PATH: %(file-relative-name (orb-process-file-field \"${=key=}\") (print jlf/slipbox-refs-directory))\n:TYPE: %(capitalize \"${=type=}\")\n:AUTHOR: ${author-or-editor}\n:YEAR: ${year}\n:END:\n\n* Notes\n:PROPERTIES:\n:NOTER_DOCUMENT: %(file-relative-name (orb-process-file-field \"${=key=}\") (print jlf/slipbox-refs-directory))\n:END:\n")
                    :unnarrowed t)))
-  
-  
+
+
   (org-roam-bibtex-mode)
-  
+
+  (defun jlf/org-roam-add-bibliography (&optional CLIPBOARD-YANK)
+    "Add bibliography entry to bibliography file.
+  If CLIPBOARD-YANK is non-nil, paste clipboard as the entry.
+  If CLIPBOARD-YANK is nil, only add the space for a new entry."
+    (interactive)
+    (find-file (concat jlf/slipbox-refs-directory "bibliography.bib"))
+    (end-of-buffer)
+    (evil-open-below 2)
+    (evil-normal-state)
+    (if CLIPBOARD-YANK
+        (save-excursion (clipboard-yank)))
+    (evil-scroll-line-to-center (line-number-at-pos)))
+
 #+end_src
 
 *** keymap
@@ -1335,6 +1450,8 @@ Criação de um "keymap" próprio para facilitar a utilização de funções rel
   (global-set-key (org-research--key "a r") 'org-roam-ref-add)
   (global-set-key (org-research--key "a t") 'org-roam-tag-add)
   (global-set-key (org-research--key "a e") 'jlf/org-roam-node-exclude-add)
+  (global-set-key (org-research--key "a b") (lambda () (interactive) (jlf/org-roam-add-bibliography t)))
+  (global-set-key (org-research--key "a B") 'jlf/org-roam-add-bibliography)
   
 #+end_src
 
@@ -1412,7 +1529,7 @@ Configuração de várias faces de texto para ajustar os tamanhos dos headings e
      '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))))
   
   ;; Gambiarra para alterar a face org-indent já que alterar no :config gera erro
-  (add-hook 'org-mode-hook '(lambda () (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))))
+  (add-hook 'org-mode-hook #'(lambda () (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))))
   
 #+end_src
 

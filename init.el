@@ -58,7 +58,7 @@
 
 ;; Configura a numeração das linhas para serem relativas a linha atual
 (add-hook 'display-line-numbers-mode-hook
-          '(lambda () (setq display-line-numbers 'relative)))
+          #'(lambda () (setq display-line-numbers 'relative)))
 
 
 ;; Visual line mode sempre ativo
@@ -67,7 +67,7 @@
 ;; Indica começo-fim de parênteses
 (add-hook 'after-init-hook (lambda () (show-paren-mode 1)))
 ;; Altera cor do parêntese e do background quando der match em um parêntese
-(add-hook 'show-paren-mode-hook '(lambda () (set-face-attribute 'show-paren-match nil :foreground "Magenta" :background "#595959")))
+(add-hook 'show-paren-mode-hook #'(lambda () (set-face-attribute 'show-paren-match nil :foreground "Magenta" :background "#595959")))
 ;; Obs: foi necessário fazer dessa forma por que o show-paren-mode-hook não estava funcionando como esperado.
 
 ;; Barra de modos (inferior) minimalista
@@ -133,7 +133,7 @@
 ;; É necessário baixar as fontes Fira Code e Inconsolata
 ;; As funções criadas com namespace 'sscreen' (switch-screen) possibilitam trocar os tamanhos das fontes para diferentes tipos de telas (sem alterar frame size ou modeline size)
 
-(defvar sscreen--current-screen-type-index 0
+(defvar sscreen--current-screen-type-index 1
   "Index of the current screen type according to sscreen--screen-types.")
 
 (defvar sscreen-screen-types '("Default" "Monitor")
@@ -198,7 +198,7 @@
     (sscreen--change-screen-type screen-type)))
 
 ;; Inicializar o emacs com o screen type "Default"
-(add-hook 'after-init-hook (lambda () (sscreen--change-screen-type "Default")))
+(add-hook 'after-init-hook (lambda () (sscreen--change-screen-type "Monitor")))
 
 ;; Keybinding para chamar a função
 (global-set-key (kbd "M-+") 'sscreen-toggle-screen-type)
@@ -262,19 +262,33 @@
 (use-package company
   :config
   (add-hook 'after-init-hook 'global-company-mode)
-  (add-hook 'company-mode-hook '(lambda () (define-key company-active-map (kbd "<tab>") nil)))
-  (add-hook 'company-mode-hook '(lambda () (define-key company-active-map (kbd "TAB") nil)))
-  (add-hook 'company-mode-hook '(lambda () (define-key company-active-map (kbd "C-<return>") 'company-abort)))
-  (add-hook 'company-mode-hook '(lambda () (define-key company-active-map (kbd "<return>") 'company-complete-selection)))
-  (add-hook 'company-mode-hook '(lambda () (define-key company-active-map (kbd "C-j") 'company-select-next)))
-  (add-hook 'company-mode-hook '(lambda () (define-key company-active-map (kbd "C-k") 'company-select-previous)))
+  (add-hook 'company-mode-hook #'(lambda () (define-key company-active-map (kbd "<tab>") nil)))
+  (add-hook 'company-mode-hook #'(lambda () (define-key company-active-map (kbd "TAB") nil)))
+  (add-hook 'company-mode-hook #'(lambda () (define-key company-active-map (kbd "C-<return>") 'company-abort)))
+  (add-hook 'company-mode-hook #'(lambda () (define-key company-active-map (kbd "<return>") 'company-complete-selection)))
+  (add-hook 'company-mode-hook #'(lambda () (define-key company-active-map (kbd "C-j") 'company-select-next)))
+  (add-hook 'company-mode-hook #'(lambda () (define-key company-active-map (kbd "C-k") 'company-select-previous)))
   :custom
   (company-minimum-prefix-length 1)
   (company-idle-delay 0.2))
 
 ;; Melhora aparência do menu de autocompletion
-(use-package company-box
-  :hook (company-mode . company-box-mode))
+;; (use-package company-box
+;;   :hook (company-mode . company-box-mode))
+
+;; Integração com LSP de python (pylsp)
+;; Atualmente não funciona
+;; (use-package company-jedi
+;;   :init
+;;   (setq jedi:complete-on-dot t)
+;;   (setq jedi:get-in-function-call-delay 100)
+;;   (setq jedi:get-in-function-call-timeout 200))
+
+;; (defun my/python-mode-hook ()
+;;   (add-to-list 'company-backends 'company-jedi)
+;;   (jedi-mode))
+
+;; (add-hook 'python-mode-hook 'my/python-mode-hook)
 
 ;; Configura a exibição de itens do dired, a funcionalidade do dwim e alocação de itens deletados
 (use-package dired
@@ -482,6 +496,13 @@
 ;; Diminui prompts yes/no para agilizar escolha
 (fset 'yes-or-no-p 'y-or-n-p)
 
+(setq recentf-mode 1)
+(global-set-key (kbd "C-M-b") 'recentf-open-files) ;; abrir buffer com arquivos recentes
+
+;; Mostra histórico de opções no minibuffer usando M-p
+(setq history-length 25)
+(setq savehist-mode 1)
+
 ;; Possibilita a criação de bundles estilo TextMate
 (use-package yasnippet
   :config (yas-global-mode 1))
@@ -557,7 +578,7 @@
   (indent-for-tab-command)
   (evil-append 1))
 
-(add-hook 'LaTeX-mode-hook '(lambda () (define-key LaTeX-mode-map (kbd "C-<return>") 'jlf/LaTeX-insert-item)))
+(add-hook 'LaTeX-mode-hook #'(lambda () (define-key LaTeX-mode-map (kbd "C-<return>") 'jlf/LaTeX-insert-item)))
 
 ;; Breadcrumb no topo do buffer (caminho do arquivo)
 (defun jlf/lsp-mode-setup ()
@@ -571,7 +592,9 @@
   :init
   (setq lsp-keymap-prefix "C-c l") 
   (setq lsp-diagnostics-provider :none)
-  :hook (c++-mode . lsp)
+  :hook
+  (c++-mode . lsp)
+  (c-mode . lsp)
   :config
   (lsp-enable-which-key-integration t))
 
@@ -595,13 +618,51 @@
         (c++-mode . "cc-mode")
         (other . "gnu")))
 
-;; pip3 install 'python-lsp-server[all]'
 ;; (use-package python-mode
-;;   :ensure t
-;;   :hook (python-mode . lsp-deferred)
+;;   :hook
+;;   (python-mode . lsp-deferred)
+;;   (python-mode . electric-pair-mode)
 ;;   :custom
-;;   ;; NOTE: Set these if Python 3 is called "python3" on your system!
-;;   (python-shell-interpreter "python3"))
+;;   (python-shell-interpreter "python3")
+;;   :init
+;;   (setq lsp-pylsp-plugins-jedi-completion-fuzzy t))
+
+(use-package elpy
+  :init
+  (elpy-enable)
+  (setq python-shell-interpreter "python3")
+  (highlight-indentation-mode)
+  (setq elpy-rpc-python-command "python3")
+  (setq elpy-shell-darwin-use-pty t))
+
+;; (use-package pyvenv
+;;   :config
+;;   (pyvenv-mode 1))
+
+(use-package flycheck)
+  ;; :hook (python-mode . flycheck-mode))
+
+(defun return-t() t)
+
+(defun jlf/end-python-work()
+  "Kills python process and deactivates any virtual environments."
+  (interactive)
+  (let ((kill-buffer-query-functions (list 'return-t)))
+    (kill-buffer "*Python*"))
+  (pyvenv-deactivate))
+
+(add-hook 'python-mode-hook 'hs-minor-mode)
+(add-hook 'python-mode-hook 'electric-pair-mode)
+(add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c k") 'jlf/end-python-work)))
+(add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c C-a") 'pyvenv-activate)))
+
+(use-package blacken
+  :hook (python-mode . blacken-mode)
+  :init (setq blacken-line-length 79))
+
+(use-package python-isort
+  :after python
+  :hook (python-mode . python-isort-on-save-mode))
 
 ;; Funciona como um cliente LSP para Emacs, utilizado para escrever em LaTeX
 (use-package eglot
@@ -624,7 +685,7 @@
 (defvar jlf/my-workspace-alist (list)
   "List of entries in workspace.")
 
-(add-to-list 'jlf/my-workspace-alist '("Artigo" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Artigos/2021/EJPC/"))) t)
+(add-to-list 'jlf/my-workspace-alist '("Artigo" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Artigos/2022/JHE"))) t)
 (add-to-list 'jlf/my-workspace-alist '("Dissertação C++" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Projetos/C++/pancreasArtificial/"))) t)
 (add-to-list 'jlf/my-workspace-alist '("Dissertação TeX" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Pós-Graduação/UFRN/Mestrado/Dissertação/Defesa/"))) t)
 (add-to-list 'jlf/my-workspace-alist '("Emacs" . (lambda () (jlf/my-workspace-find-file "~/.emacs.d/"))) t)
@@ -632,8 +693,13 @@
 (add-to-list 'jlf/my-workspace-alist '("Agenda" . (lambda () (org-agenda nil "d") (delete-other-windows))) t)
 (add-to-list 'jlf/my-workspace-alist '("Org" . (lambda () (jlf/my-workspace-find-file org-directory))) t)
 (add-to-list 'jlf/my-workspace-alist '("Doutorado" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Pós-Graduação/UFRN/Doutorado/"))) t)
-(add-to-list 'jlf/my-workspace-alist '("Ledger" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Financeiro/Ledger/"))) t)
+;; (add-to-list 'jlf/my-workspace-alist '("Ledger" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Financeiro/Ledger/"))) t)
+(add-to-list 'jlf/my-workspace-alist '("Ledger" . (lambda () (find-file "~/Sync/Jota/Financeiro/Ledger/ledger.dat"))) t)
 (add-to-list 'jlf/my-workspace-alist '("Lattes" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Projetos/Lattes/"))) t)
+(add-to-list 'jlf/my-workspace-alist '("Ensino" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Ensino/Substituto UFRN/2022-2/"))) t)
+(add-to-list 'jlf/my-workspace-alist '("Python" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Projetos/Python/"))) t)
+(add-to-list 'jlf/my-workspace-alist '("O-data" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/O-data/"))) t)
+(add-to-list 'jlf/my-workspace-alist '("Hubbi" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/O-data/Hubbi/scripts/hubbi/"))) t)
 
 (defun jlf/my-workspace-find-file (FILE)
   (let ((default-directory FILE))
@@ -721,147 +787,146 @@
   (add-hook 'pdf-view-mode-hook 'pdf-view-restore-mode)
   (setq pdf-view-restore-filename "~/.emacs.d/.pdf-view-restore"))
 
-;; Variável do diretório root dos arquivos do slip-box
-  (defvar jlf/slipbox-directory "~/Sync/Jota/Academico/Projetos/Slip-Box/"
-    "Directory of slip-box files.")
-  
-  ;; Variável do diretório dos arquivos de referência slip-box
-  (defvar jlf/slipbox-refs-directory "~/Sync/Jota/Academico/Projetos/Slip-Box/Refs/"
-    "Directory of slip-box ref files.")
-  
-  ;; Variável do diretório dos dailies do slip-box (fleeting notes do zettelkasten)
-  (defvar jlf/slipbox-dailies-directory "~/Sync/Jota/Academico/Projetos/Slip-Box/Dailies/"
-    "Directory of slip-box dailies files.")
-  
-  (use-package org-roam
-    :init
-    (setq org-roam-v2-ack t)
-    :custom
-    (org-roam-directory (file-truename jlf/slipbox-directory))
-    (org-roam-capture-templates
-     '(("n" "Note File" plain "%?"
-        :if-new (file+head "${slug}.org"
-                           "#+TITLE: ${title}\n#+AUTHOR: %(print user-full-name)\n#+EMAIL: %(print user-mail-address)\n#+URL: %(print user-url)\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+FILETAGS:\n\n* ")
-        :unnarrowed t)))
-    (org-roam-capture-ref-templates
-     '(("r" "Roam Ref Protocol" plain "%?"
-        :if-new (file+head "Refs/${slug}.org"
-                           "#+TITLE: ${title}\n#+AUTHOR: %(print user-full-name)\n#+EMAIL: %(print user-mail-address)\n#+URL: %(print user-url)\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+FILETAGS:\n\n* ")
-        :unnarrowed t)))
-    (org-roam-dailies-directory jlf/slipbox-dailies-directory)
-    (org-roam-dailies-capture-templates
-     '(("d" "Dailies" entry
-        "* %?"
-        :if-new (file+head "Dailies/%<%Y-%m-%d>.org"
-                           "#+TITLE: %<%Y-%m-%d>\n\n"))))
-    :bind (("C-c n l" . org-roam-buffer-toggle)
-           ("C-c n f" . org-roam-node-find)
-           ("C-c n g" . org-roam-graph)
-           ("C-c n i" . org-roam-node-insert)
-           ("C-c n c" . org-roam-capture)
-           ;; Dailies
-           ("C-c n j" . org-roam-dailies-capture-today))
-    :config
-    (org-roam-setup))
-  
-  
-  (with-eval-after-load "org-roam"
-  
-    (cl-defmethod org-roam-node-filetitle ((node org-roam-node))
-      "Return the file TITLE for the node."
-      (org-roam-get-keyword "TITLE" (org-roam-node-file node)))
-  
-    (cl-defmethod org-roam-node-filecitekey ((node org-roam-node))
-      "Return the file CITE_KEY for the node."
-      (org-roam-get-keyword "CITE_KEY" (org-roam-node-file node)))
-  
-    (cl-defmethod org-roam-node-directories ((node org-roam-node))
-      (if-let ((dirs (file-name-directory (file-relative-name (org-roam-node-file node) org-roam-directory))))
-          (format "(%s)" (string-join (f-split dirs) "/"))
-        ""))
-  
-    (cl-defmethod org-roam-node-backlinkscount ((node org-roam-node))
-      (let* ((count (caar (org-roam-db-query
-                           [:select (funcall count source)
-                                    :from links
-                                    :where (= dest $s1)
-                                    :and (= type "id")]
-                           (org-roam-node-id node)))))
-        (format "[%d]" count)))
-  
-    (cl-defmethod org-roam-node-hierarchy ((node org-roam-node))
-      "Return the hierarchy for the node."
-      (let ((title (org-roam-node-title node))
-            (olp (org-roam-node-olp node))
-            (level (org-roam-node-level node))
-            (filetitle (org-roam-node-filetitle node))
-            (filecitekey (org-roam-node-filecitekey node)))
-        (if filecitekey
-            (concat
-             (if (> level 0) (concat filecitekey " > "))
-             (if (> level 1) (concat (string-join olp " > ") " > "))
-             (if (= level 0) filecitekey title))
+;; VARIÁVEL do diretório root dos arquivos do slip-box
+(defvar jlf/slipbox-directory "~/Sync/Jota/Academico/Projetos/Slip-Box/"
+  "Directory of slip-box files.")
+
+;; Variável do diretório dos arquivos de referência slip-box
+(defvar jlf/slipbox-refs-directory "~/Sync/Jota/Academico/Projetos/Slip-Box/Refs/"
+  "Directory of slip-box ref files.")
+
+;; Variável do diretório dos dailies do slip-box (fleeting notes do zettelkasten)
+(defvar jlf/slipbox-dailies-directory "~/Sync/Jota/Academico/Projetos/Slip-Box/Dailies/"
+  "Directory of slip-box dailies files.")
+
+(use-package org-roam
+  :init
+  (setq org-roam-v2-ack t)
+  :custom
+  (org-roam-directory (file-truename jlf/slipbox-directory))
+  (org-roam-capture-templates
+   '(("n" "Note File" plain "%?"
+      :if-new (file+head "${slug}.org"
+                         "#+TITLE: ${title}\n#+AUTHOR: %(print user-full-name)\n#+EMAIL: %(print user-mail-address)\n#+URL: %(print user-url)\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+FILETAGS:\n\n* ")
+      :unnarrowed t)))
+  (org-roam-capture-ref-templates
+   '(("r" "Roam Ref Protocol" plain "%?"
+      :if-new (file+head "Refs/${slug}.org"
+                         "#+TITLE: ${title}\n#+AUTHOR: %(print user-full-name)\n#+EMAIL: %(print user-mail-address)\n#+URL: %(print user-url)\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+FILETAGS:\n\n* ")
+      :unnarrowed t)))
+  (org-roam-dailies-directory jlf/slipbox-dailies-directory)
+  (org-roam-dailies-capture-templates
+   '(("d" "Dailies" entry
+      "* %?"
+      :if-new (file+head "Dailies/%<%Y-%m-%d>.org"
+                         "#+TITLE: %<%Y-%m-%d>\n\n"))))
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n g" . org-roam-graph)
+         ("C-c n i" . org-roam-node-insert)
+         ("C-c n c" . org-roam-capture)
+         ;; Dailies
+         ("C-c n j" . org-roam-dailies-capture-today))
+  :config
+  (org-roam-setup))
+
+
+(with-eval-after-load "org-roam"
+
+  (cl-defmethod org-roam-node-filetitle ((node org-roam-node))
+    "Return the file TITLE for the node."
+    (org-roam-get-keyword "TITLE" (org-roam-node-file node)))
+
+  (cl-defmethod org-roam-node-filecitekey ((node org-roam-node))
+    "Return the file CITE_KEY for the node."
+    (org-roam-get-keyword "CITE_KEY" (org-roam-node-file node)))
+
+  (cl-defmethod org-roam-node-directories ((node org-roam-node))
+    (if-let ((dirs (file-name-directory (file-relative-name (org-roam-node-file node) org-roam-directory))))
+        (format "(%s)" (string-join (f-split dirs) "/"))
+      ""))
+
+  (cl-defmethod org-roam-node-backlinkscount ((node org-roam-node))
+    (let* ((count (caar (org-roam-db-query
+                         [:select (funcall count source)
+                                  :from links
+                                  :where (= dest $s1)
+                                  :and (= type "id")]
+                         (org-roam-node-id node)))))
+      (format "[%d]" count)))
+
+  (cl-defmethod org-roam-node-hierarchy ((node org-roam-node))
+    "Return the hierarchy for the node."
+    (let ((title (org-roam-node-title node))
+          (olp (org-roam-node-olp node))
+          (level (org-roam-node-level node))
+          (filetitle (org-roam-node-filetitle node))
+          (filecitekey (org-roam-node-filecitekey node)))
+      (if filecitekey
           (concat
-           (if (> level 0) (concat filetitle " > "))
+           (if (> level 0) (concat filecitekey " > "))
            (if (> level 1) (concat (string-join olp " > ") " > "))
-           title)))))
-  
-  (setq org-roam-node-display-template "${directories:10} ${hierarchy:*} ${tags:25} ${backlinkscount:6}")
-  
-  (defun jlf/org-roam-node-exclude-add ()
-    "Add ROAM_EXCLUDE property to node with value t."
-    (interactive)
-    (org-entry-put (point) "ROAM_EXCLUDE" "t"))
-  
-  (advice-add 'org-noter-insert-note :after 'jlf/org-roam-node-exclude-add)
-  
-  
-  ;; Função para atualizar campos em um org buffer. Usada para atualizar o #+LAST_MODIFIED
-  (defun jlf/org-update-field (REGEXP_FIELD NEW &optional ANYWHERE)
-    "Update any field that starts at the beginning of a line in an org buffer. 
-REGEXP_FIELD is a string with regexp match to the desired field. Beware that, as it is a string, any time you use the escape character (\\) you need to insert two of them for the match to occur. For example, if you want to match the field #+LAST_MODIFIED: you need to pass #\\\\+LAST_MODIFIED: as a string to REGEXP_FIELD. 
-NEW is a string with the new value for the field. 
-If ANYWHERE is t, the match can occur anywhere inside the buffer. If it is nil or ommited, the match can only occur before the first heading."
-    (save-excursion
-      (goto-char (point-min))
-      (let ((first-heading
-             (save-excursion
-               (re-search-forward org-outline-regexp-bol nil t))))
-        (if (re-search-forward (concat "^" REGEXP_FIELD) (if ANYWHERE nil first-heading) t)
-            (progn
-              (if (looking-at-p " ")
-                  (forward-char)
-                (insert " "))
-              (delete-region (point) (line-end-position))
-              (insert NEW))
-          nil))))
-  
-  ;; Função para atualizar o campo #+LAST_MODIFIED em org buffers
-  (defun jlf/org-update-last-modified ()
-    "Update #+LAST_MODIFIED field in org buffers."
-    (when (derived-mode-p 'org-mode)
-      (jlf/org-update-field "#\\+LAST_MODIFIED:" (format-time-string "[%d-%m-%Y %a %H:%M:%S]") nil)))
-  
-  ;; Hook para atualizar 
-  (add-hook 'before-save-hook 'jlf/org-update-last-modified)
-  
-  ;; org-roam-protocol
-  (require 'org-roam-protocol)
-  
-  ;; org-roam-server
-  ;; (use-package org-roam-server
-  ;;   :config
-  ;;   (setq org-roam-server-host "127.0.0.1"
-  ;;         org-roam-server-port 8080
-  ;;         org-roam-server-authenticate nil
-  ;;         org-roam-server-export-inline-images t
-  ;;         org-roam-server-serve-files nil
-  ;;         org-roam-server-served-file-extensions '("pdf" "mp4" "ogv")
-  ;;         org-roam-server-network-poll t
-  ;;         org-roam-server-network-arrows nil
-  ;;         org-roam-server-network-label-truncate t
-  ;;         org-roam-server-network-label-truncate-length 60
-  ;;         org-roam-server-network-label-wrap-length 20))
+           (if (= level 0) filecitekey title))
+        (concat
+         (if (> level 0) (concat filetitle " > "))
+         (if (> level 1) (concat (string-join olp " > ") " > "))
+         title)))))
+
+(setq org-roam-node-display-template "${directories:10} ${hierarchy:*} ${tags:25} ${backlinkscount:6}")
+
+(defun jlf/org-roam-node-exclude-add ()
+  "Add ROAM_EXCLUDE property to node with value t."
+  (interactive)
+  (org-entry-put (point) "ROAM_EXCLUDE" "t"))
+
+(advice-add 'org-noter-insert-note :after 'jlf/org-roam-node-exclude-add)
+
+;; Função para atualizar campos em um org buffer. Usada para atualizar o #+LAST_MODIFIED
+(defun jlf/org-update-field (REGEXP_FIELD NEW &optional ANYWHERE)
+  "Update any field that starts at the beginning of a line in an org buffer. 
+    REGEXP_FIELD is a string with regexp match to the desired field. Beware that, as it is a string, any time you use the escape character (\\) you need to insert two of them for the match to occur. For example, if you want to match the field #+LAST_MODIFIED: you need to pass #\\\\+LAST_MODIFIED: as a string to REGEXP_FIELD. 
+    NEW is a string with the new value for the field. 
+    If ANYWHERE is t, the match can occur anywhere inside the buffer. If it is nil or ommited, the match can only occur before the first heading."
+  (save-excursion
+    (goto-char (point-min))
+    (let ((first-heading
+           (save-excursion
+             (re-search-forward org-outline-regexp-bol nil t))))
+      (if (re-search-forward (concat "^" REGEXP_FIELD) (if ANYWHERE nil first-heading) t)
+          (progn
+            (if (looking-at-p " ")
+                (forward-char)
+              (insert " "))
+            (delete-region (point) (line-end-position))
+            (insert NEW))
+        nil))))
+
+;; Função para atualizar o campo #+LAST_MODIFIED em org buffers
+(defun jlf/org-update-last-modified ()
+  "Update #+LAST_MODIFIED field in org buffers."
+  (when (derived-mode-p 'org-mode)
+    (jlf/org-update-field "#\\+LAST_MODIFIED:" (format-time-string "[%d-%m-%Y %a %H:%M:%S]") nil)))
+
+;; Hook para atualizar 
+(add-hook 'before-save-hook 'jlf/org-update-last-modified)
+
+;; org-roam-protocol
+(require 'org-roam-protocol)
+
+;; org-roam-server
+;; (use-package org-roam-server
+;;   :config
+;;   (setq org-roam-server-host "127.0.0.1"
+;;         org-roam-server-port 8080
+;;         org-roam-server-authenticate nil
+;;         org-roam-server-export-inline-images t
+;;         org-roam-server-serve-files nil
+;;         org-roam-server-served-file-extensions '("pdf" "mp4" "ogv")
+;;         org-roam-server-network-poll t
+;;         org-roam-server-network-arrows nil
+;;         org-roam-server-network-label-truncate t
+;;         org-roam-server-network-label-truncate-length 60
+;;         org-roam-server-network-label-wrap-length 20))
 
 (use-package org-roam-ui
   :after org-roam
@@ -988,6 +1053,19 @@ With a prefix ARG, remove start location."
 
 (org-roam-bibtex-mode)
 
+(defun jlf/org-roam-add-bibliography (&optional CLIPBOARD-YANK)
+  "Add bibliography entry to bibliography file.
+If CLIPBOARD-YANK is non-nil, paste clipboard as the entry.
+If CLIPBOARD-YANK is nil, only add the space for a new entry."
+  (interactive)
+  (find-file (concat jlf/slipbox-refs-directory "bibliography.bib"))
+  (end-of-buffer)
+  (evil-open-below 2)
+  (evil-normal-state)
+  (if CLIPBOARD-YANK
+      (save-excursion (clipboard-yank)))
+  (evil-scroll-line-to-center (line-number-at-pos)))
+
 (defcustom org-research-keymap-prefix "C-c r"
   "The prefix for org-research key bindings."
   :type 'string
@@ -1010,6 +1088,8 @@ With a prefix ARG, remove start location."
 (global-set-key (org-research--key "a r") 'org-roam-ref-add)
 (global-set-key (org-research--key "a t") 'org-roam-tag-add)
 (global-set-key (org-research--key "a e") 'jlf/org-roam-node-exclude-add)
+(global-set-key (org-research--key "a b") (lambda () (interactive) (jlf/org-roam-add-bibliography t)))
+(global-set-key (org-research--key "a B") 'jlf/org-roam-add-bibliography)
 
 ;; (use-package perspective
 ;;   :custom
@@ -1070,7 +1150,7 @@ With a prefix ARG, remove start location."
    '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))))
 
 ;; Gambiarra para alterar a face org-indent já que alterar no :config gera erro
-(add-hook 'org-mode-hook '(lambda () (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))))
+(add-hook 'org-mode-hook #'(lambda () (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))))
 
 (defvar jlf/org-directory "~/Sync/Jota/Academico/Projetos/Org/"
   "My Org directory.")

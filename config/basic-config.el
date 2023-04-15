@@ -418,21 +418,21 @@
      (shell . t)
      (python . t))))
 
-(setq emacs-org-filename "Emacs.org")
-(setq emacs-org-filepath (expand-file-name (concat user-emacs-directory emacs-org-filename)))
-(setq emacs-config-dir-name "config/")
-(setq emacs-config-dir-path (expand-file-name (concat user-emacs-directory emacs-config-dir-name)))
+(defvar emacs-org-filename "Emacs.org")
+(defvar emacs-org-filepath (expand-file-name (concat user-emacs-directory emacs-org-filename)))
+(defvar emacs-config-dir-name "config/")
+(defvar emacs-config-dir-path (expand-file-name (concat user-emacs-directory emacs-config-dir-name)))
 
-(setq emacs-config-basic-name "basic-config.org")
-(setq emacs-config-basic-path (concat emacs-config-dir-path emacs-config-basic-name))
+(defvar emacs-config-basic-name "basic-config.org")
+(defvar emacs-config-basic-path (concat emacs-config-dir-path emacs-config-basic-name))
 
-(setq emacs-config-python-name "python-config.org")
-(setq emacs-config-python-path (concat emacs-config-dir-path emacs-config-python-name))
+(defvar emacs-config-python-name "python-config.org")
+(defvar emacs-config-python-path (concat emacs-config-dir-path emacs-config-python-name))
 
-(setq emacs-config-org-name "org-config.org")
-(setq emacs-config-org-path (concat emacs-config-dir-path emacs-config-org-name))
+(defvar emacs-config-org-name "org-config.org")
+(defvar emacs-config-org-path (concat emacs-config-dir-path emacs-config-org-name))
 
-(setq emacs-config-files-list (list emacs-org-filepath
+(defvar emacs-config-files-list (list emacs-org-filepath
                                     emacs-config-basic-path
                                     emacs-config-python-path
                                     emacs-config-org-path))

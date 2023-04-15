@@ -8,5 +8,6 @@
 !/Emacs.org
 !/old-init.el
 !/snippets/
+!/config/
 
 .DS_Store

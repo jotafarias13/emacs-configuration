@@ -18,12 +18,13 @@
 (add-hook 'before-save-hook 'py-isort-before-save)
 
 (use-package numpydoc
+  :after yasnippet
   :init
   (setq numpydoc-insertion-style nil)
   (setq numpydoc-insertion-style 'yas)
   (setq numpydoc-insert-examples-block nil)
   :bind (:map python-mode-map
-              ("C-c C-n" . numpydoc-generate))
+	      ("C-c C-n" . numpydoc-generate))
   :after python)
 
 (defun jlf/return-t()

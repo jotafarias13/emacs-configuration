@@ -1,211 +1,4 @@
-;; Buffer de inicialização
-;; (add-hook 'after-init-hook 'jlf/org-agenda-main)
-
-;; Diretório de inicialização
-(setq default-directory "~/.emacs.d/")
-
-;; Tamanho da janela de inicialização
-(add-to-list 'initial-frame-alist '(height . 1.0))
-(add-to-list 'initial-frame-alist '(width . 1.0))
-
-;; Dados de usuário
-(setq user-full-name "João Lucas Correia Barbosa de Farias")
-(setq user-mail-address "fariasjota09@gmail.com")
-(defvar user-url "https://github.com/jotafarias13")
-
-;; Inicialização do gerenciador de pacotes padrão
-(require 'package)
-
-;; Repositórios 
-(setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                         ("org" . "https://orgmode.org/elpa/")
-                         ("elpa" . "https://elpa.gnu.org/packages/")))
-
-;; Inicialização de pacotes
-(package-initialize)
-
-;; Instalação do use-package
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-
-;; Coloca ":ensure t" em todos os pacotes
-(require 'use-package)
-(setq use-package-always-ensure t)
-
-;; Remove de mensagem de boas-vindas
-(setq inhibit-startup-message t)
-
-;; Remove menus
-(tool-bar-mode -1)
-(menu-bar-mode -1)
-
-;; Remove barra de rolagem
-(scroll-bar-mode -1)
-
-;; Numerar linhas e colunas
-(column-number-mode)
-(global-display-line-numbers-mode t)
-
-;; Desabilita line-number para alguns modos
-(dolist (mode '(org-mode-hook
-                term-mode-hook
-                shell-mode-hook
-                treemacs-mode-hook
-                pdf-view-mode-hook
-                eshell-mode-hook))
-  (add-hook mode (lambda () (display-line-numbers-mode 0))))
-
-;; Configura a numeração das linhas para serem relativas a linha atual
-(add-hook 'display-line-numbers-mode-hook
-          #'(lambda () (setq display-line-numbers 'relative)))
-
-
-;; Visual line mode sempre ativo
-(global-visual-line-mode 1)
-
-;; Indica começo-fim de parênteses
-(add-hook 'after-init-hook (lambda () (show-paren-mode 1)))
-;; Altera cor do parêntese e do background quando der match em um parêntese
-(add-hook 'show-paren-mode-hook #'(lambda () (set-face-attribute 'show-paren-match nil :foreground "Magenta" :background "#595959")))
-;; Obs: foi necessário fazer dessa forma por que o show-paren-mode-hook não estava funcionando como esperado.
-
-;; Barra de modos (inferior) minimalista
-(use-package doom-modeline
-  :init (doom-modeline-mode 1)
-  :custom ((doom-modeline-height 15)))
-
-;; Pacote All the icons
-(use-package all-the-icons)
-;; Obs: é preciso instalar as fontes do pacote (executar apenas uma vez)
-;; M-x all-the-icons-install-fonts
-
-;; Gerenciamento de arquivos de backup e autosave
-(setq backup-directory-alist '((".*" . "~/.emacs.d/backup/")))
-(setq version-control t)
-(setq delete-old-versions t)
-(setq auto-save-list-file-prefix "~/.emacs.d/autosave/")
-(setq auto-save-file-name-transforms '((".*" "~/.emacs.d/autosave/" t)))
-
-;; Envia comandos custom para outro arquivo
-(setq custom-file "~/.emacs.d/custom.el")
-(load custom-file)
-
-;; Gerencia atualização automática dos pacotes
-;; (use-package auto-package-update
-;;   :custom
-;;   (auto-package-update-interval 30)
-;;   (auto-package-update-prompt-before-update t)
-;;   (auto-package-update-hide-results t)
-;;   :config
-;;   (auto-package-update-maybe)
-;;   (auto-package-update-at-time "10:00"))
-
-;; Atalhos personalizados para manipular janelas, selecionar texto e usar colar do clipboard
-(global-set-key (kbd "M-<up>") 'enlarge-window) ;; aumentar a janela verticalmente com M-<up>
-(global-set-key (kbd "M-<down>") 'shrink-window) ;; diminuir a janela verticalmente com M-<down>
-(global-set-key (kbd "M-<right>") 'enlarge-window-horizontally) ;; aumentar a janela horizontalmente com M-<right>
-(global-set-key (kbd "M-<left>") 'shrink-window-horizontally) ;; diminuir a janela horizontalmente com M-<left>
-;; (global-set-key (kbd "C-=") 'set-mark-command) ;; selecionar texto com C-=
-(global-set-key (kbd "C-M-y") 'clipboard-yank) ;; colar do clipboard
-
-;; Atalhos para dired, para abrir o init.el e para abrir o eshell 
-(global-set-key (kbd "C-M-0") (lambda () (interactive) (find-file "~/.emacs.d/Emacs.org" nil)))
-(global-set-key (kbd "C-M-1") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Pós-Graduação/UFRN/Mestrado/Dissertação/Defesa/")))
-(global-set-key (kbd "C-M-2") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Projetos/C++/")))
-(global-set-key (kbd "C-M-3") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/Academico/Projetos/Org/")))
-(global-set-key (kbd "C-M-4") (lambda () (interactive) (dired-jump nil "~/Sync/Jota/")))
-(global-set-key (kbd "C-M-s") (lambda () (interactive) (eshell nil)))
-
-(when (eq system-type 'darwin) ;; verifica se está no Mac
-  (setq mac-command-modifier 'control)
-  (setq mac-right-command-modifier 'meta))
-
-;; Tamanho das fontes
-(defvar jlf/default-font-size 150)
-(defvar jlf/default-fixed-font-size 130)
-(defvar jlf/default-variable-font-size 150)
-(defvar jlf/monitor-font-size 190)
-(defvar jlf/monitor-fixed-font-size 170)
-(defvar jlf/monitor-variable-font-size 190)
-
-;; Fontes utilizadas
-;; É necessário baixar as fontes Fira Code e Inconsolata
-;; As funções criadas com namespace 'sscreen' (switch-screen) possibilitam trocar os tamanhos das fontes para diferentes tipos de telas (sem alterar frame size ou modeline size)
-
-(defvar sscreen--current-screen-type-index 1
-  "Index of the current screen type according to sscreen--screen-types.")
-
-(defvar sscreen-screen-types '("Default" "Monitor")
-  "All screen types available for user setup.")
-
-(defun sscreen-switch-screen-type ()
-  "Switches screen type changing font sizes accordingly."
-  (interactive)
-  (let* ((frame-inhibit-implied-resize t)
-         (screen-type-list (append sscreen-screen-types '("Custom")))
-         (screen-type (completing-read "Screen " screen-type-list)))
-    (pcase screen-type
-      ("Monitor" 
-       (progn
-         (set-face-attribute 'default nil :family "Inconsolata" :height jlf/monitor-font-size)
-         (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height jlf/monitor-fixed-font-size)
-         (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height jlf/monitor-variable-font-size :weight 'regular)))
-      ("Custom" 
-       (call-interactively
-        (lambda (default-font-size fixed-font-size variable-font-size)
-          (interactive "nDefault Font Size: \nnFixed Font Size: \nnVariable Font Size: ")
-          (set-face-attribute 'default nil :family "Inconsolata" :height default-font-size)
-          (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height fixed-font-size)
-          (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height variable-font-size :weight 'regular))))
-      (_ 
-       (progn
-         (set-face-attribute 'default nil :family "Inconsolata" :height jlf/default-font-size)
-         (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height jlf/default-fixed-font-size)
-         (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height jlf/default-variable-font-size :weight 'regular))))) 
-  (doom-modeline-refresh-font-width-cache)) 
-
-(defun sscreen--change-screen-type (screen-type)
-  "Updates font sizes according to screen-type."
-  (let ((frame-inhibit-implied-resize t)) 
-    (pcase screen-type
-      ("Monitor" 
-       (progn
-         (set-face-attribute 'default nil :family "Inconsolata" :height jlf/monitor-font-size)
-         (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height jlf/monitor-fixed-font-size)
-         (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height jlf/monitor-variable-font-size :weight 'regular)))
-      ("Custom" 
-       (call-interactively
-        (lambda (default-font-size fixed-font-size variable-font-size)
-          (interactive "nDefault Font Size: \nnFixed Font Size: \nnVariable Font Size: ")
-          (set-face-attribute 'default nil :family "Inconsolata" :height default-font-size)
-          (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height fixed-font-size)
-          (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height variable-font-size :weight 'regular))))
-      (_ 
-       (progn
-         (set-face-attribute 'default nil :family "Inconsolata" :height jlf/default-font-size)
-         (set-face-attribute 'fixed-pitch nil :family "Fira Code" :height jlf/default-fixed-font-size)
-         (set-face-attribute 'variable-pitch nil :family "Inconsolata" :height jlf/default-variable-font-size :weight 'regular))))) 
-  (doom-modeline-refresh-font-width-cache))
-
-(defun sscreen-toggle-screen-type ()
-  "Updates the index of the current screen type to the next value in sscreen-screen-types and calls sscreen--change-screen-type to change the font sizes accordingly."
-  (interactive)
-  (setq sscreen--current-screen-type-index (+ sscreen--current-screen-type-index 1))
-  (if (>= sscreen--current-screen-type-index (length sscreen-screen-types))
-      (setq sscreen--current-screen-type-index 0))
-  (let ((screen-type (nth sscreen--current-screen-type-index sscreen-screen-types)))
-    (sscreen--change-screen-type screen-type)))
-
-;; Inicializar o emacs com o screen type "Default"
-(add-hook 'after-init-hook (lambda () (sscreen--change-screen-type "Monitor")))
-
-;; Keybinding para chamar a função
-(global-set-key (kbd "M-+") 'sscreen-toggle-screen-type)
-
-;; Tema doom-moonlight
-(use-package doom-themes
-  :init (load-theme 'doom-moonlight t))
+(load-file (concat user-emacs-directory "config/basic-config.el"))
 
 (use-package which-key
   :config
@@ -215,48 +8,6 @@
 
 (use-package ace-window
   :bind (("C-1" . ace-window)))
-
-;; Configuração do ivy (autocompletar no minibuffer)
-(use-package ivy
-  :diminish 
-  :bind (("C-s" . swiper)
-         :map ivy-minibuffer-map
-         ("TAB" . ivy-alt-done)	
-         ("C-l" . ivy-alt-done)
-         ("C-j" . ivy-next-line)
-         ("C-k" . ivy-previous-line)
-         ("C-RET" . ivy-immediate-done)
-         :map ivy-switch-buffer-map
-         ("C-k" . ivy-previous-line)
-         ("C-l" . ivy-done)
-         ("C-d" . ivy-switch-buffer-kill)
-         :map ivy-reverse-i-search-map
-         ("C-k" . ivy-previous-line)
-         ("C-d" . ivy-reverse-i-search-kill))
-  :config
-  (ivy-mode 1))
-
-;; Exibe ícones para todos os buffer no ivy
-(use-package all-the-icons-ivy-rich
-  :after ivy
-  :init (all-the-icons-ivy-rich-mode 1))
-
-;; Substitui comandos para funcionar melhor com ivy
-(use-package counsel
-  :bind (:map counsel-mode-map
-  ([remap switch-to-buffer] . counsel-switch-buffer)
-  ([remap dired] . counsel-dired))
-  :config
-  (counsel-mode 1))
-
-;; Adiciona informações sobre cada comando no ivy
-(use-package ivy-rich
-  :after ivy
-  :init
-  (ivy-rich-mode 1))
-
-;; Ferramenta de pesquisa que substitui isearch e tem integração com ivy
-(use-package swiper)
 
 ;; Autocompletion in-buffer
 (use-package company
@@ -273,103 +24,15 @@
   (company-idle-delay 0.2))
 
 ;; Melhora aparência do menu de autocompletion
-;; (use-package company-box
-;;   :hook (company-mode . company-box-mode))
-
-;; Integração com LSP de python (pylsp)
-;; Atualmente não funciona
-;; (use-package company-jedi
-;;   :init
-;;   (setq jedi:complete-on-dot t)
-;;   (setq jedi:get-in-function-call-delay 100)
-;;   (setq jedi:get-in-function-call-timeout 200))
-
-;; (defun my/python-mode-hook ()
-;;   (add-to-list 'company-backends 'company-jedi)
-;;   (jedi-mode))
-
-;; (add-hook 'python-mode-hook 'my/python-mode-hook)
-
-;; Configura a exibição de itens do dired, a funcionalidade do dwim e alocação de itens deletados
-(use-package dired
-  :ensure nil
-  :bind (
-         ("C-x C-j" . dired-jump)
-         ("C-=" . dired-create-empty-file))
-  :custom
-  (dired-listing-switches "-agho --group-directories-first")
-
-  (dired-dwim-target t) ;; quando tem dois dired abertos, usa o segundo como path pra comandos do primeiro
-  (delete-by-moving-to-trash t)) ;; move os itens deletados para o lixo do computador
-
-;; Configura a manutenção de um único buffer do dired quando se abre arquivos ou diretórios
-(use-package dired-single
-  :after evil-collection
-  :config
-  (evil-collection-define-key 'normal 'dired-mode-map
-    "h" 'dired-single-up-directory
-    "l" 'dired-single-buffer))  ;; utiliza 'h' e 'l' para subir/descer na raiz de diretórios
-
-;; Configurações adicionais do dired-single (diretamente do repositório do pacote)
-(defun my-dired-init ()
-  "Remaps some dired functions to use dired-single functions.\nBunch of stuff to run for dired, either immediately or when it's
-       loaded."
-  (define-key dired-mode-map [remap dired-find-file]
-    'dired-single-buffer)
-  (define-key dired-mode-map [remap dired-mouse-find-file-other-window]
-    'dired-single-buffer-mouse)
-  (define-key dired-mode-map [remap dired-up-directory]
-    'dired-single-up-directory))
-
-;; if dired's already loaded, then the keymap will be bound
-(if (boundp 'dired-mode-map)
-    ;; we're good to go; just add our bindings
-    (my-dired-init)
-  ;; it's not loaded yet, so add our bindings to the load-hook
-  (add-hook 'dired-load-hook 'my-dired-init))
-
-
-;; Configura 'H' para esconder/exibir dotfiles nos itens do diretório
-(use-package dired-hide-dotfiles
-  :hook (dired-mode . dired-hide-dotfiles-mode)
-  :config
-  (evil-collection-define-key 'normal 'dired-mode-map
-    "H" 'dired-hide-dotfiles-mode))
-
-;; Configura o swiper para pesquisa no dired através do '/' 
-(defun guto/dired-swiper ()
-  "teste"
-  (interactive)
-  (swiper)
-  (if (file-directory-p (dired-file-name-at-point))
-      (progn
-        (dired-single-buffer)
-        (guto/dired-swiper))
-    (dired-single-buffer)))
-
-(with-eval-after-load "evil"
-  (evil-define-key 'normal dired-mode-map (kbd "/") 'guto/dired-swiper)
-  (evil-define-key 'normal dired-mode-map (kbd "SPC") 'dired-view-file))
-
-;; ls do Mac não suporta a flag --dired
-;; Instala o coreutils pelo homebrew
-;; Coloca o path pro executável na variável 'insert-directory-program'
-(when (string= system-type "darwin")
-  (setq dired-use-ls-dired t
-        insert-directory-program "/usr/local/bin/gls"))
-
-
-
-;; Adiciona ícones para os elementos do dired
-(use-package all-the-icons-dired
-  :hook 
-  (dired-mode . all-the-icons-dired-mode)
-  (all-the-icons-dired-mode . (lambda () (setq all-the-icons-dired-monochrome nil))))
+(use-package company-box
+  :hook (company-mode . company-box-mode))
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode)
   :config
-  (set-face-attribute 'rainbow-delimiters-depth-3-face nil :foreground "systemBlueColor")) ;; Fica melhor com o tema doom-moonlight
+    ;; (set-face-attribute 'rainbow-delimiters-depth-3-face nil :foreground "systemBlueColor")) ;; Fica melhor com o tema doom-moonlight
+    (set-face-attribute 'rainbow-delimiters-depth-1-face nil :foreground "systemBlueColor") ;; Fica melhor com o tema dracula
+    (set-face-attribute 'rainbow-delimiters-depth-4-face nil :foreground "systemIndigoColor")) ;; Fica melhor com o tema dracula
 
 ;; Adiciona informação extra nos buffers de ajuda
 (use-package helpful
@@ -383,95 +46,12 @@
   ([remap describe-variable] . counsel-describe-variable)
   ([remap describe-key] . helpful-key))
 
-(defun jlf/olivetti-mode-setup ()
-  (olivetti-mode)
-  (olivetti-set-width 0.9))
+;; (defun jlf/olivetti-mode-setup ()
+;;   (olivetti-mode)
+;;   (olivetti-set-width 0.9))
 
-(use-package olivetti
-  :hook (org-mode . jlf/olivetti-mode-setup))
-
-;; Melhora as funções de desfazer e refazer do evil
-(use-package undo-tree
-  :config
-  (setq undo-tree-visualizer-diff t)
-  (global-undo-tree-mode))
-
-;; Configura o evil-mode para simular o Vim no Emacs
-(use-package evil
-  :init
-  (setq evil-want-integration t)
-  (setq evil-want-keybinding nil)
-  (setq evil-want-C-u-scroll t)
-  (setq evil-want-C-i-jump nil)
-  (setq evil-want-Y-yank-to-eol t)
-  (setq evil-undo-system 'undo-tree)
-  :config
-  (evil-mode 1)
-  (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-  (define-key evil-normal-state-map (kbd "m") (lambda () (interactive) (evil-open-below 1) (evil-normal-state)))
-  (define-key evil-normal-state-map (kbd "M") (lambda () (interactive) (evil-open-above 1) (evil-normal-state)))
-  (define-key evil-normal-state-map (kbd "g r") 'revert-buffer)
-  (define-key evil-motion-state-map (kbd "C-u") 'evil-scroll-up)
-  (define-key evil-insert-state-map (kbd "Z") (lambda () (interactive) (evil-force-normal-state) (evil-append-line 1)))
-
-  ;; Configura a navegação para funcionar quando visual-line-mode não está ativado
-  (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-  (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
-  (evil-global-set-key 'motion "gj" 'evil-next-line)
-  (evil-global-set-key 'motion "gk" 'evil-previous-line)
-
-  (evil-set-initial-state 'messages-buffer-mode 'normal)
-  (evil-set-initial-state 'dashboard-mode 'normal))
-
-;; Aumenta a atuação dos keybindings do evil
-(use-package evil-collection
-  :after evil
-  :custom
-  (evil-collection-company-use-tng nil)   ;; evita o bug de completion de funções do clangd
-  :config
-  (evil-collection-init))
-
-;; Emula a ação surround do vim
-(use-package evil-surround
-  :config
-  (global-evil-surround-mode 1))
-
-;; Adiciona "linha" como um text-obj (w,W,b,B etc)
-(use-package evil-textobj-line)
-
-;; Adiciona o comandos "gc" para comentar como uma ação (d,c,y etc)
-(use-package evil-commentary
-  :config
-  (evil-commentary-mode))
-
-;; Destaca a parte do texto onde um comando foi efetuado
-(use-package evil-goggles
-  :config
-  (evil-goggles-mode)
-  (evil-goggles-use-diff-faces))
-
-(use-package evil-exchange)
-(setq evil-exchange-key (kbd "gz"))
-(setq evil-exchange-cancel-key (kbd "gZ"))
-(evil-exchange-install)
-
-(use-package evil-easymotion
-  :config
-  (evilem-default-keybindings "SPC"))
-
-(evilem-define (kbd "SPC f") (list 'evil-repeat-find-char
-                                   'evil-repeat-find-char-reverse)
-               :pre-hook (save-excursion
-                           (setq evil-this-type 'inclusive)
-                           (call-interactively #'evil-find-char))
-               :bind ((evil-cross-lines t)))
-
-(evilem-define (kbd "SPC t") (list 'evil-repeat-find-char
-                                   'evil-repeat-find-char-reverse)
-               :pre-hook (save-excursion
-                           (setq evil-this-type 'inclusive)
-                           (call-interactively #'evil-find-char-to))
-               :bind ((evil-cross-lines t)))
+;; (use-package olivetti
+;;   :hook (org-mode . jlf/olivetti-mode-setup))
 
 (use-package prescient
   :custom
@@ -489,19 +69,6 @@
   (company-prescient-sort-length-enable nil)
   :config
   (company-prescient-mode))
-
-;; Altera o padrão para separação de sentenças para ser apenas um espaço
-(setq sentence-end-double-space nil)
-
-;; Diminui prompts yes/no para agilizar escolha
-(fset 'yes-or-no-p 'y-or-n-p)
-
-(setq recentf-mode 1)
-(global-set-key (kbd "C-M-b") 'recentf-open-files) ;; abrir buffer com arquivos recentes
-
-;; Mostra histórico de opções no minibuffer usando M-p
-(setq history-length 25)
-(setq savehist-mode 1)
 
 ;; Possibilita a criação de bundles estilo TextMate
 (use-package yasnippet
@@ -618,60 +185,57 @@
         (c++-mode . "cc-mode")
         (other . "gnu")))
 
-;; (use-package python-mode
-;;   :hook
-;;   (python-mode . lsp-deferred)
-;;   (python-mode . electric-pair-mode)
-;;   :custom
-;;   (python-shell-interpreter "python3")
-;;   :init
-;;   (setq lsp-pylsp-plugins-jedi-completion-fuzzy t))
+(load-file (concat user-emacs-directory "config/python-config.el"))
 
-(use-package elpy
-  :init
-  (elpy-enable)
-  (setq python-shell-interpreter "python3")
-  (highlight-indentation-mode)
-  (setq elpy-rpc-python-command "python3")
-  (setq elpy-shell-darwin-use-pty t))
+(use-package yaml-mode)
 
-;; (use-package pyvenv
-;;   :config
-;;   (pyvenv-mode 1))
+(use-package dockerfile-mode)
 
-(use-package flycheck)
-  ;; :hook (python-mode . flycheck-mode))
+(use-package treemacs
+  :config
+  (treemacs-git-mode 'deferred)
+  (treemacs-filewatch-mode t)
+  (treemacs-peek-mode t)
+  :bind
+  (:map global-map
+        ("M-0"       . treemacs-select-window)
+        ("C-x t 1"   . treemacs-delete-other-windows)
+        ("C-x t t"   . treemacs)
+        ("C-x t d"   . treemacs-select-directory)
+        ("C-x t B"   . treemacs-bookmark)
+        ("C-x t C-t" . treemacs-find-file)
+        ("C-x t M-t" . treemacs-find-tag)))
 
-(defun return-t() t)
+(use-package treemacs-evil
+  :after (treemacs evil))
 
-(defun jlf/end-python-work()
-  "Kills python process and deactivates any virtual environments."
-  (interactive)
-  (let ((kill-buffer-query-functions (list 'return-t)))
-    (kill-buffer "*Python*"))
-  (pyvenv-deactivate))
+(use-package treemacs-icons-dired
+  :hook (dired-mode . treemacs-icons-dired-enable-once))
 
-(add-hook 'python-mode-hook 'hs-minor-mode)
-(add-hook 'python-mode-hook 'electric-pair-mode)
-(add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c k") 'jlf/end-python-work)))
-(add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c C-a") 'pyvenv-activate)))
+(use-package treemacs-magit
+  :after (treemacs magit))
 
-(use-package blacken
-  :hook (python-mode . blacken-mode)
-  :init (setq blacken-line-length 79))
+(use-package treemacs-all-the-icons
+  :after (treemacs treemacs-icons-dired))
 
-(use-package python-isort
-  :after python
-  :hook (python-mode . python-isort-on-save-mode))
+(use-package tree-sitter)
+(use-package tree-sitter-langs)
+(add-hook 'python-mode-hook 'tree-sitter-mode)
+(add-hook 'python-mode-hook #'(lambda () (tree-sitter-hl-mode)))
+
+(with-eval-after-load "flymake" 
+  (set-face-attribute 'flymake-warning nil :underline nil))
 
 ;; Funciona como um cliente LSP para Emacs, utilizado para escrever em LaTeX
 (use-package eglot
-  :hook (LaTeX-mode . eglot-ensure))
+  :hook 
+  (LaTeX-mode . eglot-ensure)
+  (python-mode . eglot-ensure))
 
 ;; Auxilia o Eglot a reconhecer projetos com arquivos em diretórios distintos
 
 ;; (defvar main-tex "defesa.tex")
-(defvar main-tex "projeto-pesquisa.tex")
+(defvar main-tex "main.tex")
 
 (defun jlf/latex-root (dir)
   (when-let ((root (locate-dominating-file dir main-tex)))
@@ -680,26 +244,18 @@
 (add-hook 'project-find-functions #'jlf/latex-root)
 
 (cl-defmethod project-root ((project (head latex-module)))
-   (cdr project))
+  (cdr project))
 
 (defvar jlf/my-workspace-alist (list)
   "List of entries in workspace.")
 
-(add-to-list 'jlf/my-workspace-alist '("Artigo" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Artigos/2022/JHE"))) t)
-(add-to-list 'jlf/my-workspace-alist '("Dissertação C++" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Projetos/C++/pancreasArtificial/"))) t)
-(add-to-list 'jlf/my-workspace-alist '("Dissertação TeX" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Pós-Graduação/UFRN/Mestrado/Dissertação/Defesa/"))) t)
 (add-to-list 'jlf/my-workspace-alist '("Emacs" . (lambda () (jlf/my-workspace-find-file "~/.emacs.d/"))) t)
 (add-to-list 'jlf/my-workspace-alist '("Slip-Box" . (lambda () (jlf/my-workspace-find-file jlf/slipbox-directory))) t)
-(add-to-list 'jlf/my-workspace-alist '("Agenda" . (lambda () (org-agenda nil "d") (delete-other-windows))) t)
-(add-to-list 'jlf/my-workspace-alist '("Org" . (lambda () (jlf/my-workspace-find-file org-directory))) t)
 (add-to-list 'jlf/my-workspace-alist '("Doutorado" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Pós-Graduação/UFRN/Doutorado/"))) t)
-;; (add-to-list 'jlf/my-workspace-alist '("Ledger" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Financeiro/Ledger/"))) t)
 (add-to-list 'jlf/my-workspace-alist '("Ledger" . (lambda () (find-file "~/Sync/Jota/Financeiro/Ledger/ledger.dat"))) t)
 (add-to-list 'jlf/my-workspace-alist '("Lattes" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Projetos/Lattes/"))) t)
-(add-to-list 'jlf/my-workspace-alist '("Ensino" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Ensino/Substituto UFRN/2022-2/"))) t)
 (add-to-list 'jlf/my-workspace-alist '("Python" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Projetos/Python/"))) t)
-(add-to-list 'jlf/my-workspace-alist '("O-data" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/O-data/"))) t)
-(add-to-list 'jlf/my-workspace-alist '("Hubbi" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/O-data/Hubbi/scripts/hubbi/"))) t)
+(add-to-list 'jlf/my-workspace-alist '("NewGate" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/NewGate/"))) t)
 
 (defun jlf/my-workspace-find-file (FILE)
   (let ((default-directory FILE))
@@ -743,7 +299,7 @@
   (define-key pdf-view-mode-map (kbd "C-r") 'isearch-backward)
   ;; Ativa midnight-mode automaticamente para PDF's (inversão de cores)
   (add-hook 'pdf-view-mode-hook (lambda ()
-    (pdf-view-midnight-minor-mode t)))) 
+                                  (pdf-view-midnight-minor-mode t)))) 
 
 ;; Função para otimizar os espaços laterais "em branco" do buffer
 (defun guto/pdf-view-slice-vertical (&optional window)
@@ -771,13 +327,14 @@
 
 ;; Conserta o bug do pdf-tools ao utilizar o pacote evil (borda do buffer piscando)
 (add-hook 'pdf-view-mode-hook
-  (lambda ()
-    (set (make-local-variable 'evil-normal-state-cursor) (list nil))
-    (internal-show-cursor nil nil)))
+          (lambda ()
+            (set (make-local-variable 'evil-normal-state-cursor) (list nil))
+            (internal-show-cursor nil nil)))
 
 ;; Configura atalhos para movimentação de e para hyperlinks no PDF buffer
-(evil-define-key 'normal pdf-view-mode-map (kbd ";") 'pdf-history-backward)
-(evil-define-key 'normal pdf-view-mode-map (kbd ",") 'pdf-history-forward)
+(with-eval-after-load "evil"
+  (evil-define-key 'normal pdf-view-mode-map (kbd ";") 'pdf-history-backward)
+  (evil-define-key 'normal pdf-view-mode-map (kbd ",") 'pdf-history-forward))
 
 ;; Salva a localização (página) do PDF para quando abrir novamente
 ;; A informação fica salva em ".pdf-view-restore" no mesmo diretório do Emacs "~/.emacs.d/"
@@ -913,21 +470,6 @@
 ;; org-roam-protocol
 (require 'org-roam-protocol)
 
-;; org-roam-server
-;; (use-package org-roam-server
-;;   :config
-;;   (setq org-roam-server-host "127.0.0.1"
-;;         org-roam-server-port 8080
-;;         org-roam-server-authenticate nil
-;;         org-roam-server-export-inline-images t
-;;         org-roam-server-serve-files nil
-;;         org-roam-server-served-file-extensions '("pdf" "mp4" "ogv")
-;;         org-roam-server-network-poll t
-;;         org-roam-server-network-arrows nil
-;;         org-roam-server-network-label-truncate t
-;;         org-roam-server-network-label-truncate-length 60
-;;         org-roam-server-network-label-wrap-length 20))
-
 (use-package org-roam-ui
   :after org-roam
   :config
@@ -1030,7 +572,6 @@ With a prefix ARG, remove start location."
 
 (use-package org-roam-bibtex
   :after org-roam
-  :load-path "~/Sync/Jota/Academico/Projetos/Emacs/org-roam-bibtex-branch-v2/org-roam-bibtex/"
   :custom
   (orb-preformat-keywords
    '("=key=" "file" "title" "=type=" "author-or-editor" "year" "journal" "doi" "url" "keywords" "abstract"))
@@ -1083,6 +624,7 @@ If CLIPBOARD-YANK is nil, only add the space for a new entry."
 (global-set-key (org-research--key "R") 'org-roam-buffer-toggle)
 (global-set-key (org-research--key "f") 'org-roam-node-find)
 (global-set-key (org-research--key "g") 'org-roam-graph)
+(global-set-key (org-research--key "u") 'org-roam-ui-mode)
 (global-set-key (org-research--key "d") 'org-roam-dailies-capture-today)
 (global-set-key (org-research--key "a a") 'org-roam-alias-add)
 (global-set-key (org-research--key "a r") 'org-roam-ref-add)
@@ -1091,350 +633,7 @@ If CLIPBOARD-YANK is nil, only add the space for a new entry."
 (global-set-key (org-research--key "a b") (lambda () (interactive) (jlf/org-roam-add-bibliography t)))
 (global-set-key (org-research--key "a B") 'jlf/org-roam-add-bibliography)
 
-;; (use-package perspective
-;;   :custom
-;;   (persp-mode-prefix-key (kbd "C-c p"))
-;;   (persp-state-default-file "~/.emacs.d/persp-state-session")
-;;   (persp-modestring-short t)
-;;   :bind (("C-x b" . persp-counsel-switch-buffer))
-;;   :config
-;;   (persp-mode))
-
-;; (add-hook 'kill-emacs-hook #'persp-state-save)
-
-;; Congifuração das fontes e faces
-(defun jlf/org-font-setup ()
-
-  ;; Substitui os hífens das listas por pontos (bullets)
-  (font-lock-add-keywords 'org-mode
-                          '(("^ *\\([-]\\) "
-                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
-
-  ;; Configura as faces dos headings
-  (dolist (face '((org-document-title . 1.42)
-                  (org-level-1 . 1.4)
-                  (org-level-2 . 1.2)
-                  (org-level-3 . 1.15)
-                  (org-level-4 . 1.1)
-                  (org-level-5 . 1.1)
-                  (org-level-6 . 1.1)
-                  (org-level-7 . 1.1)
-                  (org-level-8 . 1.1)))
-    (set-face-attribute (car face) nil :family "Inconsolata" :weight 'regular :width 'condensed :height (cdr face)))
-
-  ;; Configura as faces de título e keywords
-  (dolist (face '((org-document-info-keyword . 1.0)
-                  (org-document-info . 1.0)))
-    (set-face-attribute (car face) nil :family "Inconsolata" :weight 'regular :height (cdr face)))
-
-  ;; Assegura que o que deve ser fixed-pitch no org-mode fique dessa forma
-  (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
-  (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
-  (set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-table nil    :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-  (set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch)
-  (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
-  (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch)
-
-  (custom-theme-set-faces
-   'user
-   '(org-document-info ((t (:foreground "dark orange"))))
-   '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
-   '(org-link ((t (:foreground "linkColor" :underline t))))
-   '(org-property-value ((t (:inherit fixed-pitch))) t)
-   '(org-table ((t (:inherit fixed-pitch :foreground "#83a598"))))
-   '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))))
-
-;; Gambiarra para alterar a face org-indent já que alterar no :config gera erro
-(add-hook 'org-mode-hook #'(lambda () (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))))
-
-(defvar jlf/org-directory "~/Sync/Jota/Academico/Projetos/Org/"
-  "My Org directory.")
-
-(defun jlf/org-mode-setup ()
-  (org-indent-mode)
-  (variable-pitch-mode 1)
-  (visual-line-mode 1))
-
-(use-package org
-  :pin org
-  :commands (org-capture org-agenda)
-  :hook (org-mode . jlf/org-mode-setup)
-  :bind 
-  ("C-c t" . counsel-org-tag)
-  ("C-c a" . org-agenda)
-  ("C-c d" . (lambda () (interactive) (org-todo "DONE"))) 
-  ("C-c w" . (lambda () (interactive) (org-todo "DONE") (org-refile))) 
-  :custom
-  (org-startup-folded 'content)
-  (org-directory jlf/org-directory)
-  (org-format-latex-options '(
-                              :foreground default
-                              :background default
-                              :scale 1.7
-                              :html-foreground "Black"
-                              :html-background "Transparent"
-                              :html-scale 1.7
-                              :matchers ("begin" "$1" "$" "$$" "\\(" "\\[")))
-  :config
-  (setq org-ellipsis " ▾")
-  (setq org-hide-emphasis-markers t) 
-  (jlf/org-font-setup))
-
-
-(with-eval-after-load 'org  
-  ;; Códigos finais
-
-  ;; Variáveis
-  (defvar jlf/org-directory "~/Sync/Jota/Academico/Projetos/Org/"
-    "My Org directory.")
-
-  (defvar jlf/org-agenda-directory (concat jlf/org-directory "Agenda/")
-    "My Org Agenda directory.")
-
-  (defvar jlf/org-calendar-directory (concat jlf/org-directory "Calendar/")
-    "My Org Calendar directory.")
-
-
-  ;; Templates
-  (add-to-list 'org-capture-templates
-               `("i" "Inbox" entry (file ,(concat jlf/org-agenda-directory "inbox.org"))
-                 "* TODO %^{Description: }"
-                 :immediate-finish t) t)
-
-  (add-to-list 'org-capture-templates
-               `("pi" "Inbox" entry (file ,(concat jlf/org-agenda-directory "inbox.org"))
-                 "* TODO [[%:link][%:description]]\n%^{Description: }"
-                 :immediate-finish t) t)
-
-
-  ;; Org-log
-  (setq org-agenda-start-with-log-mode t)
-  (setq org-log-done 'time)
-  (setq org-log-into-drawer t)
-
-  ;; Org agenda view
-  (setq org-agenda-block-separator "\n")
-  (setq org-agenda-remove-tags t)
-
-  ;; Agenda Custom
-  (setq jlf/org-agenda-main-view
-        `(" " "Agenda"
-          ((agenda ""
-                   ((org-agenda-span 'day)
-                    (org-deadline-warning-days 60)))
-           (todo "TODO"
-                 ((org-agenda-overriding-header "To Refile")
-                  (org-agenda-files '(,(concat jlf/org-agenda-directory "inbox.org")))))
-           (todo "NEXT"
-                 ((org-agenda-overriding-header "In Progress")
-                  (org-agenda-files '(,(concat jlf/org-agenda-directory "projects.org")
-                                      ,(concat jlf/org-agenda-directory "tasks.org")
-                                      ,(concat jlf/org-agenda-directory "reading.org")))))
-           (todo "TODO"
-                 ((org-agenda-overriding-header "Projects")
-                  (org-agenda-files '(,(concat jlf/org-agenda-directory "projects.org")))))
-           (todo "TODO"
-                 ((org-agenda-overriding-header "Tasks")
-                  (org-agenda-files '(,(concat jlf/org-agenda-directory "tasks.org")))
-                  (org-agenda-skip-function '(org-agenda-skip-entry-if 'timestamp)))))))
-
-  (setq jlf/org-agenda-week-view
-        `("d" "Week"
-          ((agenda ""
-                   ((org-agenda-span 'week)
-                    (org-deadline-warning-days 60))))))
-
-  (setq jlf/org-agenda-reading-view
-        `("r" "Reading"
-          ((todo "NEXT"
-                 ((org-agenda-overriding-header "Next")
-                  (org-agenda-files '(,(concat jlf/org-agenda-directory "reading.org")))))
-           (todo "TODO"
-                 ((org-agenda-overriding-header "All")
-                  (org-agenda-files '(,(concat jlf/org-agenda-directory "reading.org"))))))))
-
-  (setq org-agenda-custom-commands nil)
-  (add-to-list 'org-agenda-custom-commands `,jlf/org-agenda-main-view)
-  (add-to-list 'org-agenda-custom-commands `,jlf/org-agenda-week-view)
-  (add-to-list 'org-agenda-custom-commands `,jlf/org-agenda-reading-view)
-
-  (defun jlf/org-agenda-main ()
-    "Open org-agenda in main view."
-    (interactive)
-    (org-agenda nil " ")
-    (delete-other-windows))
-
-  (global-set-key (kbd "C-M-_") 'jlf/org-agenda-main)
-
-  ;; Agenda Files
-  (require 'find-lisp)
-  (setq org-agenda-files (find-lisp-find-files jlf/org-agenda-directory "\.org$"))
-
-  ;; Agenda Refiles
-  (setq org-refile-use-outline-path 'file
-        org-outline-path-complete-in-steps nil)
-  (setq org-refile-allow-creating-parent-nodes 'confirm)
-
-  (setq org-refile-targets
-        '(("projects.org" :maxlevel . 2)
-          ("tasks.org" :level . 2)
-          ("reading.org" :level . 1)))
-
-  ;; Salva os buffers de org depois de executar o refile
-  (advice-add 'org-refile :after 'org-save-all-org-buffers)
-  (advice-add 'org-agenda-refile :after 'org-save-all-org-buffers)
-
-  ;; Agenda Tags
-  (setq org-tag-alist
-        '(("emacs" . ?e)
-          ("lazer" . ?l)
-          ("leitura" . ?L)
-          ("saúde" . ?s)
-          (:newline)
-          ("doutorado" . ?d)
-          ("financeiro" . ?f)
-          ("biblioteca" . ?b)
-          ("escrita" . ?E)))
-
-  ;; Agenda TODO keywords
-  (setq org-todo-keywords
-        '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
-          (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)")))
-
-  ;; Função para inbox capture
-  (defun jlf/org-capture-inbox ()
-    "Capture inbox item."
-    (interactive)
-    (org-capture nil "i"))
-
-  (global-set-key (kbd "C-c i") 'jlf/org-capture-inbox)
-  ;; (define-key org-agenda-mode-map "c" 'jlf/org-capture-inbox)
-
-  ;; Função para processar TODO
-  (defun jlf/org-agenda-process-inbox-item ()
-    "Process single inbox item in org-agenda.
-          First, set a priority. Then, set the effort. Next, choose between
-          add a timestamp, a schedule, a deadline or no timestamp. Finally,
-          refile the item."
-    (interactive)
-    (org-agenda-priority)
-    (org-agenda-set-effort)
-    (let ((time (completing-read "Time: " '("Timestamp" "Schedule" "Deadline" "No Timestamp"))))
-      (pcase time
-        ("Timestamp"
-         (call-interactively 'org-time-stamp))
-        ("Schedule"
-         (call-interactively 'org-agenda-schedule))
-        ("Deadline"
-         (call-interactively 'org-agenda-deadline))
-        ("No Timestamp"
-         ())
-        (_
-         (message "Invalid input. Using 'No Timestamp' option."))))
-    (org-agenda-refile))
-
-  ;; (define-key org-agenda-mode-map "P" 'jlf/org-agenda-process-inbox-item)
-  )
-
-(use-package org-protocol
-  :ensure nil
-  :init
-  (server-start)
-  :config
-  (add-to-list 'org-capture-templates
-               '("p" "Protocol"))
-  (add-to-list 'org-capture-templates
-               '("pb" "Bookmark" plain
-                 (file+function "~/Sync/Jota/Academico/Projetos/Org/Protocol/bookmarks.org" jlf/org-protocol--capture-template-headline-target)
-                 "** %(if (string-empty-p \"\%:description\") \"\%^{Title: }\" \"\%:description\")\n:LINK: %:link\n:ACCESS: [%<%d-%m-%Y %a %H:%M:%S>]\n%^{Description: }"
-                 :empty-lines 1
-                 :immediate-finish t) t)
-  (add-to-list 'org-capture-templates
-               '("pr" "Read List" plain
-                 (file+function "~/Sync/Jota/Academico/Projetos/Org/Protocol/read_list.org" jlf/org-protocol--capture-template-headline-target)
-                 "** TODO %(if (string-empty-p \"\%:description\") \"\%^{Title: }\" \"\%:description\")\n:LINK: %:link\n:ACCESS: [%<%d-%m-%Y %a %H:%M:%S>]\n%^{Description: }"
-                 :empty-lines 1
-                 :immediate-finish t) t))
-
-;; Função que retorna uma lista com todos os headings level N de um org-buffer
-(defun jlf/org--return-level-n-headings (N)
-  (org-element-map (org-element-parse-buffer) 'headline
-    (lambda (item)
-      (when (= (org-element-property :level item) N) (org-element-property :raw-value item)))))
-
-;; Função que retorna o buffer-point para inserção de um novo heading
-(defun jlf/org-protocol--capture-template-headline-target ()
-  (let* ((options (jlf/org--return-level-n-headings 1))
-         (heading (completing-read "Section: " (add-to-list 'options "* ADD NEW SECTION *"))))
-    (if (string-equal heading "* ADD NEW SECTION *")
-        (call-interactively
-         (lambda (new-section)
-           (interactive "sNew Section: ")
-           (goto-char (point-min))
-           (if (re-search-forward "^* Others" nil t)
-               (progn
-                 (beginning-of-line)
-                 (newline)
-                 (previous-line))
-             (progn
-               (goto-char (point-max))
-               (evil-open-below 2)
-               (evil-normal-state)))
-           (insert (concat "* " new-section "\n"))))
-      (progn
-        (goto-char (point-min))
-        (re-search-forward (concat "^* " heading))
-        (org-end-of-subtree)
-        (org-return)))))
-
-;; Melhora a integração do evil com org
-(use-package evil-org
-  :after org
-  :hook (org-mode . evil-org-mode)
-  :config
-  (require 'evil-org-agenda)
-  (evil-org-agenda-set-keys))
-
-;; Usa bullet points em vez de hífen
-(use-package org-bullets
-  :hook (org-mode . org-bullets-mode)
-  :custom
-  (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
-
-;; Structure templates para as linguagens mais utilizadas em org-mode
-(with-eval-after-load 'org
-  ;; This is needed as of Org 9.2
-  (require 'org-tempo)
-
-  (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
-  (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
-  (add-to-list 'org-structure-template-alist '("cc" . "src C"))
-  (add-to-list 'org-structure-template-alist '("cpp" . "src C++"))
-  (add-to-list 'org-structure-template-alist '("py" . "src python")))
-
-;; Configura as linguagens de programação a serem compatíveis com org-babel
-(with-eval-after-load 'org
-(org-babel-do-load-languages
-    'org-babel-load-languages
-    '((emacs-lisp . t)
-    (C . t)
-    (latex . t)
-    (python . t))))
-
-;; Exporta automaticamente o arquivo de saída associado aos blocos de código (tangle) toda vez que o arquivo .org for salvo
-(defun jlf/org-babel-tangle-config ()
-(when (string-equal (buffer-file-name) "/Users/jota/.emacs.d/Emacs.org")
-;; (when (string-equal (file-name-directory (buffer-file-name))
-;;                     (expand-file-name user-emacs-directory))
-    (let ((org-confirm-babel-evaluate nil))
-    (org-babel-tangle))))
-
-(add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'jlf/org-babel-tangle-config)))
+(load-file (concat user-emacs-directory "config/org-config.el"))
 
 ;; brew install ledger
 (use-package ledger-mode

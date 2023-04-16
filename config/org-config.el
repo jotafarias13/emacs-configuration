@@ -238,6 +238,7 @@
   )
 
 (use-package org-protocol
+  :after org
   :ensure nil
   :init
   (server-start)

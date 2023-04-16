@@ -266,6 +266,7 @@ O pacote /[[https://orgmode.org/worg/org-contrib/org-protocol.html][org-protocol
 #+begin_src emacs-lisp
   
   (use-package org-protocol
+    :after org
     :ensure nil
     :init
     (server-start)

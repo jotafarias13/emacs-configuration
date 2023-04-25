@@ -11,15 +11,15 @@
 Configuração de várias faces de texto para ajustar os tamanhos dos headings e usar fontes de largura variável (variable-pitch) para ficar mais similar a um ambiente de edição. Tabelas, blocos de código e outros ambientes mantém fontes de largura fixa (fixed-pitch) para melhorar a distinção e exibição.
 
 #+begin_src emacs-lisp
-  
+
   ;; Congifuração das fontes e faces
   (defun jlf/org-font-setup ()
-  
+
     ;; Substitui os hífens das listas por pontos (bullets)
     (font-lock-add-keywords 'org-mode
                             '(("^ *\\([-]\\) "
                                (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
-  
+
     ;; Configura as faces dos headings
     (dolist (face '((org-document-title . 1.42)
                     (org-level-1 . 1.4)
@@ -31,12 +31,12 @@ Configuração de várias faces de texto para ajustar os tamanhos dos headings e
                     (org-level-7 . 1.1)
                     (org-level-8 . 1.1)))
       (set-face-attribute (car face) nil :family "Inconsolata" :weight 'regular :width 'condensed :height (cdr face)))
-  
+
     ;; Configura as faces de título e keywords
     (dolist (face '((org-document-info-keyword . 1.0)
                     (org-document-info . 1.0)))
       (set-face-attribute (car face) nil :family "Inconsolata" :weight 'regular :height (cdr face)))
-  
+
     ;; Assegura que o que deve ser fixed-pitch no org-mode fique dessa forma
     (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
     (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
@@ -47,9 +47,9 @@ Configuração de várias faces de texto para ajustar os tamanhos dos headings e
     (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
     (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
     (set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch)
-    (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
+    ;; (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
     (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch)
-  
+
     (custom-theme-set-faces
      'user
      '(org-document-info ((t (:foreground "dark orange"))))
@@ -58,10 +58,10 @@ Configuração de várias faces de texto para ajustar os tamanhos dos headings e
      '(org-property-value ((t (:inherit fixed-pitch))) t)
      '(org-table ((t (:inherit fixed-pitch :foreground "#83a598"))))
      '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))))
-  
+
   ;; Gambiarra para alterar a face org-indent já que alterar no :config gera erro
   (add-hook 'org-mode-hook #'(lambda () (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))))
-  
+
 #+end_src
 
 ** General

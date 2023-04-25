@@ -92,102 +92,138 @@ The package [[https://github.com/douglasdavis/numpydoc.el][numpydoc]] allows for
 
 #+end_src
 
+* Importmagic
+The package [[https://github.com/anachronic/importmagic.el][importmagic]] allows for auto insert of import statements.
+
+#+begin_src emacs-lisp
+
+  (use-package importmagic
+      :config
+      (add-hook 'python-mode-hook 'importmagic-mode))
+  ;; (define-key importmagic-mode-map (kbd "C-c C-i") 'importmagic-fix-symbol-at-point)
+  (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c j p") 'importmagic-fix-symbol-at-point)))
+  (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c j a") 'importmagic-fix-imports)))
+  (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c j s") 'importmagic-fix-symbol)))
+
+#+end_src>
+
+* Pyimport
+#+begin_src emacs-lisp
+
+  (use-package pyimport)
+
+#+end_src>
+
 * Others
 Functions and keybindings to boost productivity while writing python projects.
 
 #+begin_src emacs-lisp
 
-  (defun jlf/return-t()
-    "Always returns true."
-    t)
+      (defun jlf/return-t()
+        "Always returns true."
+        t)
+
+      (defvar jlf/virtualenv-name ".venv")
+
+      (defun jlf/project-root (file-or-dir-name max-depth)
+        "Find the project root directory containing FILE-OR-DIR-NAME,
+         up to MAX-DEPTH levels."
+        (let ((dir (file-name-parent-directory (buffer-file-name))))
+          (catch 'my-project-root
+            (dotimes (i max-depth)
+              (if (file-exists-p (concat dir file-or-dir-name))
+                  (throw 'my-project-root dir)
+                (setq dir (file-name-parent-directory dir)))) nil)))
+
+      (defun jlf/python-venv-activate()
+        "Activates virtual environment automatically.
+         If there is a .venv folder in project-root, activate
+         that environment. Else, if there is a .venv directory
+         anywhere 3 directories upwards, activate that environment.
+         Else, ask for user to select environment manually."
+        (interactive)
+        (let* ((root (project-root (eglot--current-project)))
+               (env (concat root jlf/virtualenv-name)))
+          (if (file-directory-p env)
+              (pyvenv-activate env)
+            (let ((other-root (jlf/project-root jlf/virtualenv-name 3)))
+              (if other-root
+                  (pyvenv-activate (concat other-root jlf/virtualenv-name))
+                (call-interactively #'pyvenv-activate))))))
+
+      (defun jlf/python-venv-activate-workon()
+        "Activates workon virtual environment automatically.
+           If there is a .venv folder in $WORKON_HOME, activate
+           that environment. Else, ask for user to select
+           workon environment manually."
+        (interactive)
+        (let ((env (concat (pyvenv-workon-home) "/.venv")))
+          (if (file-directory-p env)
+              (pyvenv-activate env)
+            (call-interactively #'pyvenv-workon))))
 
 
-  (defun jlf/python-venv-activate()
-    "Activates virtual environment automatically.
-     If there is a .venv folder in project-root, activate
-     that environment. Else, ask for user to select
-     environment manually."
-    (interactive)
-    (let* ((root (project-root (eglot--current-project)))
-           (env (concat root ".venv")))
-      (if (file-directory-p env)
-          (pyvenv-activate env)
-        (call-interactively #'pyvenv-activate))))
+      (defun jlf/python-venv-activate-ask()
+        "Activates virtual environment with user input."
+        (interactive)
+        (call-interactively #'pyvenv-activate))
 
 
-  (defun jlf/python-venv-activate-workon()
-    "Activates workon virtual environment automatically.
-     If there is a .venv folder in $WORKON_HOME, activate
-     that environment. Else, ask for user to select
-     workon environment manually."
-    (interactive)
-    (let ((env (concat (pyvenv-workon-home) "/.venv")))
-      (if (file-directory-p env)
-          (pyvenv-activate env)
-        (call-interactively #'pyvenv-workon))))
+      (defun jlf/python-run-python()
+        "Opens buffer-dedicated python REPL buffer."
+        (interactive)
+        (run-python nil t t)
+        (other-window -1))
 
 
-  (defun jlf/python-venv-activate-ask()
-    "Activates virtual environment with user input."
-    (interactive)
-    (call-interactively #'pyvenv-activate))
+      (defun jlf/python-start-python()
+        "Activates virtual enviroment and starts python REPL."
+        (interactive)
+        (jlf/python-venv-activate)
+        (jlf/python-run-python))
 
 
-  (defun jlf/python-run-python()
-    "Opens buffer-dedicated python REPL buffer."
-    (interactive)
-    (run-python nil t t)
-    (other-window -1))
+      (defun jlf/python-venv-deactivate()
+        "Deactivates virtual environment."
+        (interactive)
+        (pyvenv-deactivate))
 
 
-  (defun jlf/python-start-python()
-    "Activates virtual enviroment and starts python REPL."
-    (interactive)
-    (jlf/python-venv-activate)
-    (jlf/python-run-python))
+      (defun jlf/python-kill-buffer-dedicated()
+        "Kills dedicated python process attached to the current buffer."
+        (interactive)
+        (let ((kill-buffer-query-functions (list 'jlf/return-t))
+              (process (concat "*Python[" (buffer-name) "]*")))
+          (kill-buffer process)))
 
 
-  (defun jlf/python-venv-deactivate()
-    "Deactivates virtual environment."
-    (interactive)
-    (pyvenv-deactivate))
+      (defun jlf/python-kill-buffer-all()
+        "Kills all python process."
+        (interactive)
+        (let ((kill-buffer-query-functions (list 'jlf/return-t)))
+          (kill-matching-buffers "\\*Python" nil t)))
 
 
-  (defun jlf/python-kill-buffer-dedicated()
-    "Kills dedicated python process attached to the current buffer."
-    (interactive)
-    (let ((kill-buffer-query-functions (list 'jlf/return-t))
-          (process (concat "*Python[" (buffer-name) "]*")))
-      (kill-buffer process)))
+      (defun jlf/python-end-python()
+        "Deactivates virtual environment and kills python process."
+        (interactive)
+        (jlf/python-venv-deactivate)
+        (jlf/python-kill-buffer-dedicated))
 
 
-  (defun jlf/python-kill-buffer-all()
-    "Kills all python process."
-    (interactive)
-    (let ((kill-buffer-query-functions (list 'jlf/return-t)))
-      (kill-matching-buffers "\\*Python" nil t)))
+      (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c a") 'jlf/python-venv-activate)))
+      (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c w") 'jlf/python-venv-activate-workon)))
+      (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c C-a") 'jlf/python-venv-activate-ask)))
+      (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c p") 'jlf/python-run-python)))
+      (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c s") 'jlf/python-start-python)))
+      (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c d") 'jlf/python-venv-deactivate)))
+      (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c o") 'jlf/python-kill-buffer-dedicated)))
+      (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c l") 'jlf/python-kill-buffer-all)))
+      (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c k") 'jlf/python-end-python)))
+      (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c f") 'flymake-show-buffer-diagnostics)))
 
-
-  (defun jlf/python-end-python()
-    "Deactivates virtual environment and kills python process."
-    (interactive)
-    (jlf/python-venv-deactivate)
-    (jlf/python-kill-buffer-dedicated))
-
-
-  (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c a") 'jlf/python-venv-activate)))
-  (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c w") 'jlf/python-venv-activate-workon)))
-  (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c C-a") 'jlf/python-venv-activate-ask)))
-  (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c p") 'jlf/python-run-python)))
-  (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c s") 'jlf/python-start-python)))
-  (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c d") 'jlf/python-venv-deactivate)))
-  (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c o") 'jlf/python-kill-buffer-dedicated)))
-  (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c l") 'jlf/python-kill-buffer-all)))
-  (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c k") 'jlf/python-end-python)))
-  (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c f") 'flymake-show-buffer-diagnostics)))
-
-  (add-hook 'python-mode-hook 'hs-minor-mode)
-  (add-hook 'python-mode-hook 'electric-pair-mode)
+      (add-hook 'python-mode-hook 'hs-minor-mode)
+      (add-hook 'python-mode-hook 'electric-pair-mode)
 
 #+end_src
 

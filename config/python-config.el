@@ -31,25 +31,39 @@
   "Always returns true."
   t)
 
+(defvar jlf/virtualenv-name ".venv")
+
+(defun jlf/project-root (file-or-dir-name max-depth)
+  "Find the project root directory containing FILE-OR-DIR-NAME,
+   up to MAX-DEPTH levels."
+  (let ((dir (file-name-parent-directory (buffer-file-name))))
+    (catch 'my-project-root
+      (dotimes (i max-depth)
+        (if (file-exists-p (concat dir file-or-dir-name))
+            (throw 'my-project-root dir)
+          (setq dir (file-name-parent-directory dir)))) nil)))
 
 (defun jlf/python-venv-activate()
   "Activates virtual environment automatically.
    If there is a .venv folder in project-root, activate
-   that environment. Else, ask for user to select
-   environment manually."
+   that environment. Else, if there is a .venv directory
+   anywhere 3 directories upwards, activate that environment.
+   Else, ask for user to select environment manually."
   (interactive)
   (let* ((root (project-root (eglot--current-project)))
-         (env (concat root ".venv")))
+         (env (concat root jlf/virtualenv-name)))
     (if (file-directory-p env)
         (pyvenv-activate env)
-      (call-interactively #'pyvenv-activate))))
-
+      (let ((other-root (jlf/project-root jlf/virtualenv-name 3)))
+        (if other-root
+            (pyvenv-activate (concat other-root jlf/virtualenv-name))
+          (call-interactively #'pyvenv-activate))))))
 
 (defun jlf/python-venv-activate-workon()
   "Activates workon virtual environment automatically.
-   If there is a .venv folder in $WORKON_HOME, activate
-   that environment. Else, ask for user to select
-   workon environment manually."
+     If there is a .venv folder in $WORKON_HOME, activate
+     that environment. Else, ask for user to select
+     workon environment manually."
   (interactive)
   (let ((env (concat (pyvenv-workon-home) "/.venv")))
     (if (file-directory-p env)

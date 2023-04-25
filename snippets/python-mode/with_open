@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: with_open
+# key: wo
+# group: definitions
+# --
+with open("$1", "$2") as file:
+    $0

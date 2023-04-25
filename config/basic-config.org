@@ -423,71 +423,77 @@ Adiciona algumas configurações do dired para facilitar sua utilização e a na
 
 #+begin_src emacs-lisp
 
- ;; Melhora as funções de desfazer e refazer do evil
- (use-package undo-tree
-   :config
-   (setq undo-tree-visualizer-diff t)
-   (setq undo-tree-auto-save-history nil)
-   (global-undo-tree-mode))
+  ;; Melhora as funções de desfazer e refazer do evil
+  (use-package undo-tree
+    :config
+    (setq undo-tree-visualizer-diff t)
+    (setq undo-tree-auto-save-history nil)
+    (global-undo-tree-mode))
 
- ;; Configura o evil-mode para simular o Vim no Emacs
- (use-package evil
-   :init
-   (setq evil-want-integration t)
-   (setq evil-want-keybinding nil)
-   (setq evil-want-C-u-scroll t)
-   (setq evil-want-C-i-jump nil)
-   (setq evil-want-Y-yank-to-eol t)
-   (setq evil-undo-system 'undo-tree)
-   :config
-   (evil-mode 1)
-   (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-   (define-key evil-normal-state-map (kbd "m") (lambda () (interactive) (evil-open-below 1) (evil-normal-state)))
-   (define-key evil-normal-state-map (kbd "M") (lambda () (interactive) (evil-open-above 1) (evil-normal-state)))
-   (define-key evil-normal-state-map (kbd "g r") 'revert-buffer)
-   (define-key evil-motion-state-map (kbd "C-u") 'evil-scroll-up)
-   (define-key evil-insert-state-map (kbd "Z") (lambda () (interactive) (evil-force-normal-state) (evil-append-line 1)))
+  ;; Configura o evil-mode para simular o Vim no Emacs
+  (use-package evil
+    :init
+    (setq evil-want-integration t)
+    (setq evil-want-keybinding nil)
+    (setq evil-want-C-u-scroll t)
+    (setq evil-want-C-i-jump nil)
+    (setq evil-want-Y-yank-to-eol t)
+    (setq evil-undo-system 'undo-tree)
+    :config
+    (evil-mode 1)
+    (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+    (define-key evil-normal-state-map (kbd "m") (lambda () (interactive) (evil-open-below 1) (evil-normal-state)))
+    (define-key evil-normal-state-map (kbd "M") (lambda () (interactive) (evil-open-above 1) (evil-normal-state)))
+    (define-key evil-normal-state-map (kbd "g r") 'revert-buffer)
+    (define-key evil-motion-state-map (kbd "C-u") 'evil-scroll-up)
+    (define-key evil-insert-state-map (kbd "Z") (lambda () (interactive) (evil-force-normal-state) (evil-append-line 1)))
 
-   ;; Configura a navegação para funcionar quando visual-line-mode não está ativado
-   (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-   (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
-   (evil-global-set-key 'motion "gj" 'evil-next-line)
-   (evil-global-set-key 'motion "gk" 'evil-previous-line)
+    ;; Configura a navegação para funcionar quando visual-line-mode não está ativado
+    (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+    (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+    (evil-global-set-key 'motion "gj" 'evil-next-line)
+    (evil-global-set-key 'motion "gk" 'evil-previous-line)
 
-   (evil-set-initial-state 'messages-buffer-mode 'normal)
-   (evil-set-initial-state 'dashboard-mode 'normal))
+    (evil-set-initial-state 'messages-buffer-mode 'normal)
+    (evil-set-initial-state 'dashboard-mode 'normal))
 
- ;; Aumenta a atuação dos keybindings do evil
- (use-package evil-collection
-   :after evil
-   :custom
-   (evil-collection-company-use-tng nil)   ;; evita o bug de completion de funções do clangd
-   :config
-   (evil-collection-init))
+  ;; Aumenta a atuação dos keybindings do evil
+  (use-package evil-collection
+    :after evil
+    :custom
+    (evil-collection-company-use-tng nil)   ;; evita o bug de completion de funções do clangd
+    :config
+    (evil-collection-init))
 
- ;; Emula a ação surround do vim
- (use-package evil-surround
-   :config
-   (global-evil-surround-mode 1))
+  ;; Emula a ação surround do vim
+  (use-package evil-surround
+    :config
+    (global-evil-surround-mode 1))
 
- ;; Adiciona "linha" como um text-obj (w,W,b,B etc)
- (use-package evil-textobj-line)
+  ;; Adiciona "linha" como um text-obj (w,W,b,B etc)
+  (use-package evil-textobj-line)
 
- ;; Adiciona o comandos "gc" para comentar como uma ação (d,c,y etc)
- (use-package evil-commentary
-   :config
-   (evil-commentary-mode))
+  ;; Adiciona o comandos "gc" para comentar como uma ação (d,c,y etc)
+  (use-package evil-commentary
+    :config
+    (evil-commentary-mode))
 
- ;; Destaca a parte do texto onde um comando foi efetuado
- (use-package evil-goggles
-   :config
-   (evil-goggles-mode)
-   (evil-goggles-use-diff-faces))
+  ;; Destaca a parte do texto onde um comando foi efetuado
+  (use-package evil-goggles
+    :config
+    (evil-goggles-mode)
+    (evil-goggles-use-diff-faces))
 
- (use-package evil-exchange)
- (setq evil-exchange-key (kbd "gz"))
- (setq evil-exchange-cancel-key (kbd "gZ"))
- (evil-exchange-install)
+  (use-package evil-exchange)
+  (setq evil-exchange-key (kbd "gz"))
+  (setq evil-exchange-cancel-key (kbd "gZ"))
+  (evil-exchange-install)
+
+  ;; Incrementa o número em uma dada linha
+  (use-package evil-numbers)
+  (with-eval-after-load "evil"
+    (define-key evil-normal-state-map (kbd "C-c +") 'evil-numbers/inc-at-pt)
+    (define-key evil-normal-state-map (kbd "C-c -") 'evil-numbers/dec-at-pt))
 
 #+end_src
 

@@ -408,6 +408,12 @@
 (setq evil-exchange-cancel-key (kbd "gZ"))
 (evil-exchange-install)
 
+;; Incrementa o número em uma dada linha
+(use-package evil-numbers)
+(with-eval-after-load "evil"
+  (define-key evil-normal-state-map (kbd "C-c +") 'evil-numbers/inc-at-pt)
+  (define-key evil-normal-state-map (kbd "C-c -") 'evil-numbers/dec-at-pt))
+
 ;; Programming languages compatible with org-babel
 (with-eval-after-load 'org
   (org-babel-do-load-languages

@@ -246,6 +246,10 @@
 (cl-defmethod project-root ((project (head latex-module)))
   (cdr project))
 
+(use-package markdown-mode
+  :mode ("README\\.md\\'" . gfm-mode)
+  :init (setq markdown-command "multimarkdown"))
+
 (defvar jlf/my-workspace-alist (list)
   "List of entries in workspace.")
 

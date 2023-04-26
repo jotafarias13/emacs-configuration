@@ -455,6 +455,23 @@ Eglot is also used with python as a LSP server.
 
 #+end_src
 
+** Markdown
+The package [[https://github.com/jrblevin/markdown-mode][markdown-mode]] adds functionality to work with markdown files, even using GFM (github flavored markdown). For these features to work, you need to install [[https://github.com/fletcher/MultiMarkdown-6][multimarkdown]] with brew.
+
+#+begin_src shell
+
+  brew install multimarkdown
+
+#+end_src
+
+#+begin_src emacs-lisp
+
+  (use-package markdown-mode
+    :mode ("README\\.md\\'" . gfm-mode)
+    :init (setq markdown-command "multimarkdown"))
+
+#+end_src
+
 ** MyWorkSpace
 A ferramenta /MyWorkSpace/ é uma função de minha autoria que me auxilia na abertura de arquivos e diretórios dos projetos nos quais trabalho. Ela foi criada por que os pacotes tradicionais e famosos que servem esse propósito são muito rebuscados e minha necessidade é suprida pelas poucas funcionalidades desta ferramenta.
 

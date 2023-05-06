@@ -204,6 +204,17 @@ Para que a senha da chave pudesse ser digitada (dentro do Emacs) para adicioná-
 
 #+end_src
 
+** Subversion
+We use [[https://alexott.net/en/writings/emacs-vcs/EmacsPSVN.html][psvn]] package for svn manipulation in Emacs. Since it is not on MELPA, we need to manually download from the website and put it inside =elpa= directory where Emacs can find it.
+
+#+begin_src emacs-lisp
+
+  (use-package psvn
+    :ensure nil
+    :load-path "~/.emacs.d/elpa/psvn/")
+
+#+end_src
+
 ** Eshell 
 O pacote /[[https://github.com/purcell/exec-path-from-shell][exec-path-from-shell]]/ configura o eshell do Emacs para utilizar o mesmo $PATH do terminal do computador.
 
@@ -491,6 +502,7 @@ A ferramenta /MyWorkSpace/ é uma função de minha autoria que me auxilia na ab
   (add-to-list 'jlf/my-workspace-alist '("Lattes" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Projetos/Lattes/"))) t)
   (add-to-list 'jlf/my-workspace-alist '("Python" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Projetos/Python/"))) t)
   (add-to-list 'jlf/my-workspace-alist '("NewGate" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/NewGate/"))) t)
+  (add-to-list 'jlf/my-workspace-alist '("Inovall" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Inovall/"))) t)
 
   (defun jlf/my-workspace-find-file (FILE)
     (let ((default-directory FILE))

@@ -86,6 +86,10 @@
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
   (magit-diff-refine-hunk 'all))
 
+(use-package psvn
+  :ensure nil
+  :load-path "~/.emacs.d/elpa/psvn/")
+
 ;; Utiliza $PATH do terminal
 (use-package exec-path-from-shell) ; torna o PATH do shell igual do temrinal
 (when (memq window-system '(mac ns x))
@@ -260,6 +264,7 @@
 (add-to-list 'jlf/my-workspace-alist '("Lattes" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Projetos/Lattes/"))) t)
 (add-to-list 'jlf/my-workspace-alist '("Python" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Projetos/Python/"))) t)
 (add-to-list 'jlf/my-workspace-alist '("NewGate" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/NewGate/"))) t)
+(add-to-list 'jlf/my-workspace-alist '("Inovall" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Inovall/"))) t)
 
 (defun jlf/my-workspace-find-file (FILE)
   (let ((default-directory FILE))

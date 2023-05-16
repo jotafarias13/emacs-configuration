@@ -90,6 +90,26 @@
   :ensure nil
   :load-path "~/.emacs.d/elpa/psvn/")
 
+;; Não entrar no evil-mode quando abrir o svn-status-mode
+(evil-set-initial-state 'svn-status-mode 'emacs)
+
+(define-key dired-mode-map (kbd "C-c s") 'svn-status-update)
+(define-key svn-status-mode-map (kbd "C-d") 'evil-scroll-down)
+(define-key svn-status-mode-map (kbd "C-u") 'evil-scroll-up)
+(define-key svn-status-mode-map (kbd "C-e") 'evil-scroll-line-down)
+(define-key svn-status-mode-map (kbd "C-y") 'evil-scroll-line-up)
+
+;; Remapear os comandos originais de 'w' e 'b'
+(define-key svn-status-mode-map (kbd "C-w") 'svn-status-copy-current-line-info)
+(define-key svn-status-mode-map (kbd "C-b") 'svn-status-blame)
+(define-key svn-status-mode-map (kbd "w") 'evil-forward-word-begin)
+(define-key svn-status-mode-map (kbd "b") 'evil-backward-word-begin)
+
+;; Remapear o comando original de 'k'
+(define-key svn-status-mode-map (kbd "C-k") 'svn-status-lock)
+(define-key svn-status-mode-map (kbd "k") 'evil-previous-visual-line)
+(define-key svn-status-mode-map (kbd "j") 'evil-next-visual-line)
+
 ;; Utiliza $PATH do terminal
 (use-package exec-path-from-shell) ; torna o PATH do shell igual do temrinal
 (when (memq window-system '(mac ns x))

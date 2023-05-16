@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: pandas loc dataframe equal
+# key: pdle
+# group: definitions
+# --
+$1 = $1[$1$0]

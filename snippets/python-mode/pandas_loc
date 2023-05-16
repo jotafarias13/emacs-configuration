@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: pandas loc dataframe
+# key: pdl
+# group: definitions
+# --
+$1[$1$0]

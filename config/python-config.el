@@ -35,7 +35,7 @@
 
 (defun jlf/project-root (file-or-dir-name max-depth)
   "Find the project root directory containing FILE-OR-DIR-NAME,
-   up to MAX-DEPTH levels."
+     up to MAX-DEPTH levels."
   (let ((dir (file-name-parent-directory (buffer-file-name))))
     (catch 'my-project-root
       (dotimes (i max-depth)
@@ -45,10 +45,10 @@
 
 (defun jlf/python-venv-activate()
   "Activates virtual environment automatically.
-   If there is a .venv folder in project-root, activate
-   that environment. Else, if there is a .venv directory
-   anywhere 3 directories upwards, activate that environment.
-   Else, ask for user to select environment manually."
+     If there is a .venv folder in project-root, activate
+     that environment. Else, if there is a .venv directory
+     anywhere 3 directories upwards, activate that environment.
+     Else, ask for user to select environment manually."
   (interactive)
   (let* ((root (project-root (eglot--current-project)))
          (env (concat root jlf/virtualenv-name)))
@@ -61,9 +61,9 @@
 
 (defun jlf/python-venv-activate-workon()
   "Activates workon virtual environment automatically.
-     If there is a .venv folder in $WORKON_HOME, activate
-     that environment. Else, ask for user to select
-     workon environment manually."
+       If there is a .venv folder in $WORKON_HOME, activate
+       that environment. Else, ask for user to select
+       workon environment manually."
   (interactive)
   (let ((env (concat (pyvenv-workon-home) "/.venv")))
     (if (file-directory-p env)
@@ -118,8 +118,22 @@
   (jlf/python-venv-deactivate)
   (jlf/python-kill-buffer-dedicated))
 
+(defun jlf/install-requirements()
+  "Creates virtualenv, activates it and installs project requirements."
+  (interactive)
+  (eshell nil)
+  (insert (concat "virtualenv " jlf/virtualenv-name))
+  (execute-kbd-macro (kbd "<return>"))
+  (sit-for 1.5)
+  (kill-buffer (current-buffer))
+  (jlf/python-venv-activate)
+  (eshell nil)
+  (insert "pip install -r requirements.txt")
+  (execute-kbd-macro (kbd "<return>")))
+
 
 (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c a") 'jlf/python-venv-activate)))
+(global-set-key (kbd "C-c a") 'jlf/python-venv-activate)
 (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c w") 'jlf/python-venv-activate-workon)))
 (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c C-a") 'jlf/python-venv-activate-ask)))
 (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c p") 'jlf/python-run-python)))
@@ -128,6 +142,7 @@
 (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c o") 'jlf/python-kill-buffer-dedicated)))
 (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c l") 'jlf/python-kill-buffer-all)))
 (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c k") 'jlf/python-end-python)))
+(global-set-key (kbd "C-c u") 'jlf/install-requirements)
 (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c f") 'flymake-show-buffer-diagnostics)))
 
 (add-hook 'python-mode-hook 'hs-minor-mode)

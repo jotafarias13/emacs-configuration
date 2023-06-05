@@ -138,6 +138,33 @@ O pacote /[[https://github.com/raxod502/prescient.el][prescient]]/ possibilita u
   
 #+end_src
 
+** Daemon
+#+begin_src emacs-lisp
+
+  (defvar jlf/scratch-directory "~/Sync/Jota/Academico/Projetos/Emacs/scratch/")
+
+  (defun jlf/adjust-frame-size-and-position ()
+    "Adjusts the size and position of the Emacs frame."
+    (interactive)
+    (let* ((screen-width (display-pixel-width))
+           (screen-height (display-pixel-height))
+           (new-width (/ screen-width 2))
+           (new-height (/ screen-height 2))
+           (new-left (- screen-width new-width))
+           (new-top 0))
+      (set-frame-size (selected-frame) new-width new-height t)
+      (set-frame-position (selected-frame) new-left new-top)))
+
+  (defun jlf/scratch()
+    (interactive)
+    (jlf/adjust-frame-size-and-position)
+    (find-file (concat jlf/scratch-directory "scratch.md"))
+    (end-of-buffer)
+    (evil-open-below 1)
+    (insert "- "))
+
+#+end_src
+
 * Development
 ** YASnippet
 O pacote /[[https://github.com/joaotavora/yasnippet][YASnippet]]/ possibilita a criação de bundles (como TextMate) para diversas linguagens de programação. O pacote /[[https://github.com/AndreaCrotti/yasnippet-snippets][yasnippet-snippets]]/ adiciona vários snippets úteis para utilização. Os snippets próprios criados pelo usuário estão no diretório "~/.emacs.d/snippets/" separados em diretórios distintos para cada linguaguem.

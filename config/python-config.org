@@ -98,21 +98,26 @@ The package [[https://github.com/anachronic/importmagic.el][importmagic]] allows
 #+begin_src emacs-lisp
 
   (use-package importmagic
-      :config
-      (add-hook 'python-mode-hook 'importmagic-mode))
-  ;; (define-key importmagic-mode-map (kbd "C-c C-i") 'importmagic-fix-symbol-at-point)
-  (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c j p") 'importmagic-fix-symbol-at-point)))
-  (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c j a") 'importmagic-fix-imports)))
-  (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c j s") 'importmagic-fix-symbol)))
+    :after python
+    :bind (:map python-mode-map
+                ("C-c j p" . importmagic-fix-symbol-at-point)
+                ("C-c j a" . importmagic-fix-imports)
+                ("C-c j s" . importmagic-fix-symbol))
+    :config
+    (add-hook 'python-mode-hook 'importmagic-mode))
 
-#+end_src>
+#+end_src
 
 * Pyimport
+The package [[https://github.com/Wilfred/pyimport/][pyimport]] allows for auto removing of unused import packages.
 #+begin_src emacs-lisp
 
-  (use-package pyimport)
+  (use-package pyimport
+    :after python
+    :bind (:map python-mode-map
+                ("C-c j r" . pyimport-remove-unused)))
 
-#+end_src>
+#+end_src
 
 * Others
 Functions and keybindings to boost productivity while writing python projects.

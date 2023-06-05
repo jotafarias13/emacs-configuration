@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: shape0
+# key: sha0
+# group: definitions
+# --
+shape[0]$1

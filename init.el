@@ -70,6 +70,28 @@
   :config
   (company-prescient-mode))
 
+(defvar jlf/scratch-directory "~/Sync/Jota/Academico/Projetos/Emacs/scratch/")
+
+(defun jlf/adjust-frame-size-and-position ()
+  "Adjusts the size and position of the Emacs frame."
+  (interactive)
+  (let* ((screen-width (display-pixel-width))
+         (screen-height (display-pixel-height))
+         (new-width (/ screen-width 2))
+         (new-height (/ screen-height 2))
+         (new-left (- screen-width new-width))
+         (new-top 0))
+    (set-frame-size (selected-frame) new-width new-height t)
+    (set-frame-position (selected-frame) new-left new-top)))
+
+(defun jlf/scratch()
+  (interactive)
+  (jlf/adjust-frame-size-and-position)
+  (find-file (concat jlf/scratch-directory "scratch.md"))
+  (end-of-buffer)
+  (evil-open-below 1)
+  (insert "- "))
+
 ;; Possibilita a criação de bundles estilo TextMate
 (use-package yasnippet
   :config (yas-global-mode 1))

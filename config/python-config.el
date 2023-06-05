@@ -27,6 +27,20 @@
 	      ("C-c C-n" . numpydoc-generate))
   :after python)
 
+(use-package importmagic
+  :after python
+  :bind (:map python-mode-map
+              ("C-c j p" . importmagic-fix-symbol-at-point)
+              ("C-c j a" . importmagic-fix-imports)
+              ("C-c j s" . importmagic-fix-symbol))
+  :config
+  (add-hook 'python-mode-hook 'importmagic-mode))
+
+(use-package pyimport
+  :after python
+  :bind (:map python-mode-map
+              ("C-c j r" . pyimport-remove-unused)))
+
 (defun jlf/return-t()
   "Always returns true."
   t)

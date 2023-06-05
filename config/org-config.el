@@ -62,7 +62,7 @@
   :hook (org-mode . jlf/org-mode-setup)
   :bind 
   ("C-c t" . counsel-org-tag)
-  ("C-c a" . org-agenda)
+  ;; ("C-c a" . org-agenda)
   ("C-c d" . (lambda () (interactive) (org-todo "DONE"))) 
   ("C-c w" . (lambda () (interactive) (org-todo "DONE") (org-refile))) 
   :custom

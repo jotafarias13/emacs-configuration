@@ -270,6 +270,16 @@
 (cl-defmethod project-root ((project (head latex-module)))
   (cdr project))
 
+;; Tell project-root that directories with .venv folders are python project roots
+(defun jlf/python-root (dir)
+  (when-let ((root (locate-dominating-file dir jlf/virtualenv-name)))
+    (cons 'python-module root)))
+
+(add-hook 'project-find-functions #'jlf/python-root)
+
+(cl-defmethod project-root ((project (head python-module)))
+  (cdr project))
+
 (use-package markdown-mode
   :mode ("README\\.md\\'" . gfm-mode)
   :init (setq markdown-command "multimarkdown"))

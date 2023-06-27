@@ -173,4 +173,4 @@
                                        :mccabe (:enabled nil) 
                                        :pycodestyle (:enabled nil)
                                        :pyflakes (:enabled nil)
-                                       :flake8 (:enabled t)))))))
+                                       :flake8 (:enabled t :ignore "E203")))))))

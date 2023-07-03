@@ -145,6 +145,15 @@
   (insert "pip install -r requirements.txt")
   (execute-kbd-macro (kbd "<return>")))
 
+(defun jlf/python-add-import (text)
+  "Inserts the given TEXT (python package) at the beginning of the current buffer and returns to the starting point."
+  (interactive "sEnter import statement: ")
+  (save-excursion
+    (goto-char (point-min))
+    (evil-open-above 1)
+    (insert text))
+  (py-isort-buffer))
+
 
 (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c a") 'jlf/python-venv-activate)))
 (global-set-key (kbd "C-c a") 'jlf/python-venv-activate)
@@ -158,6 +167,7 @@
 (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c k") 'jlf/python-end-python)))
 (global-set-key (kbd "C-c u") 'jlf/install-requirements)
 (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c f") 'flymake-show-buffer-diagnostics)))
+(add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c j i") 'jlf/python-add-import)))
 
 (add-hook 'python-mode-hook 'hs-minor-mode)
 (add-hook 'python-mode-hook 'electric-pair-mode)

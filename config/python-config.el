@@ -185,4 +185,4 @@
                                        :mccabe (:enabled nil) 
                                        :pycodestyle (:enabled nil)
                                        :pyflakes (:enabled nil)
-                                       :flake8 (:enabled t :ignore "E203")))))))
+                                       :flake8 (:enabled t :ignore ["E203" "W503"])))))))

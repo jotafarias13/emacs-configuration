@@ -36,10 +36,10 @@
   :config
   (add-hook 'python-mode-hook 'importmagic-mode))
 
-(use-package pyimport
-  :after python
-  :bind (:map python-mode-map
-              ("C-c j r" . pyimport-remove-unused)))
+;; (use-package pyimport
+;;   :after python
+;;   :bind (:map python-mode-map
+;;               ("C-c j r" . pyimport-remove-unused)))
 
 (defun jlf/return-t()
   "Always returns true."
@@ -161,6 +161,8 @@
 
 (add-hook 'python-mode-hook 'hs-minor-mode)
 (add-hook 'python-mode-hook 'electric-pair-mode)
+
+(load-file "config/python-remove-import.el")
 
 (with-eval-after-load "eglot"
 

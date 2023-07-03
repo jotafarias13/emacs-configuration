@@ -112,10 +112,10 @@ The package [[https://github.com/anachronic/importmagic.el][importmagic]] allows
 The package [[https://github.com/Wilfred/pyimport/][pyimport]] allows for auto removing of unused import packages.
 #+begin_src emacs-lisp
 
-  (use-package pyimport
-    :after python
-    :bind (:map python-mode-map
-                ("C-c j r" . pyimport-remove-unused)))
+  ;; (use-package pyimport
+  ;;   :after python
+  ;;   :bind (:map python-mode-map
+  ;;               ("C-c j r" . pyimport-remove-unused)))
 
 #+end_src
 
@@ -244,6 +244,8 @@ Functions and keybindings to boost productivity while writing python projects.
 
   (add-hook 'python-mode-hook 'hs-minor-mode)
   (add-hook 'python-mode-hook 'electric-pair-mode)
+
+  (load-file "config/python-remove-import.el")
 
 #+end_src
 

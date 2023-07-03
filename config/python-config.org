@@ -256,6 +256,7 @@ Functions and keybindings to boost productivity while writing python projects.
   (add-hook 'python-mode-hook 'electric-pair-mode)
 
   (load-file "config/python-remove-import.el")
+  (load-file "config/python-format-comment.el")
 
 #+end_src
 

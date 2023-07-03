@@ -173,6 +173,7 @@
 (add-hook 'python-mode-hook 'electric-pair-mode)
 
 (load-file "config/python-remove-import.el")
+(load-file "config/python-format-comment.el")
 
 (with-eval-after-load "eglot"
 

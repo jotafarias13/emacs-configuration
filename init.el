@@ -302,6 +302,10 @@
 (cl-defmethod project-root ((project (head python-module)))
   (cdr project))
 
+(with-eval-after-load "eglot"
+  (set-face-attribute 'eglot-diagnostic-tag-unnecessary-face nil :inherit 'unspecified)
+  (set-face-attribute 'eglot-highlight-symbol-face nil :foreground "cyan"))
+
 (use-package markdown-mode
   :mode ("README\\.md\\'" . gfm-mode)
   :init (setq markdown-command "multimarkdown"))

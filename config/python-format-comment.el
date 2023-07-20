@@ -48,3 +48,6 @@
       (goto-char start)
       (dolist (line comments)
 	(insert (concat line "\n"))))))
+
+
+(add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c j c") 'python-format-comment)))

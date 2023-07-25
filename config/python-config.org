@@ -228,7 +228,7 @@ Functions and keybindings to boost productivity while writing python projects.
     (insert "pip install -r requirements.txt")
     (execute-kbd-macro (kbd "<return>")))
 
-  (defun jlf/python-add-import (text)
+  (defun jlf/python-add-import-manually (text)
     "Inserts the given TEXT (python package) at the beginning of the current buffer and returns to the starting point."
     (interactive "sEnter import statement: ")
     (save-excursion
@@ -250,7 +250,7 @@ Functions and keybindings to boost productivity while writing python projects.
   (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c k") 'jlf/python-end-python)))
   (global-set-key (kbd "C-c u") 'jlf/install-requirements)
   (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c f") 'flymake-show-buffer-diagnostics)))
-  (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c j i") 'jlf/python-add-import)))
+  (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c j i") 'jlf/python-add-import-manually)))
 
   (add-hook 'python-mode-hook 'hs-minor-mode)
   (add-hook 'python-mode-hook 'electric-pair-mode)

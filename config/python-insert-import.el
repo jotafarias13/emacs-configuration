@@ -72,8 +72,6 @@
               str))
           lst))
 
-(setq modified-list (remove-common-substring my-py-files (current-buffer-directory)))
-
 
 (defun process-py-file-path (file-name)
   "Process a .py file path to eliminate the directory, extension, and replace / with ."
@@ -117,29 +115,36 @@
 
 
 (defun import-type-from (module)
-  (format "from %s" module))
-
-
-(module-contents (python-shell-send-string-no-output
-		  (format "import %s\n\nprint(' '.join(dir(%s)))" module module)))
-(module-contents-list (split-string module-contents))
-(module-contents-processed-list (remove-if 'exclude-modules-p module-contents-list))
-(module-list (cons "import" module-contents-processed-list))
-(item (completing-read "Select a function/class/constant: " module-list))
-
-
-
-(let ((submodules '())
-        (submodule ""))
+  (let* ((prescient-sort-length-enable nil)
+	 (submodules '())
+         (submodule "")
+	 (submodule-name module))
     (while (not (string-equal submodule "import"))
-      (setq submodule (completing-read "Select submodule: " '("from" "import")))
+      (setq module-contents (python-shell-send-string-no-output
+			     (format "import %s\n\nprint(' '.join(dir(%s)))" module submodule-name)))
+      (setq module-contents-list (split-string module-contents))
+      (setq module-contents-processed-list (remove-if 'exclude-modules-p module-contents-list))
+      (setq module-list (cons "import" module-contents-processed-list))
+      (setq submodule (completing-read "Select a submodule/function/class/constant: " module-list))
       (unless (string-equal submodule "import")
-        (push submodule submodules)))
-    (mapconcat 'identity submodules "."))
+	(push submodule submodules))
+      (setq submodule-name (format "%s.%s" module (mapconcat 'identity (reverse submodules) "."))))
+    (if (null submodules) (setq final-submodule module)
+      (setq final-submodule submodule-name))
+
+    (let* ((module-contents (python-shell-send-string-no-output
+				  (format "import %s\n\nprint(' '.join(dir(%s)))" module final-submodule)))
+	   (module-contents-list (split-string module-contents))
+
+	   (module-contents-processed-list (remove-if 'exclude-modules-p module-contents-list))
+	   (module-list (if (null module-contents-processed-list) module-contents-list module-contents-processed-list))
+
+	   (final-import (completing-read "Select a function/class/constant: " module-list)))
+      (format "from %s import %s" final-submodule final-import))))
 
 
 
-(defun my-python-import-statement-2 ()
+(defun my-python-import-statement ()
   "Create a Python import statement interactively."
   (interactive)
   (let* ((prescient-sort-length-enable nil)
@@ -152,30 +157,8 @@
       (setq import-statement (import-type-from module)))
     (let ((alias (when (y-or-n-p "Add an alias? ") (read-string "Enter alias: "))))
       (setq import-statement (if alias (concat import-statement (format " as %s" alias)) import-statement))
-  (insert import-statement))))
+  (jlf/python-add-import import-statement))))
 
-
-
-(defun my-python-import-statement ()
-  "Create a Python import statement interactively."
-  (interactive)
-  (let* ((prescient-sort-length-enable nil)
-	 (import-type (completing-read "Select import type: " '("from" "import")))
-         (modules (list-modules))
-         (module (completing-read "Select a module: " modules))
-         (module-contents (python-shell-send-string-no-output
-			   (format "import %s\n\nprint(' '.join(dir(%s)))" module module)))
-	 (module-contents-list (split-string module-contents))
-	 (module-contents-processed-list (remove-if 'exclude-modules-p module-contents-list))
-         (item (completing-read "Select a function/class/constant: " module-contents-processed-list))
-         (alias (when (y-or-n-p "Add an alias? ")
-                  (read-string "Enter alias: "))))
-         ;; (import-statement (format "%s %s %s" import-type module item)))
-    (if (string= import-type "from")
-	(setq import-statement (format "%s %s import %s" import-type module item))
-	(setq import-statement (format "%s %s.%s" import-type module item)))
-    (setq import-statement (if alias (concat import-statement (format " as %s" alias)) import-statement))
-    (jlf/python-add-import import-statement)))
 
 
 (defun jlf/python-add-import (text)
@@ -188,5 +171,3 @@
     (py-isort-buffer))
   (save-buffer))
 
-
-(setq module "time")

@@ -282,53 +282,53 @@ Configures the fonts and create functions to alter font size. You need to downlo
 
 #+begin_src emacs-lisp
 
- ;; Configuração do ivy (autocompletar no minibuffer)
- (use-package ivy
-   :diminish 
-   :bind (("C-s" . swiper)
-          :map ivy-minibuffer-map
-          ("TAB" . ivy-alt-done)	
-          ("C-l" . ivy-alt-done)
-          ("C-j" . ivy-next-line)
-          ("C-k" . ivy-previous-line)
-          ("C-RET" . ivy-immediate-done)
-          :map ivy-switch-buffer-map
-          ("C-k" . ivy-previous-line)
-          ("C-l" . ivy-done)
-          ("C-d" . ivy-switch-buffer-kill)
-          :map ivy-reverse-i-search-map
-          ("C-k" . ivy-previous-line)
-          ("C-d" . ivy-reverse-i-search-kill))
-   :config
-   (ivy-mode 1))
+  ;; Configuração do ivy (autocompletar no minibuffer)
+  (use-package ivy
+    :diminish 
+    :bind (("C-s" . swiper)
+           :map ivy-minibuffer-map
+           ("TAB" . ivy-alt-done)	
+           ("C-l" . ivy-alt-done)
+           ("C-j" . ivy-next-line)
+           ("C-k" . ivy-previous-line)
+           ("C-RET" . ivy-immediate-done)
+           :map ivy-switch-buffer-map
+           ("C-k" . ivy-previous-line)
+           ("C-l" . ivy-done)
+           ("C-d" . ivy-switch-buffer-kill)
+           :map ivy-reverse-i-search-map
+           ("C-k" . ivy-previous-line)
+           ("C-d" . ivy-reverse-i-search-kill))
+    :config
+    (ivy-mode 1))
 
- ;; Exibe ícones para todos os buffer no ivy
- (use-package all-the-icons-ivy-rich
-   :after ivy
-   :init (all-the-icons-ivy-rich-mode 1))
+  ;; Exibe ícones para todos os buffer no ivy
+  (use-package all-the-icons-ivy-rich
+    :after ivy
+    :init (all-the-icons-ivy-rich-mode 1))
 
- ;; Substitui comandos para funcionar melhor com ivy
- (use-package counsel
-   :bind (:map counsel-mode-map
-               ([remap switch-to-buffer] . counsel-switch-buffer)
-               ([remap dired] . counsel-dired))
-   :config
-   (counsel-mode 1))
+  ;; Substitui comandos para funcionar melhor com ivy
+  (use-package counsel
+    :bind (:map counsel-mode-map
+                ;; ([remap switch-to-buffer] . counsel-switch-buffer)
+                ([remap dired] . counsel-dired))
+    :config
+    (counsel-mode 1))
 
- ;; Adiciona informações sobre cada comando no ivy
- (use-package ivy-rich
-   :after ivy
-   :init
-   (ivy-rich-mode 1))
+  ;; Adiciona informações sobre cada comando no ivy
+  (use-package ivy-rich
+    :after ivy
+    :init
+    (ivy-rich-mode 1))
 
- ;; Ferramenta de pesquisa que substitui isearch e tem integração com ivy
- (use-package swiper)
+  ;; Ferramenta de pesquisa que substitui isearch e tem integração com ivy
+  (use-package swiper)
 
- ;; Extra config
- (global-set-key (kbd "C-x C-b") 'counsel-switch-buffer) 
- (global-set-key (kbd "C-x f") 'counsel-find-file) 
- (global-set-key (kbd "C-x C-d") 'counsel-dired) 
- (global-set-key (kbd "C-x C-k") 'all-the-icons-ivy-rich-kill-buffer) 
+  ;; Extra config
+  (global-set-key (kbd "C-x C-b") 'counsel-switch-buffer) 
+  (global-set-key (kbd "C-x f") 'counsel-find-file) 
+  (global-set-key (kbd "C-x C-d") 'counsel-dired) 
+  (global-set-key (kbd "C-x C-k") 'all-the-icons-ivy-rich-kill-buffer) 
 
 #+end_src
 
@@ -525,12 +525,16 @@ It is imperative that this configuration is executed everytime. Otherwise, any a
   (defvar emacs-config-python-name "python-config.org")
   (defvar emacs-config-python-path (concat emacs-config-dir-path emacs-config-python-name))
 
+  (defvar emacs-config-rust-name "rust-config.org")
+  (defvar emacs-config-rust-path (concat emacs-config-dir-path emacs-config-rust-name))
+
   (defvar emacs-config-org-name "org-config.org")
   (defvar emacs-config-org-path (concat emacs-config-dir-path emacs-config-org-name))
 
   (defvar emacs-config-files-list (list emacs-org-filepath
                                       emacs-config-basic-path
                                       emacs-config-python-path
+                                      emacs-config-rust-path
                                       emacs-config-org-path))
 
   ;; Automatically calls org-babel-tangle everytime a org configuration file is saved, creating the config .el file

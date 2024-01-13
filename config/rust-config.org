@@ -1,0 +1,39 @@
+#+TITLE:  Rust Configuration
+#+AUTHOR: João Lucas Farias
+#+EMAIL: fariasjota09@gmail.com
+#+OPTIONS: ':t toc:t author:t email:t
+#+PROPERTY: header-args:emacs-lisp :tangle ./rust-config.el :mkdirp yes
+
+* Rust
+Configuration of Rust IDE-like tools. The package rust-mode is used.
+
+#+begin_src emacs-lisp
+
+  ;; (use-package rust-mode
+  ;;   :init
+  ;;   (setq rust-format-on-save t))
+
+  ;; (add-hook 'rust-mode-hook
+  ;;           (lambda () (setq indent-tabs-mode nil)))
+
+  ;; (add-hook 'rust-mode-hook
+  ;;           (lambda () (prettify-symbols-mode)))
+
+  (use-package rustic
+    :init
+    (setq rustic-lsp-client 'eglot)
+    :custom
+    (rustic-analyzer-command '("rustup" "run" "stable" "rust-analyzer"))
+    :config
+    (setq rustic-analyzer-command '("~/.cargo/bin/rust-analyzer")))
+
+#+end_src
+
+* Eglot
+Eglot configuration to work as LSP for Rust.
+
+#+begin_src emacs-lisp
+
+  (add-hook 'rust-mode-hook 'eglot-ensure)
+
+#+end_src

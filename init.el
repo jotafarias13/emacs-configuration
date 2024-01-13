@@ -7,7 +7,8 @@
     (which-key-mode)))
 
 (use-package ace-window
-  :bind (("C-1" . ace-window)))
+  :bind (("C-1" . other-window)
+         ("C-2" . other-frame)))
 
 ;; Autocompletion in-buffer
 (use-package company
@@ -137,6 +138,13 @@
 (when (memq window-system '(mac ns x))
   (exec-path-from-shell-initialize))
 
+(defun create-dedicated-eshell()
+  (interactive)
+  (let ((eshell-buffer-name (format "*eshell[%s]*" (buffer-name))))
+    (eshell)))
+
+(global-set-key (kbd "C-M-s") (lambda () (interactive) (create-dedicated-eshell)))
+
 ;; AUCTeX
 (use-package tex
   :ensure auctex)
@@ -233,6 +241,8 @@
 
 (load-file (concat user-emacs-directory "config/python-config.el"))
 
+(load-file (concat user-emacs-directory "config/rust-config.el"))
+
 (use-package yaml-mode)
 
 (use-package dockerfile-mode)
@@ -319,8 +329,9 @@
 (add-to-list 'jlf/my-workspace-alist '("Ledger" . (lambda () (find-file "~/Sync/Jota/Financeiro/Ledger/ledger.dat"))) t)
 (add-to-list 'jlf/my-workspace-alist '("Lattes" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Projetos/Lattes/"))) t)
 (add-to-list 'jlf/my-workspace-alist '("Python" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Projetos/Python/"))) t)
+(add-to-list 'jlf/my-workspace-alist '("Rust" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Academico/Projetos/Rust/"))) t)
 (add-to-list 'jlf/my-workspace-alist '("NewGate" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/NewGate/"))) t)
-(add-to-list 'jlf/my-workspace-alist '("Inovall" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Inovall/"))) t)
+(add-to-list 'jlf/my-workspace-alist '("Inovall" . (lambda () (jlf/my-workspace-find-file "~/Sync/Jota/Inovall/Code/DM-005/"))) t)
 
 (defun jlf/my-workspace-find-file (FILE)
   (let ((default-directory FILE))

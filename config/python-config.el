@@ -167,13 +167,14 @@
 (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c k") 'jlf/python-end-python)))
 (global-set-key (kbd "C-c u") 'jlf/install-requirements)
 (add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c f") 'flymake-show-buffer-diagnostics)))
-(add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c j i") 'jlf/python-add-import-manually)))
+(add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c j m") 'jlf/python-add-import-manually)))
 
 (add-hook 'python-mode-hook 'hs-minor-mode)
 (add-hook 'python-mode-hook 'electric-pair-mode)
 
 (load-file "config/python-remove-import.el")
 (load-file "config/python-format-comment.el")
+(load-file "config/python-insert-import.el")
 
 (with-eval-after-load "eglot"
 
@@ -184,6 +185,5 @@
                              :plugins (:pycodestyle (:enabled nil) 
                                        :jedi_completion (:include_params t :fuzzy t)
                                        :mccabe (:enabled nil) 
-                                       :pycodestyle (:enabled nil)
                                        :pyflakes (:enabled nil)
                                        :flake8 (:enabled t :ignore ["E203" "W503"])))))))

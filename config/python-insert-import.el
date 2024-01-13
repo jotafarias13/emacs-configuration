@@ -5,7 +5,9 @@
       (string-match-p "[0-9]\\{2,\\}" module)))
 
 (defun select-all-modules()
-  (let* ((input (python-shell-send-string-no-output "help('modules')"))
+  (run-python-internal)
+  (sit-for 0.2)
+  (let* ((input (python-shell-internal-send-string "help('modules')"))
 	 (index0 (string-match "    " input))
 	 (index1 (string-match "\n" (reverse (substring input 0 index0))))
 	 (text1 (substring input (- index0 index1)))
@@ -120,7 +122,7 @@
          (submodule "")
 	 (submodule-name module))
     (while (not (string-equal submodule "import"))
-      (setq module-contents (python-shell-send-string-no-output
+      (setq module-contents (python-shell-internal-send-string
 			     (format "import %s\n\nprint(' '.join(dir(%s)))" module submodule-name)))
       (setq module-contents-list (split-string module-contents))
       (setq module-contents-processed-list (remove-if 'exclude-modules-p module-contents-list))
@@ -132,7 +134,7 @@
     (if (null submodules) (setq final-submodule module)
       (setq final-submodule submodule-name))
 
-    (let* ((module-contents (python-shell-send-string-no-output
+    (let* ((module-contents (python-shell-internal-send-string
 				  (format "import %s\n\nprint(' '.join(dir(%s)))" module final-submodule)))
 	   (module-contents-list (split-string module-contents))
 
@@ -144,7 +146,7 @@
 
 
 
-(defun my-python-import-statement ()
+(defun jlf/python-add-import ()
   "Create a Python import statement interactively."
   (interactive)
   (let* ((prescient-sort-length-enable nil)
@@ -157,11 +159,11 @@
       (setq import-statement (import-type-from module)))
     (let ((alias (when (y-or-n-p "Add an alias? ") (read-string "Enter alias: "))))
       (setq import-statement (if alias (concat import-statement (format " as %s" alias)) import-statement))
-  (jlf/python-add-import import-statement))))
+  (jlf/python-insert-import import-statement))))
 
 
 
-(defun jlf/python-add-import (text)
+(defun jlf/python-insert-import (text)
   "Inserts the given TEXT (python package) at the beginning of the current buffer and returns to the starting point."
   (save-excursion
     (goto-char (point-min))
@@ -171,3 +173,5 @@
     (py-isort-buffer))
   (save-buffer))
 
+
+(add-hook 'python-mode-hook #'(lambda () (define-key python-mode-map (kbd "C-c j i") 'jlf/python-add-import)))

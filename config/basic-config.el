@@ -243,7 +243,7 @@
 ;; Substitui comandos para funcionar melhor com ivy
 (use-package counsel
   :bind (:map counsel-mode-map
-              ([remap switch-to-buffer] . counsel-switch-buffer)
+              ;; ([remap switch-to-buffer] . counsel-switch-buffer)
               ([remap dired] . counsel-dired))
   :config
   (counsel-mode 1))
@@ -435,12 +435,16 @@
 (defvar emacs-config-python-name "python-config.org")
 (defvar emacs-config-python-path (concat emacs-config-dir-path emacs-config-python-name))
 
+(defvar emacs-config-rust-name "rust-config.org")
+(defvar emacs-config-rust-path (concat emacs-config-dir-path emacs-config-rust-name))
+
 (defvar emacs-config-org-name "org-config.org")
 (defvar emacs-config-org-path (concat emacs-config-dir-path emacs-config-org-name))
 
 (defvar emacs-config-files-list (list emacs-org-filepath
                                     emacs-config-basic-path
                                     emacs-config-python-path
+                                    emacs-config-rust-path
                                     emacs-config-org-path))
 
 ;; Automatically calls org-babel-tangle everytime a org configuration file is saved, creating the config .el file

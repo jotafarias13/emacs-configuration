@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: div_class
+# key: dc
+# group: definitions
+# --
+<div class="$1">
+    $0
+</div>

@@ -172,13 +172,29 @@ Set the theme to be used in emacs.
 
 #+begin_src emacs-lisp
 
-  ;; Tema doom-moonlight
-  (use-package doom-themes)
-  :init (load-theme 'doom-moonlight t)
+  ;; ;; Tema doom-moonlight
+  ;; (use-package doom-themes)
+  ;; :init (load-theme 'doom-moonlight t)
 
-  (use-package dracula-theme)
-  ;; (load-theme 'doom-dracula t)
-  (load-theme 'dracula t)
+  ;; (use-package dracula-theme)
+  ;; ;; (load-theme 'doom-dracula t)
+  ;; (load-theme 'dracula t)
+
+  (use-package vscode-dark-plus-theme
+    :config
+    (load-theme 'vscode-dark-plus t))
+
+  ;; Remove the border around the TODO word on org-mode files
+  (setq vscode-dark-plus-box-org-todo nil)
+
+  ;; Do not set different heights for some org faces
+  (setq vscode-dark-plus-scale-org-faces nil)
+
+  ;; Avoid inverting hl-todo face
+  (setq vscode-dark-plus-invert-hl-todo nil)
+
+  ;; Configure current line highlighting style (works best with Emacs 28 or newer)
+  (setq vscode-dark-plus-render-line-highlight 'line)
 
 #+end_src
 
@@ -337,84 +353,84 @@ Adiciona algumas configurações do dired para facilitar sua utilização e a na
 
 #+begin_src emacs-lisp
 
- ;; Configura a exibição de itens do dired, a funcionalidade do dwim e alocação de itens deletados
- (use-package dired
-   :ensure nil
-   :bind (
-          ("C-x C-j" . dired-jump)
-          ("C-=" . dired-create-empty-file))
-   :custom
-   (dired-listing-switches "-agho --group-directories-first")
+  ;; Configura a exibição de itens do dired, a funcionalidade do dwim e alocação de itens deletados
+  (use-package dired
+    :ensure nil
+    :bind (
+           ("C-x C-j" . dired-jump)
+           ("C-=" . dired-create-empty-file))
+    :custom
+    (dired-listing-switches "-agho --group-directories-first")
 
-   (dired-dwim-target t) ;; quando tem dois dired abertos, usa o segundo como path pra comandos do primeiro
-   (delete-by-moving-to-trash t)) ;; move os itens deletados para o lixo do computador
+    (dired-dwim-target t) ;; quando tem dois dired abertos, usa o segundo como path pra comandos do primeiro
+    (delete-by-moving-to-trash t)) ;; move os itens deletados para o lixo do computador
 
- ;; Configura a manutenção de um único buffer do dired quando se abre arquivos ou diretórios
- (use-package dired-single
-   :after evil-collection
-   :config
-   (evil-collection-define-key 'normal 'dired-mode-map
-     "h" 'dired-single-up-directory
-     "l" 'dired-single-buffer))  ;; utiliza 'h' e 'l' para subir/descer na raiz de diretórios
+  ;; Configura a manutenção de um único buffer do dired quando se abre arquivos ou diretórios
+  (use-package dired-single
+    :after evil-collection
+    :config
+    (evil-collection-define-key 'normal 'dired-mode-map
+      "h" 'dired-single-up-directory
+      "l" 'dired-single-buffer))  ;; utiliza 'h' e 'l' para subir/descer na raiz de diretórios
 
- ;; Configurações adicionais do dired-single (diretamente do repositório do pacote)
- (defun my-dired-init ()
-   "Remaps some dired functions to use dired-single functions.\nBunch of stuff to run for dired, either immediately or when it's
-          loaded."
-   (define-key dired-mode-map [remap dired-find-file]
-     'dired-single-buffer)
-   (define-key dired-mode-map [remap dired-mouse-find-file-other-window]
-     'dired-single-buffer-mouse)
-   (define-key dired-mode-map [remap dired-up-directory]
-     'dired-single-up-directory))
+  ;; Configurações adicionais do dired-single (diretamente do repositório do pacote)
+  (defun my-dired-init ()
+    "Remaps some dired functions to use dired-single functions.\nBunch of stuff to run for dired, either immediately or when it's
+           loaded."
+    (define-key dired-mode-map [remap dired-find-file]
+      'dired-single-buffer)
+    (define-key dired-mode-map [remap dired-mouse-find-file-other-window]
+      'dired-single-buffer-mouse)
+    (define-key dired-mode-map [remap dired-up-directory]
+      'dired-single-up-directory))
 
- ;; if dired's already loaded, then the keymap will be bound
- (if (boundp 'dired-mode-map)
-     ;; we're good to go; just add our bindings
-     (my-dired-init)
-   ;; it's not loaded yet, so add our bindings to the load-hook
-   (add-hook 'dired-load-hook 'my-dired-init))
-
-
- ;; Configura 'H' para esconder/exibir dotfiles nos itens do diretório
- (use-package dired-hide-dotfiles
-   :hook (dired-mode . dired-hide-dotfiles-mode)
-   :config
-   (evil-collection-define-key 'normal 'dired-mode-map
-     "H" 'dired-hide-dotfiles-mode))
-
- ;; Configura o swiper para pesquisa no dired através do '/' 
- (defun guto/dired-swiper ()
-   "teste"
-   (interactive)
-   (swiper)
-   (if (file-directory-p (dired-file-name-at-point))
-       (progn
-         (dired-single-buffer)
-         (guto/dired-swiper))
-     (dired-single-buffer)))
-
- (with-eval-after-load "evil"
-   (evil-define-key 'normal dired-mode-map (kbd "/") 'guto/dired-swiper)
-   (evil-define-key 'normal dired-mode-map (kbd "SPC") 'dired-view-file))
-
- ;; ls do Mac não suporta a flag --dired
- ;; Instala o coreutils pelo homebrew
- ;; Coloca o path pro executável na variável 'insert-directory-program'
- ;; If it is on Apple Silicon (Mac-mini), use different path
- (when (string= system-type "darwin")
-   (if (string= emacs-build-system "Mac-mini")
-       (setq dired-use-ls-dired t
-             insert-directory-program "/opt/homebrew/bin/gls")
-     (setq dired-use-ls-dired t
-           insert-directory-program "/usr/local/bin/gls")))
+  ;; if dired's already loaded, then the keymap will be bound
+  (if (boundp 'dired-mode-map)
+      ;; we're good to go; just add our bindings
+      (my-dired-init)
+    ;; it's not loaded yet, so add our bindings to the load-hook
+    (add-hook 'dired-load-hook 'my-dired-init))
 
 
- ;; Adiciona ícones para os elementos do dired
- (use-package all-the-icons-dired
-   :hook 
-   (dired-mode . all-the-icons-dired-mode)
-   (all-the-icons-dired-mode . (lambda () (setq all-the-icons-dired-monochrome nil))))
+  ;; Configura 'H' para esconder/exibir dotfiles nos itens do diretório
+  (use-package dired-hide-dotfiles
+    :hook (dired-mode . dired-hide-dotfiles-mode)
+    :config
+    (evil-collection-define-key 'normal 'dired-mode-map
+      "H" 'dired-hide-dotfiles-mode))
+
+  ;; Configura o swiper para pesquisa no dired através do '/' 
+  (defun guto/dired-swiper ()
+    "teste"
+    (interactive)
+    (swiper)
+    (if (file-directory-p (dired-file-name-at-point))
+        (progn
+          (dired-single-buffer)
+          (guto/dired-swiper))
+      (dired-single-buffer)))
+
+  (with-eval-after-load "evil"
+    (evil-define-key 'normal dired-mode-map (kbd "/") 'guto/dired-swiper)
+    (evil-define-key 'normal dired-mode-map (kbd "SPC") 'dired-view-file))
+
+  ;; ls do Mac não suporta a flag --dired
+  ;; Instala o coreutils pelo homebrew
+  ;; Coloca o path pro executável na variável 'insert-directory-program'
+  ;; If it is on Apple Silicon (Mac-mini), use different path
+  (when (string= system-type "darwin")
+    (if (string= emacs-build-system "Mac-mini")
+        (setq dired-use-ls-dired t
+              insert-directory-program "/opt/homebrew/bin/gls")
+      (setq dired-use-ls-dired t
+            insert-directory-program "/usr/local/bin/gls")))
+
+
+  ;; Adiciona ícones para os elementos do dired
+  (use-package all-the-icons-dired
+    :hook 
+    (dired-mode . all-the-icons-dired-mode)
+    (all-the-icons-dired-mode . (lambda () (setq all-the-icons-dired-monochrome nil))))
 
 #+end_src
 

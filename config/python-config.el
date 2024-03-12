@@ -17,6 +17,21 @@
   (setq py-isort-options '("--profile=black" "-l 79")))
 (add-hook 'before-save-hook 'py-isort-before-save)
 
+;; (defun python-ruff-format ()
+;;   "Formats the current buffer using ruff (also sorts imports)."
+;;   (interactive)
+;;   (shell-command (concat "ruff format --line-length 79 " (buffer-file-name)))
+;;   (shell-command (concat "ruff check --select I --fix " (buffer-file-name))))
+
+;; (defun python-ruff-format-on-save ()
+;;   "Runs python-ruff-format on save."
+;;   (interactive)
+;;   (when (eq major-mode 'python-mode)
+;;     (condition-case err (python-ruff-format)
+;;       (error (message "%s" (error-message-string err))))))
+
+;; (add-hook 'before-save-hook 'python-ruff-format-on-save nil t)
+
 (use-package numpydoc
   :after yasnippet
   :init
@@ -176,14 +191,14 @@
 (load-file "config/python-format-comment.el")
 (load-file "config/python-insert-import.el")
 
-(with-eval-after-load "eglot"
+;; (with-eval-after-load "eglot"
 
-  (add-to-list 'eglot-server-programs '(python-mode . ("pylsp")))
+;;   (add-to-list 'eglot-server-programs '(python-mode . ("pylsp")))
 
-  (setq-default eglot-workspace-configuration
-                '((:pylsp . (:configurationSources ["flake8"] 
-                             :plugins (:pycodestyle (:enabled nil) 
-                                       :jedi_completion (:include_params t :fuzzy t)
-                                       :mccabe (:enabled nil) 
-                                       :pyflakes (:enabled nil)
-                                       :flake8 (:enabled t :ignore ["E203" "W503"])))))))
+;;   (setq-default eglot-workspace-configuration
+;;                 '((:pylsp . (:configurationSources ["flake8"] 
+;;                              :plugins (:pycodestyle (:enabled nil) 
+;;                                        :jedi_completion (:include_params t :fuzzy t)
+;;                                        :mccabe (:enabled nil) 
+;;                                        :pyflakes (:enabled nil)
+;;                                        :flake8 (:enabled t :ignore ["E203" "W503"])))))))

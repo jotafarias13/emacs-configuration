@@ -279,6 +279,7 @@ O pacote /[[https://github.com/purcell/exec-path-from-shell][exec-path-from-shel
       (eshell)))
 
   (global-set-key (kbd "C-M-s") (lambda () (interactive) (create-dedicated-eshell)))
+  (add-to-list 'auto-mode-alist '("\\.env\\'" . sh-mode))
 
 #+end_src
 
@@ -348,7 +349,7 @@ O pacote /[[https://www.gnu.org/software/auctex/][AUCTeX]]/ auxilia e configura 
 ** LSP Mode 
 O pacote /[[https://emacs-lsp.github.io/lsp-mode/][lsp-mode]]/ serve como um cliente de Language Server Protocol para Emacs. Necessita de um servidor para fazer comunicação com o Emacs e simular ferramentas de uma IDE. Configurado para funcionar com o /[[https://clangd.llvm.org/][clangd]]/ para programação em C++. O pacote /[[https://github.com/emacs-lsp/lsp-ui][lsp-ui]]/ acrescenta informações sobre a parte do código sobre o qual o cursor está em cima, mostrando-as no minibuffer ou em um menu. O pacote /[[https://github.com/emacs-lsp/lsp-ivy][lsp-ivy]]/ faz a integração do /[[https://github.com/abo-abo/swiper][ivy]]/ no /[[https://emacs-lsp.github.io/lsp-mode/][lsp-mode]]/. Como o /[[https://emacs-lsp.github.io/lsp-mode/][lsp-mode]]/ é usado para programação em C/C++, a configuração do estilo de formatação do buffer é feita abaixo, modificando a variável /c-default-style/.
 
-*** C++
+*** C++ and Python
 Após instalar o /[[https://clangd.llvm.org/][clangd]]/, é preciso adicionar ele ao $PATH do terminal. Depois, criar o arquivo compile_commands.json no project root directory. Para isso, instala o /[[https://github.com/nickdiego/compiledb][compiledb]]/ e o utiliza para gerar o .json através de um Makefile com o comando "compiledb -n make".
 
 #+begin_src shell :tangle no
@@ -371,43 +372,49 @@ Após instalar o /[[https://clangd.llvm.org/][clangd]]/, é preciso adicionar el
 
 #+begin_src emacs-lisp
 
-    ;; Breadcrumb no topo do buffer (caminho do arquivo)
-    (defun jlf/lsp-mode-setup ()
-      (setq lsp-headerline-breadcrumb-segments '(project path-up-to-project file symbols))
-      (lsp-headerline-breadcrumb-mode))
+  ;; Breadcrumb no topo do buffer (caminho do arquivo)
+  (defun jlf/lsp-mode-setup ()
+    (setq lsp-headerline-breadcrumb-segments '(project path-up-to-project file symbols))
+    (lsp-headerline-breadcrumb-mode))
 
-    ;; Adiciona funcionalidades de IDE para o Emacs
-    (use-package lsp-mode
-      :commands (lsp lsp-deferred)
-      :hook (lsp-mode . jlf/lsp-mode-setup)
-      :init
-      (setq lsp-keymap-prefix "C-c l") 
-      (setq lsp-diagnostics-provider :none)
-      :hook
-      (c++-mode . lsp)
-      (c-mode . lsp)
-      :config
-      (lsp-enable-which-key-integration t))
+  ;; Adiciona funcionalidades de IDE para o Emacs
+  (use-package lsp-mode
+    :commands (lsp lsp-deferred)
+    :hook (lsp-mode . jlf/lsp-mode-setup)
+    :hook (lsp-mode . flymake-mode)
+    :init
+    (setq lsp-keymap-prefix "C-c l") 
+    (setq lsp-diagnostics-provider :none)
+    :hook
+    (c++-mode . lsp)
+    (c-mode . lsp)
+    (python-mode . lsp)
+    :config
+    (lsp-enable-which-key-integration t))
 
-    ;; Feature do clangd que possibilita a escolha do overload de uma função no company-box
-    (setq lsp-clients-clangd-args '("--completion-style=detailed" "--header-insertion=never"))
+  ;; Feature do clangd que possibilita a escolha do overload de uma função no company-box
+  (setq lsp-clients-clangd-args '("--completion-style=detailed" "--header-insertion=never"))
 
-    ;; Pacote para adicionar explicação do código à medida que o cursor navega pelo buffer 
-    (use-package lsp-ui
-      :hook (lsp-mode . lsp-ui-mode)
-      :custom
-      (lsp-ui-doc-position 'bottom))
+  (setq lsp-headerline-breadcrumb-enable-diagnostics nil)
+  (setq lsp-diagnostics-provider 'flymake)
+  (setq lsp-signature-render-documentation nil)
 
-    ;; Realiza integração do ivy no lsp-mode
-    (use-package lsp-ivy)
+  ;; Pacote para adicionar explicação do código à medida que o cursor navega pelo buffer 
+  (use-package lsp-ui
+    :hook (lsp-mode . lsp-ui-mode)
+    :custom
+    (lsp-ui-doc-position 'bottom))
 
-    ;; Configura o estilo de formatação de buffer para linguagens em C e similares
-    ;; (setq c-default-style '(c++-mode  . “cc-mode”))
-    (setq c-default-style
-          '((java-mode . "java")
-            (awk-mode . "awk")
-            (c++-mode . "cc-mode")
-            (other . "gnu")))
+  ;; Realiza integração do ivy no lsp-mode
+  (use-package lsp-ivy)
+
+  ;; Configura o estilo de formatação de buffer para linguagens em C e similares
+  ;; (setq c-default-style '(c++-mode  . “cc-mode”))
+  (setq c-default-style
+        '((java-mode . "java")
+          (awk-mode . "awk")
+          (c++-mode . "cc-mode")
+          (other . "gnu")))
 
 #+end_src
 
@@ -439,11 +446,29 @@ Since emacs does not have a yaml-mode by default, the [[https://github.com/yoshi
 #+end_src
 
 ** Docker
-The [[https://github.com/spotify/dockerfile-mode][dockerfile-mode]] package enables syntax highlighting inside Dockerfile files.
+The [[https://github.com/spotify/dockerfile-mode][dockerfile-mode]] package enables syntax highlighting inside Dockerfile files. Also, [[https://github.com/meqif/docker-compose-mode][docker-compose-mode]] enables syntax highlighting inside docker-compose files.
 
 #+begin_src emacs-lisp
 
   (use-package dockerfile-mode)
+
+  (use-package docker-compose-mode)
+
+#+end_src
+
+** Web
+[[https://github.com/fxbois/web-mode][web-mode]] package configures web development for emacs.
+
+#+begin_src emacs-lisp
+
+  (use-package web-mode)
+  (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.css?\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.js?\\'" . web-mode))
+  (setq web-mode-markup-indent-offset 2)
+
+  (use-package emmet-mode)
+  (add-hook 'web-mode-hook 'emmet-mode)
 
 #+end_src
 
@@ -452,32 +477,32 @@ The package [[https://github.com/Alexander-Miller/treemacs][treemacs]] creates a
 
 #+begin_src emacs-lisp
 
-  (use-package treemacs
-    :config
-    (treemacs-git-mode 'deferred)
-    (treemacs-filewatch-mode t)
-    (treemacs-peek-mode t)
-    :bind
-    (:map global-map
-          ("M-0"       . treemacs-select-window)
-          ("C-x t 1"   . treemacs-delete-other-windows)
-          ("C-x t t"   . treemacs)
-          ("C-x t d"   . treemacs-select-directory)
-          ("C-x t B"   . treemacs-bookmark)
-          ("C-x t C-t" . treemacs-find-file)
-          ("C-x t M-t" . treemacs-find-tag)))
+  ;; (use-package treemacs
+  ;;   :config
+  ;;   (treemacs-git-mode 'deferred)
+  ;;   (treemacs-filewatch-mode t)
+  ;;   (treemacs-peek-mode t)
+  ;;   :bind
+  ;;   (:map global-map
+  ;;         ("M-0"       . treemacs-select-window)
+  ;;         ("C-x t 1"   . treemacs-delete-other-windows)
+  ;;         ("C-x t t"   . treemacs)
+  ;;         ("C-x t d"   . treemacs-select-directory)
+  ;;         ("C-x t B"   . treemacs-bookmark)
+  ;;         ("C-x t C-t" . treemacs-find-file)
+  ;;         ("C-x t M-t" . treemacs-find-tag)))
 
-  (use-package treemacs-evil
-    :after (treemacs evil))
+  ;; (use-package treemacs-evil
+  ;;   :after (treemacs evil))
 
-  (use-package treemacs-icons-dired
-    :hook (dired-mode . treemacs-icons-dired-enable-once))
+  ;; (use-package treemacs-icons-dired
+  ;;   :hook (dired-mode . treemacs-icons-dired-enable-once))
 
-  (use-package treemacs-magit
-    :after (treemacs magit))
+  ;; (use-package treemacs-magit
+  ;;   :after (treemacs magit))
 
-  (use-package treemacs-all-the-icons
-    :after (treemacs treemacs-icons-dired))
+  ;; (use-package treemacs-all-the-icons
+  ;;   :after (treemacs treemacs-icons-dired))
 
 #+end_src
 
@@ -515,8 +540,9 @@ Eglot is also used with python as a LSP server.
   ;; Funciona como um cliente LSP para Emacs, utilizado para escrever em LaTeX
   (use-package eglot
     :hook 
-    (LaTeX-mode . eglot-ensure)
-    (python-mode . eglot-ensure))
+    ;; (LaTeX-mode . eglot-ensure)
+    ;; (python-mode . eglot-ensure))
+    (LaTeX-mode . eglot-ensure))
 
   ;; Auxilia o Eglot a reconhecer projetos com arquivos em diretórios distintos
 
@@ -533,18 +559,18 @@ Eglot is also used with python as a LSP server.
     (cdr project))
 
   ;; Tell project-root that directories with .venv folders are python project roots
-  (defun jlf/python-root (dir)
-    (when-let ((root (locate-dominating-file dir jlf/virtualenv-name)))
-      (cons 'python-module root)))
+  ;; (defun jlf/python-root (dir)
+  ;;   (when-let ((root (locate-dominating-file dir jlf/virtualenv-name)))
+  ;;     (cons 'python-module root)))
 
-  (add-hook 'project-find-functions #'jlf/python-root)
+  ;; (add-hook 'project-find-functions #'jlf/python-root)
 
-  (cl-defmethod project-root ((project (head python-module)))
-    (cdr project))
+  ;; (cl-defmethod project-root ((project (head python-module)))
+  ;;   (cdr project))
 
-  (with-eval-after-load "eglot"
-    (set-face-attribute 'eglot-diagnostic-tag-unnecessary-face nil :inherit 'unspecified)
-    (set-face-attribute 'eglot-highlight-symbol-face nil :foreground "cyan"))
+  ;; (with-eval-after-load "eglot"
+  ;;   (set-face-attribute 'eglot-diagnostic-tag-unnecessary-face nil :inherit 'unspecified)
+  ;;   (set-face-attribute 'eglot-highlight-symbol-face nil :foreground "cyan"))
 
 #+end_src
 
@@ -1035,6 +1061,62 @@ Criação de um "keymap" próprio para facilitar a utilização de funções rel
 
 #+end_src
 
+** Tabspaces
+#+begin_src emacs-lisp
+  (use-package tabspaces
+    ;; :hook (after-init . tabspaces-mode)
+    :commands (tabspaces-switch-or-create-workspace
+	       tabspaces-open-or-create-project-and-workspace)
+    :custom
+    (tabspaces-use-filtered-buffers-as-default t)
+    (tabspaces-default-tab "Default")
+    (tabspaces-remove-to-default t)
+    (tabspaces-include-buffers '("*scratch*")))
+
+  (tab-bar-mode 1)
+  (tabspaces-mode 1)
+
+  (setq tab-bar-close-button-show nil)
+  (setq tab-bar-new-button-show nil)
+
+
+  (defun jlf/create-new-tab-with-project ()
+    (interactive)
+    (let (
+	  (new-tab-name (read-string "Tab name: "))
+	  (project-dir-name (project-prompt-project-dir))
+	  )
+      (dired project-dir-name)
+      (tabspaces-switch-or-create-workspace new-tab-name)
+      ))
+
+  (define-key tabspaces-mode-map (kbd "C-c TAB p") #'jlf/create-new-tab-with-project)
+
+
+  ;; Inherit the face of `doom-modeline-panel` for better appearance
+  (set-face-attribute 'tab-bar-tab nil :inherit 'mode-line-highlight :foreground nil :background nil)
+
+  ;; Totally customize the format of the tab bar name
+  (defun my/tab-bar-format (tab i)
+    (propertize
+     (format
+      (concat
+	(if (eq (car tab) 'current-tab)
+	    "🔥 " "")
+	"%s")
+      (alist-get 'name tab))
+     'face (list (append
+		    '(:foreground "#FFFFFF")
+		    (if (eq (car tab) 'current-tab)
+			'(:box nil)
+			'())))))
+
+  ;; Replace the default tab bar function
+  (setq tab-bar-tab-name-format-function #'my/tab-bar-format)
+
+  (set-face-attribute 'tab-bar nil :foreground "#FFFFFF")
+
+#+end_src
 * Org Mode
  /[[https://orgmode.org/][Org Mode]]/ é um editor de documentos, planejador de projetos e tarefas e ambiente de programação muito útil e customizável, sendo de extrema importância para as tarefas e projetos do dia-a-dia.
 

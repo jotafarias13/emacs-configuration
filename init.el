@@ -144,6 +144,7 @@
     (eshell)))
 
 (global-set-key (kbd "C-M-s") (lambda () (interactive) (create-dedicated-eshell)))
+(add-to-list 'auto-mode-alist '("\\.env\\'" . sh-mode))
 
 ;; AUCTeX
 (use-package tex
@@ -210,17 +211,23 @@
 (use-package lsp-mode
   :commands (lsp lsp-deferred)
   :hook (lsp-mode . jlf/lsp-mode-setup)
+  :hook (lsp-mode . flymake-mode)
   :init
   (setq lsp-keymap-prefix "C-c l") 
   (setq lsp-diagnostics-provider :none)
   :hook
   (c++-mode . lsp)
   (c-mode . lsp)
+  (python-mode . lsp)
   :config
   (lsp-enable-which-key-integration t))
 
 ;; Feature do clangd que possibilita a escolha do overload de uma função no company-box
 (setq lsp-clients-clangd-args '("--completion-style=detailed" "--header-insertion=never"))
+
+(setq lsp-headerline-breadcrumb-enable-diagnostics nil)
+(setq lsp-diagnostics-provider 'flymake)
+(setq lsp-signature-render-documentation nil)
 
 ;; Pacote para adicionar explicação do código à medida que o cursor navega pelo buffer 
 (use-package lsp-ui
@@ -247,32 +254,43 @@
 
 (use-package dockerfile-mode)
 
-(use-package treemacs
-  :config
-  (treemacs-git-mode 'deferred)
-  (treemacs-filewatch-mode t)
-  (treemacs-peek-mode t)
-  :bind
-  (:map global-map
-        ("M-0"       . treemacs-select-window)
-        ("C-x t 1"   . treemacs-delete-other-windows)
-        ("C-x t t"   . treemacs)
-        ("C-x t d"   . treemacs-select-directory)
-        ("C-x t B"   . treemacs-bookmark)
-        ("C-x t C-t" . treemacs-find-file)
-        ("C-x t M-t" . treemacs-find-tag)))
+(use-package docker-compose-mode)
 
-(use-package treemacs-evil
-  :after (treemacs evil))
+(use-package web-mode)
+(add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.css?\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.js?\\'" . web-mode))
+(setq web-mode-markup-indent-offset 2)
 
-(use-package treemacs-icons-dired
-  :hook (dired-mode . treemacs-icons-dired-enable-once))
+(use-package emmet-mode)
+(add-hook 'web-mode-hook 'emmet-mode)
 
-(use-package treemacs-magit
-  :after (treemacs magit))
+;; (use-package treemacs
+;;   :config
+;;   (treemacs-git-mode 'deferred)
+;;   (treemacs-filewatch-mode t)
+;;   (treemacs-peek-mode t)
+;;   :bind
+;;   (:map global-map
+;;         ("M-0"       . treemacs-select-window)
+;;         ("C-x t 1"   . treemacs-delete-other-windows)
+;;         ("C-x t t"   . treemacs)
+;;         ("C-x t d"   . treemacs-select-directory)
+;;         ("C-x t B"   . treemacs-bookmark)
+;;         ("C-x t C-t" . treemacs-find-file)
+;;         ("C-x t M-t" . treemacs-find-tag)))
 
-(use-package treemacs-all-the-icons
-  :after (treemacs treemacs-icons-dired))
+;; (use-package treemacs-evil
+;;   :after (treemacs evil))
+
+;; (use-package treemacs-icons-dired
+;;   :hook (dired-mode . treemacs-icons-dired-enable-once))
+
+;; (use-package treemacs-magit
+;;   :after (treemacs magit))
+
+;; (use-package treemacs-all-the-icons
+;;   :after (treemacs treemacs-icons-dired))
 
 (use-package tree-sitter)
 (use-package tree-sitter-langs)
@@ -285,8 +303,9 @@
 ;; Funciona como um cliente LSP para Emacs, utilizado para escrever em LaTeX
 (use-package eglot
   :hook 
-  (LaTeX-mode . eglot-ensure)
-  (python-mode . eglot-ensure))
+  ;; (LaTeX-mode . eglot-ensure)
+  ;; (python-mode . eglot-ensure))
+  (LaTeX-mode . eglot-ensure))
 
 ;; Auxilia o Eglot a reconhecer projetos com arquivos em diretórios distintos
 
@@ -303,18 +322,18 @@
   (cdr project))
 
 ;; Tell project-root that directories with .venv folders are python project roots
-(defun jlf/python-root (dir)
-  (when-let ((root (locate-dominating-file dir jlf/virtualenv-name)))
-    (cons 'python-module root)))
+;; (defun jlf/python-root (dir)
+;;   (when-let ((root (locate-dominating-file dir jlf/virtualenv-name)))
+;;     (cons 'python-module root)))
 
-(add-hook 'project-find-functions #'jlf/python-root)
+;; (add-hook 'project-find-functions #'jlf/python-root)
 
-(cl-defmethod project-root ((project (head python-module)))
-  (cdr project))
+;; (cl-defmethod project-root ((project (head python-module)))
+;;   (cdr project))
 
-(with-eval-after-load "eglot"
-  (set-face-attribute 'eglot-diagnostic-tag-unnecessary-face nil :inherit 'unspecified)
-  (set-face-attribute 'eglot-highlight-symbol-face nil :foreground "cyan"))
+;; (with-eval-after-load "eglot"
+;;   (set-face-attribute 'eglot-diagnostic-tag-unnecessary-face nil :inherit 'unspecified)
+;;   (set-face-attribute 'eglot-highlight-symbol-face nil :foreground "cyan"))
 
 (use-package markdown-mode
   :mode ("README\\.md\\'" . gfm-mode)
@@ -708,6 +727,59 @@ If CLIPBOARD-YANK is nil, only add the space for a new entry."
 (global-set-key (org-research--key "a e") 'jlf/org-roam-node-exclude-add)
 (global-set-key (org-research--key "a b") (lambda () (interactive) (jlf/org-roam-add-bibliography t)))
 (global-set-key (org-research--key "a B") 'jlf/org-roam-add-bibliography)
+
+(use-package tabspaces
+  ;; :hook (after-init . tabspaces-mode)
+  :commands (tabspaces-switch-or-create-workspace
+	     tabspaces-open-or-create-project-and-workspace)
+  :custom
+  (tabspaces-use-filtered-buffers-as-default t)
+  (tabspaces-default-tab "Default")
+  (tabspaces-remove-to-default t)
+  (tabspaces-include-buffers '("*scratch*")))
+
+(tab-bar-mode 1)
+(tabspaces-mode 1)
+
+(setq tab-bar-close-button-show nil)
+(setq tab-bar-new-button-show nil)
+
+
+(defun jlf/create-new-tab-with-project ()
+  (interactive)
+  (let (
+	(new-tab-name (read-string "Tab name: "))
+	(project-dir-name (project-prompt-project-dir))
+	)
+    (dired project-dir-name)
+    (tabspaces-switch-or-create-workspace new-tab-name)
+    ))
+
+(define-key tabspaces-mode-map (kbd "C-c TAB p") #'jlf/create-new-tab-with-project)
+
+
+;; Inherit the face of `doom-modeline-panel` for better appearance
+(set-face-attribute 'tab-bar-tab nil :inherit 'mode-line-highlight :foreground nil :background nil)
+
+;; Totally customize the format of the tab bar name
+(defun my/tab-bar-format (tab i)
+  (propertize
+   (format
+    (concat
+      (if (eq (car tab) 'current-tab)
+	  "🔥 " "")
+      "%s")
+    (alist-get 'name tab))
+   'face (list (append
+		  '(:foreground "#FFFFFF")
+		  (if (eq (car tab) 'current-tab)
+		      '(:box nil)
+		      '())))))
+
+;; Replace the default tab bar function
+(setq tab-bar-tab-name-format-function #'my/tab-bar-format)
+
+(set-face-attribute 'tab-bar nil :foreground "#FFFFFF")
 
 (load-file (concat user-emacs-directory "config/org-config.el"))
 

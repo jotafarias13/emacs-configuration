@@ -731,7 +731,7 @@ If CLIPBOARD-YANK is nil, only add the space for a new entry."
 (use-package tabspaces
   ;; :hook (after-init . tabspaces-mode)
   :commands (tabspaces-switch-or-create-workspace
-	     tabspaces-open-or-create-project-and-workspace)
+             tabspaces-open-or-create-project-and-workspace)
   :custom
   (tabspaces-use-filtered-buffers-as-default t)
   (tabspaces-default-tab "Default")
@@ -748,11 +748,13 @@ If CLIPBOARD-YANK is nil, only add the space for a new entry."
 (defun jlf/create-new-tab-with-project ()
   (interactive)
   (let (
-	(new-tab-name (read-string "Tab name: "))
-	(project-dir-name (project-prompt-project-dir))
-	)
+        (new-tab-name (read-string "Tab name: "))
+        (project-dir-name (project-prompt-project-dir))
+        )
+    (switch-to-buffer "*scratch*")
+    (tab-new)
     (dired project-dir-name)
-    (tabspaces-switch-or-create-workspace new-tab-name)
+    (tab-rename new-tab-name)
     ))
 
 (define-key tabspaces-mode-map (kbd "C-c TAB p") #'jlf/create-new-tab-with-project)
@@ -766,20 +768,33 @@ If CLIPBOARD-YANK is nil, only add the space for a new entry."
   (propertize
    (format
     (concat
-      (if (eq (car tab) 'current-tab)
-	  "🔥 " "")
-      "%s")
+     (if (eq (car tab) 'current-tab)
+         "🔥 " "")
+     "%s")
     (alist-get 'name tab))
    'face (list (append
-		  '(:foreground "#FFFFFF")
-		  (if (eq (car tab) 'current-tab)
-		      '(:box nil)
-		      '())))))
+                '(:foreground "#FFFFFF")
+                (if (eq (car tab) 'current-tab)
+                    '(:box nil)
+                  '())))))
 
 ;; Replace the default tab bar function
 (setq tab-bar-tab-name-format-function #'my/tab-bar-format)
 
 (set-face-attribute 'tab-bar nil :foreground "#FFFFFF")
+
+
+;; Open iTerm window in current buffer directory
+(defun jlf/open-iterm-here ()
+  "Open iTerm with current directory."
+  (interactive)
+  (let ((dir (if (buffer-file-name)
+                 (file-name-directory (expand-file-name (buffer-file-name)))
+               (expand-file-name default-directory))))
+    (shell-command (format "open -a iTerm \"%s\"" dir))))
+
+;; Add function to project key map
+(define-key project-prefix-map (kbd "t") #'jlf/open-iterm-here)
 
 (load-file (concat user-emacs-directory "config/org-config.el"))
 
@@ -788,3 +803,6 @@ If CLIPBOARD-YANK is nil, only add the space for a new entry."
   :init
   (setq ledger-clear-whole-transactions 1)
   :mode "\\.dat\\'")
+
+;; retirar face de highlight
+(set-face-attribute 'ledger-font-xact-highlight-face nil :extend nil :inherit nil)

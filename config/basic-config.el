@@ -1,5 +1,6 @@
 ;; Diretório de inicialização
 (setq default-directory "~/.emacs.d/")
+;; (setq default-directory "~/")
 
 ;; Tamanho da janela de inicialização
 (add-to-list 'initial-frame-alist '(height . 1.0))
@@ -358,6 +359,14 @@
   (dired-mode . all-the-icons-dired-mode)
   (all-the-icons-dired-mode . (lambda () (setq all-the-icons-dired-monochrome nil))))
 
+
+;; Open pdf files using Skim from inside dired
+(defun jlf/dired-open-pdf()
+  (interactive)
+  (dired-do-shell-command "open -a Skim" nil (dired-get-marked-files)))
+
+(define-key dired-mode-map (kbd "C-c p") 'jlf/dired-open-pdf)
+
 ;; Melhora as funções de desfazer e refazer do evil
 (use-package undo-tree
   :config
@@ -383,6 +392,19 @@
   (define-key evil-motion-state-map (kbd "C-u") 'evil-scroll-up)
   (define-key evil-insert-state-map (kbd "Z") (lambda () (interactive) (evil-force-normal-state) (evil-append-line 1)))
 
+  ;; Atalhos para acessar teclas que precisam de shift
+  ;; (define-key evil-insert-state-map (kbd "C--") (lambda () (interactive) (insert "_")))
+  ;; (define-key evil-insert-state-map (kbd "C-=") (lambda () (interactive) (insert "+")))
+  ;; (define-key evil-insert-state-map (kbd "C-[") (lambda () (interactive) (insert "{")))
+  ;; (define-key evil-insert-state-map (kbd "C-]") (lambda () (interactive) (insert "}")))
+  ;; (define-key evil-insert-state-map (kbd "C-;") (lambda () (interactive) (insert ":")))
+  ;; (define-key evil-insert-state-map (kbd "C-'") (lambda () (interactive) (insert "\"")))
+  ;; (define-key evil-insert-state-map (kbd "C-/") (lambda () (interactive) (insert "?")))
+  ;; (define-key evil-insert-state-map (kbd "C-,") (lambda () (interactive) (insert "<")))
+  ;; (define-key evil-insert-state-map (kbd "C-.") (lambda () (interactive) (insert ">")))
+  ;; (define-key evil-insert-state-map (kbd "C-9") (lambda () (interactive) (insert "(")))
+  ;; (define-key evil-insert-state-map (kbd "C-0") (lambda () (interactive) (insert ")")))
+
   ;; Configura a navegação para funcionar quando visual-line-mode não está ativado
   (evil-global-set-key 'motion "j" 'evil-next-visual-line)
   (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
@@ -391,6 +413,14 @@
 
   (evil-set-initial-state 'messages-buffer-mode 'normal)
   (evil-set-initial-state 'dashboard-mode 'normal))
+
+;; setup evil in minibuffer
+(setq evil-want-minibuffer t)
+(add-hook 'minibuffer-setup-hook
+	  (lambda ()
+	    (define-key evil-insert-state-local-map (kbd "C-j") 'next-line)
+	    (define-key evil-insert-state-local-map (kbd "C-k") 'previous-line)
+	    (define-key evil-insert-state-local-map (kbd "RET") 'exit-minibuffer)))
 
 ;; Aumenta a atuação dos keybindings do evil
 (use-package evil-collection

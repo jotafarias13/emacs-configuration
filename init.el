@@ -145,6 +145,7 @@
 
 (global-set-key (kbd "C-M-s") (lambda () (interactive) (create-dedicated-eshell)))
 (add-to-list 'auto-mode-alist '("\\.env\\'" . sh-mode))
+(add-to-list 'auto-mode-alist '("\\.env.example\\'" . sh-mode))
 
 ;; AUCTeX
 (use-package tex
@@ -183,6 +184,22 @@
 (setq TeX-view-program-list
       '(("PDF Viewer" "/Applications/Skim.app/Contents/SharedSupport/displayline -b -g %n %o %b")))
 
+(add-to-list
+ 'TeX-complete-list
+ '("\\\\citeonline\\[[^]\n\\%]*\\]{\\([^{}\n\\%,]*\\)" 1 LaTeX-bibitem-list "}"))
+
+(add-to-list
+ 'TeX-complete-list
+ '("\\\\citeonline{\\([^{}\n\\%,]*\\)" 1 LaTeX-bibitem-list "}"))
+
+(add-to-list
+ 'TeX-complete-list
+ '("\\\\citeonline{\\([^{}\n\\%]*,\\)\\([^{}\n\\%,]*\\)" 2 LaTeX-bibitem-list))
+
+(add-to-list
+ 'TeX-complete-list
+ '("\\\\autoref{\\([^{}\n\\%,]*\\)" 1 LaTeX-label-list "}"))
+
 ;; Inicializa o modo servidor no Emacs para possibilitar a comunicação com o Skim
 ;; (server-start)
 
@@ -220,13 +237,29 @@
   (c-mode . lsp)
   (python-mode . lsp)
   :config
-  (lsp-enable-which-key-integration t))
+  (lsp-enable-which-key-integration t)
+  ;; (setq lsp-pylsp-server-command "pylsp")  ;; Specify pylsp as the server
+  ;; (lsp-register-custom-settings
+  ;;  '(("pylsp.plugins.pylint.enabled" nil t)
+  ;;    ("pylsp.plugins.flake8.enabled" nil t)
+  ;;    ("pylsp.plugins.mccabe.enabled" nil t)
+  ;;    ("pylsp.plugins.preload.enabled" nil t)
+  ;;    ("pylsp.plugins.pydocstyle.enabled" nil t)
+  ;;    ("pylsp.plugins.jedi_definition.enabled" nil t)
+  ;;    ("pylsp.plugins.jedi_references.enabled" nil t)
+  ;;    ("pylsp.plugins.jedi_signature_help.enabled" nil t)
+  ;;    ("pylsp.plugins.jedi_hover.enabled" nil t)
+  ;;    ("pylsp.plugins.jedi_symbols.enabled" nil t)
+  ;;    ("pylsp.plugins.jedi_completion.enabled" nil t)
+  ;;    ("pylsp.plugins.ruff.enabled" t)))
+  )
 
 ;; Feature do clangd que possibilita a escolha do overload de uma função no company-box
 (setq lsp-clients-clangd-args '("--completion-style=detailed" "--header-insertion=never"))
 
 (setq lsp-headerline-breadcrumb-enable-diagnostics nil)
 (setq lsp-diagnostics-provider 'flymake)
+;; (setq lsp-diagnostics-provider :none)
 (setq lsp-signature-render-documentation nil)
 
 ;; Pacote para adicionar explicação do código à medida que o cursor navega pelo buffer 
@@ -242,9 +275,19 @@
 ;; (setq c-default-style '(c++-mode  . “cc-mode”))
 (setq c-default-style
       '((java-mode . "java")
-        (awk-mode . "awk")
-        (c++-mode . "cc-mode")
-        (other . "gnu")))
+	(awk-mode . "awk")
+	(c++-mode . "cc-mode")
+	(other . "gnu")))
+
+(with-eval-after-load 'lsp-mode
+  ;; (setq lsp-enabled-clients '(ruff))
+  ;; (setq lsp-disabled-clients '(pylsp))
+  (setq lsp-enabled-clients '(ruff pylsp))
+  (setq lsp-disabled-clients '())
+  (setq lsp-pylsp-plugins-mypy-enabled t)
+  (add-hook 'lsp-managed-mode-hook
+	    (lambda ()
+	      (add-hook 'before-save-hook 'lsp-format-buffer nil t))))
 
 (load-file (concat user-emacs-directory "config/python-config.el"))
 
@@ -297,8 +340,15 @@
 (add-hook 'python-mode-hook 'tree-sitter-mode)
 (add-hook 'python-mode-hook #'(lambda () (tree-sitter-hl-mode)))
 
+(use-package flymake-ruff
+  :ensure t
+  :hook (lsp-managed-mode . flymake-ruff-load))
+  ;; :hook (python-mode . flymake-ruff-load))
+
 (with-eval-after-load "flymake" 
-  (set-face-attribute 'flymake-warning nil :underline nil))
+  (set-face-attribute 'flymake-warning nil :underline nil)
+  (set-face-attribute 'flymake-error nil :underline nil)
+  (setq flymake-diagnostic-functions '(flymake-ruff)))
 
 ;; Funciona como um cliente LSP para Emacs, utilizado para escrever em LaTeX
 (use-package eglot
@@ -311,6 +361,12 @@
 
 ;; (defvar main-tex "defesa.tex")
 (defvar main-tex "main.tex")
+
+;; (add-hook 'python-mode-hook 'eglot-ensure)
+;; (with-eval-after-load 'eglot
+;;   (add-to-list 'eglot-server-programs
+;; 	       '(python-mode . ("ruff" "server")))
+;;   (add-hook 'after-save-hook 'eglot-format))
 
 (defun jlf/latex-root (dir)
   (when-let ((root (locate-dominating-file dir main-tex)))
@@ -648,6 +704,8 @@ With a prefix ARG, remove start location."
   (bibtex-completion-library-path (list jlf/slipbox-refs-directory))
   (bibtex-completion-find-note-functions '(orb-find-note-file)))
 
+(add-to-list 'bibtex-completion-cite-commands "citeonline")
+
 (use-package org-ref
   :after ivy-bibtex
   :init
@@ -665,6 +723,31 @@ With a prefix ARG, remove start location."
   (ivy-configure 'org-ref-ivy-insert-cite-link
     :display-transformer-fn 'ivy-bibtex-display-transformer))
 
+
+;; Functions to enable opening PDF with Skim when on citation
+(defun jlf/bibtex-open-pdf(FILENAME)
+  (interactive)
+  (shell-command (concat "open -a Skim " FILENAME)))
+
+(defun jlf/org-ref-open-skim-pdf-at-point ()
+  "Open the pdf with Skim for bibtex key under point if it exists."
+  (interactive)
+  (let* ((bibtex-completion-bibliography (org-ref-find-bibliography))
+       (results (org-ref-get-bibtex-key-and-file))
+	 (key (car results))
+	 (pdf-file (bibtex-completion-find-pdf key t))
+       (bibtex-completion-pdf-open-function 'jlf/bibtex-open-pdf))
+    (pcase (length pdf-file)
+      (0
+       (message "no pdf found for %s" key))
+      (1
+       (funcall bibtex-completion-pdf-open-function (car pdf-file)))
+      (_
+       (funcall bibtex-completion-pdf-open-function
+	      (completing-read "pdf: " pdf-file))))))
+
+(define-key org-mode-map (kbd "C-c p") 'jlf/org-ref-open-skim-pdf-at-point)
+
 (use-package org-roam-bibtex
   :after org-roam
   :custom
@@ -677,7 +760,7 @@ With a prefix ARG, remove start location."
                '("ba" "Article" plain
                  "%?"
                  :if-new (file+head "Refs/${=key=}.org"
-                                    "#+TITLE: ${title}\n#+CITE_KEY: ${=key=}\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+FILETAGS:\n\n* Info\n:PROPERTIES:\n:DOCUMENT_PATH: %(file-relative-name (orb-process-file-field \"${=key=}\") (print jlf/slipbox-refs-directory))\n:TYPE: %(capitalize \"${=type=}\")\n:AUTHOR: ${author-or-editor}\n:YEAR: ${year}\n:JOURNAL: ${journal}\n:DOI: %(if (string-equal \"${doi}\" \"\") \"---\" \"${doi}\")\n:URL: %(if (string-equal \"${url}\" \"\") \"---\" \"${url}\")\n:KEYWORDS: %(if (string-equal \"${keywords}\" \"\") \"---\" \"${keywords}\")\n%(if (string-equal \"${abstract}\" \"\") \":ABSTRACT: ---\\n\"):END:\n%(unless (string-equal \"${abstract}\" \"\") \":ABSTRACT:\\n${abstract}\\n:END:\\n\")\n* Notes\n:PROPERTIES:\n:NOTER_DOCUMENT: %(file-relative-name (orb-process-file-field \"${=key=}\") (print jlf/slipbox-refs-directory))\n:END:\n")
+                                    "#+TITLE: ${title}\n#+CITE_KEY: ${=key=}\n#+CREATED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+LAST_MODIFIED: [%<%d-%m-%Y %a %H:%M:%S>]\n#+FILETAGS:\n\n* Info\n:PROPERTIES:\n:DOCUMENT_PATH: %(file-relative-name (orb-process-file-field \"${=key=}\") (print jlf/slipbox-refs-directory))\n:TYPE: %(capitalize \"${=type=}\")\n:AUTHOR: ${author-or-editor}\n:YEAR: ${year}\n:JOURNAL: ${journal}\n:DOI: %(if (string-equal \"${doi}\" \"\") \"---\" \"${doi}\")\n:URL: %(if (string-equal \"${url}\" \"\") \"---\" \"${url}\")\n:KEYWORDS: %(if (string-equal \"${keywords}\" \"\") \"---\" \"${keywords}\")\n%(if (string-equal \"${abstract}\" \"\") \":ABSTRACT: ---\\n\"):END:\n%(unless (string-equal \"${abstract}\" \"\") \":ABSTRACT:\\n${abstract}\\n:END:\\n\")\n* Summary\n\n* Takeaways\n- \n\n* Notes\n:PROPERTIES:\n:NOTER_DOCUMENT: %(file-relative-name (orb-process-file-field \"${=key=}\") (print jlf/slipbox-refs-directory))\n:END:\n")
                  :unnarrowed t))
   (add-to-list 'org-roam-capture-templates
                '("bb" "Book" plain
@@ -805,4 +888,5 @@ If CLIPBOARD-YANK is nil, only add the space for a new entry."
   :mode "\\.dat\\'")
 
 ;; retirar face de highlight
-(set-face-attribute 'ledger-font-xact-highlight-face nil :extend nil :inherit nil)
+(with-eval-after-load "ledger"
+  (set-face-attribute 'ledger-font-xact-highlight-face nil :extend nil :inherit nil))
